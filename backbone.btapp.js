@@ -4,6 +4,15 @@ $(function() {
 	function btfunction(url, cb) {
 		debugger;
 	}
+	
+	//in order for us to put data structures into a backbone collection every child must be an object
+	function validCollection(collection) {
+		for(c in collection) {
+			if(typeof collection[c] === 'object') continue;
+			else return false;
+		}
+		return true;
+	}
 
 	window.FetchCollection = Backbone.Collection.extend({
 		initialize: function() {
@@ -12,6 +21,9 @@ $(function() {
 		onFetch: function(data) {
 			for(v in data) {
 				var variable = data[v];
+				
+				if(variable === 'Not yet supported') continue;
+				
 				if(typeof variable === 'object') {
 					assert(!('all' in variable));
 
@@ -33,6 +45,9 @@ $(function() {
 		onFetch: function(data) {
 			for(var v in data) {
 				var variable = data[v];
+
+				if(variable === 'Not yet supported') continue;
+
 				//check the type of the variable...
 				//function namespace
 				//function definition
@@ -42,7 +57,7 @@ $(function() {
 				var param = {};
 				if(v === 'properties') {
 					this.onFetch(variable.all);
-				} else if(typeof variable === 'object' && ('all' in variable || 'get' in variable)) {
+				} else if(typeof variable === 'object' && ('all' in variable && validCollection(variable.all))) {
 					//collection
 					var collection = this.get(v);
 					if(!collection) {
@@ -50,10 +65,7 @@ $(function() {
 						param[v] = collection;
 						this.set(param);
 					}
-					if('all' in variable)
-						collection.onFetch(variable.all);
-					if('get' in variable)
-						collection.onFetch(variable.get);
+					collection.onFetch(variable.all);
 				} else if(variable === '[native function]') {
 					//dangle functions off the object directly
 					if(!(v in this)) {
@@ -80,7 +92,7 @@ $(function() {
 		},
 		fetch: function() {
 			$.ajax({
-				url: 'http://localhost:22907/btapp/torrent/all/',
+				url: 'http://localhost:22907/btapp/',
 				dataType: 'jsonp', 
 				context: this, 
 				success: function(data) {
