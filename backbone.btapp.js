@@ -96,8 +96,10 @@ $(function() {
 	window.Btapp = FetchModel.extend({
 		initialize: function() {
 			FetchModel.prototype.initialize.call(this);
-			_.bindAll(this, 'onEvents', 'onFetch', 'onInitializeSession');
+			_.bindAll(this, 'onEvents', 'onFetch', 'onInitializeSession', 'onTorrentStatus');
 			this.initializeSession();
+			
+			this.bind('torrentStatus', this.onTorrentStatus);
 		},
 		queryClient: function(query, cb) {
 			$.ajax({
@@ -144,16 +146,8 @@ $(function() {
 			if('btapp' in data) {
 				this.updateState(this.session, data.btapp, 'btapp/');
 			} else if('callback' in data && 'arguments' in data) {
-				console.log('CALLBACK - ' + data.callback + '(' + $.toJSON(data.arguments) + ')');
 				window.btappCallbacks[data.callback](data.arguments);
-			} else {
-				//check for torrent status events...the only one that isn't captured by update gui
-				//is torrent deletes...so check here
-				if('hash' in data && 'state' in data) {
-					var torrents = window.btapp.get('torrent');
-					torrents.remove(torrents.get(data.hash));
-				}
-			}
+			} else assert(false);
 		},
 		onEvents: function(data) {
 			for(var i = 0; i < data.length; i++) {
@@ -163,6 +157,17 @@ $(function() {
 		},
 		waitForEvents: function() {
 			this.queryClient('btappevents/?session=' + this.session, this.onEvents);
+		},
+		onTorrentStatus: function(args) {
+			if(args.state == -1 && args.hash) {
+				console.log('torrentStatus(' + args.hash + ')');
+				var torrents = this.get('torrent').get('all');
+				var torrent = torrents.get(args.hash);
+				if(torrent) {
+					torrent.clearState();
+				}
+				torrents.unset(args.hash);
+			}
 		},
 		setEvents: function() {
 			//we assume that we just filled in the events information...we desperately want to
@@ -174,17 +179,6 @@ $(function() {
 			for(var ev in this.get('events').get('all').attributes) {
 				this.get('events').bt['set'](null, ev, _.bind(this.trigger, this, ev));
 			}
-			
-			//we can take advantage of this internally by binding to the torrentStatus event...which we
-			//need to keep an accurate picture of the torrents
-			this.bind('torrentStatus', function(args) {
-				if(args.state == -1 && args.hash) {
-					var torrents = this.get('torrent').get('all');
-					var torrent = torrents.get(args.hash);
-					if(torrent) torrent.clearState();
-					torrents.unset(args.hash);
-				}
-			});
 		}
 	});
 	window.btapp = new Btapp();
