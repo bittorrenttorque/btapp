@@ -1,6 +1,20 @@
+//i miss __asm int 3...this is why c/c++ devs shouldn't write javascript
 function assert(b) { if(!b) debugger; }
 
 $(function() {
+	/**
+		TorrentClient provides a very thin wrapper around the web api
+		It should facilitate finding the correct port and connecting if
+		necessary to the user computer through falcon...by default uses localhost
+		
+		TorrentClient is responsible for the mapping between functions
+		passed to as arguments and the string that proxies them to the client
+		
+		TorrentClient is responsible for creating functions that wrap around
+		specific urls that can can be dangled off of models so that when we call
+		stop on a torrent file, the torrent specific url is accessed without any
+		effort on the part of the client
+	**/
 	window.TorrentClient = Backbone.Model.extend({
 		initialize: function() {
 			this.host = 'http://localhost:22907/btapp/';
@@ -63,11 +77,71 @@ $(function() {
 			});
 		}
 	});
-	window.client = new TorrentClient;	
+	//this is the TorrentClient singleton that should be used
+	window.client = new TorrentClient;
 	
-	window.FetchModel = Backbone.Model.extend({
+	/**
+		BtappCollection is a collection of objects in the client...
+		currently this can only be used to represent the list of torrents,
+		then within the torrents, their list of files...this will eventually
+		be used for rss feeds, etc as well.
+	**/
+	window.BtappCollection = Backbone.Collection.extend({
 		initialize: function() {
 			_.bindAll(this, 'clearState', 'updateState');
+			this.initializeValues();
+		},
+		initializeValues: function() {
+			this.url = '';
+			this.session = null;
+		},
+		clearState: function() {
+			this.each(function(model) {
+				model.clearState();
+			});
+			this.reset();
+			this.initializeValues();
+		},
+		updateState: function(session, data, url) {
+			this.session = session;
+			this.url = url;
+			for(var v in data) {
+				var variable = data[v];
+
+				//special case all
+				if(v == 'all') {
+					this.updateState(this.session, variable, this.url + v + '/');
+					continue;
+				}
+				
+				if(typeof variable === 'object') {
+					//don't recreate a variable we already have...just update it
+					var model = this.get(v);
+					if(!model) {
+						model = new BtappModel({'id':v});
+						this.add(model);
+					}
+					model.updateState(this.session, variable, this.url + v + '/');
+				}
+			}
+		}
+	});
+	
+	/**
+		BtappModel is the base model for most things in the client
+		a torrent is a BtappModel, a file is a BtappModel, properties that 
+		hang off of most BtappModels is also a BtappModel...both BtappModel
+		and BtappCollection objects are responsible for taking the json object
+		that is returned by the client and turning that into attributes/functions/etc
+		
+		BtappModel and BtappCollection both support clearState and updateState
+	**/	
+	window.BtappModel = Backbone.Model.extend({
+		initialize: function() {
+			_.bindAll(this, 'clearState', 'updateState');
+			this.initializeValues();
+		},
+		initializeValues: function() {
 			this.bt = {};
 			this.url = '';
 			this.session = null;
@@ -79,8 +153,8 @@ $(function() {
 					attribute.clearState();
 				}
 			}
-			this.bt = {};
 			this.clear();
+			this.initializeValues();
 		},
 		updateState: function(session, data, url) {
 			this.session = session;
@@ -100,7 +174,11 @@ $(function() {
 					//don't recreate a variable we already have...just update it
 					var model = this.get(v);
 					if(!model) {
-						model = new FetchModel;
+						if(v == 'torrent' || v == 'file') {
+							model = new BtappCollection;
+						} else {
+							model = new BtappModel;
+						}
 					}
 					model.updateState(this.session, variable, this.url + v + '/');
 					param[v] = model;
@@ -116,18 +194,39 @@ $(function() {
 					this.set(param, {server:true});
 				}	
 			}
-		},
-		set: function(attributes, options) {
-			Backbone.Model.prototype.set.call(this, attributes, options);
-			//TODO: when server isn't set assume that the change we caused by the user
-			//in this case do a set to the server to update the value of the property
-			//if(!options || !('server' in options) || !options['server']) {
 		}
 	});
 
-	window.Btapp = FetchModel.extend({
+	/**
+		Btapp is the root of the client objects' tree...this mirrors the original api
+		where document.btapp was the root of everything. generally, this api attempts to be
+		as similar as possible to that one...
+		
+		BEFORE: btapp.torrent.get('XXX').file.get('XXX').properties.get('name');
+		AFTER: btapp.get('torrent').get('XXX').get('file').get('XXX').get('properties').get('name');
+		
+		the primary difference is that in the original you got the state at that exact moment, where
+		we now simply keep the backbone objects up to date (by quick polling and updating as diffs are returned)
+		so you can query at your leisure.
+		
+		EVENTS: there are the following events
+			appDownloadProgress
+			filesDragDrop
+			appStopping
+			appUninstall
+			clientMessage
+			commentNotice
+			filesAction
+			rssStatus
+			torrentStatus
+			
+		torrentStatus is used internally to keep our objects up to date, but that and clientMessage are really the only
+		events that are generally used...these trigger events when they are received by the base object, so to listen in
+		on torrentStatus events, simply provide a callback to btapp.bind('torrentStatus', callback_func)
+	**/		
+	window.Btapp = BtappModel.extend({
 		initialize: function() {
-			FetchModel.prototype.initialize.call(this);
+			BtappModel.prototype.initialize.call(this);
 			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
 			this.fetch();
 			
