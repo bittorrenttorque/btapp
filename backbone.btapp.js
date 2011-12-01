@@ -1,45 +1,69 @@
+function assert(b) { if(!b) debugger; }
+
 $(function() {
-	function assert(b) { if(!b) debugger; }
-
-	var host = 'http://localhost:22907/';
-
-	//we can't send function pointers to the torrent client server, so we'll send
-	//the name of the callback, and the server can call this by sending an event with
-	//the name and args back to us...we're responsible for making the call to the function 
-	//when we detect this...this is similar to the way that jsonp makes ajax callbacks
-	window.btappCallbacks = {};
-	function storeCallbackFunction(cb) {
-		var str = 'bt_';
-		for(var i = 0; i < 20; i++) { str += Math.floor(Math.random() * 10); }
-		window.btappCallbacks[str] = cb;
-		return str;
-	}
-	
-	//functions are simply urls that we make ajax request to...the cb is called with the
-	//result of that ajax request.
-	function createFunction(session, url) {
-		return function(cb) {
-			var path = host + url + '(';
-			for(var i = 1; i < arguments.length; i++) {
-				if(i > 1) path += ',';
-				//we are responsible for converting functions to variable names...
-				//this will be called later via a event with a callback and arguments variables
-				if(typeof arguments[i] === 'function') {
-					path += storeCallbackFunction(arguments[i]);
-				} else {
-					path += arguments[i];
+	window.TorrentClient = Backbone.Model.extend({
+		initialize: function() {
+			this.host = 'http://localhost:22907/btapp/';
+			this.btappCallbacks = {};
+		},
+		//we can't send function pointers to the torrent client server, so we'll send
+		//the name of the callback, and the server can call this by sending an event with
+		//the name and args back to us...we're responsible for making the call to the function 
+		//when we detect this...this is similar to the way that jsonp makes ajax callbacks
+		storeCallbackFunction: function(cb) {
+			cb = cb || function() { debugger; };
+			var str = 'bt_';
+			for(var i = 0; i < 20; i++) { str += Math.floor(Math.random() * 10); }
+			this.btappCallbacks[str] = cb;
+			return str;
+		},
+		//functions are simply urls that we make ajax request to...the cb is called with the
+		//result of that ajax request.
+		createFunction: function(session, url) {
+			return _.bind(function(cb) {
+				cb = cb || function() { debugger; };
+				var path = url + '(';
+				for(var i = 1; i < arguments.length; i++) {
+					if(i > 1) path += ',';
+					//we are responsible for converting functions to variable names...
+					//this will be called later via a event with a callback and arguments variables
+					if(typeof arguments[i] === 'function') {
+						path += this.storeCallbackFunction(arguments[i]);
+					} else {
+						path += arguments[i];
+					}
 				}
-			}
-			path += ')/?session=' + session;
-			console.log(path);
+				path += ')/'
+				this.query([path], session, cb, function() {debugger;});
+			}, this);
+		},
+		query: function(query, session, cb, err) {
+			//do a bit of parameter validation
+			cb = cb || function() { debugger; };
+			err = err || function() { debugger; };
+			if(typeof query === 'string') query = [query];
+			
+			var url = this.host;
+			var args = {};
+			//add the query as a parameter
+			if(query) args['queries'] = $.toJSON(query);
+			//add the session as a parameter if there is one
+			if(session) args['session'] = session;
 			$.ajax({
-				url: path,
-				dataType: 'jsonp', 
-				success: cb,
-				error: cb
-			});		
-		};
-	}
+				url: url,
+				dataType: 'jsonp',
+				context: this,
+				data: args,
+				success: function(data) {
+					if('error' in data)	err();
+					else cb(data);
+				},
+				error: err,
+				timeout: 4000
+			});
+		}
+	});
+	window.client = new TorrentClient;	
 	
 	window.FetchModel = Backbone.Model.extend({
 		initialize: function() {
@@ -75,7 +99,7 @@ $(function() {
 					this.set(param,{server:true});
 				} else if(variable === '[native function]') {
 					if(!(v in this.bt)) {
-						this.bt[v] = createFunction(session, this.url + v);
+						this.bt[v] = client.createFunction(session, this.url + v);
 						this.trigger('change');
 					}
 				} else {
@@ -96,49 +120,24 @@ $(function() {
 	window.Btapp = FetchModel.extend({
 		initialize: function() {
 			FetchModel.prototype.initialize.call(this);
-			_.bindAll(this, 'onEvents', 'onFetch', 'onInitializeSession', 'onTorrentStatus');
-			this.initializeSession();
+			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
+			this.fetch();
 			
 			this.bind('torrentStatus', this.onTorrentStatus);
 		},
-		queryClient: function(query, cb) {
-			$.ajax({
-				url: host + query,
-				dataType: 'jsonp', 
-				context: this, 
-				success: function(data) {
-					if('error' in data)	this.connectionError();
-					else cb(data);
-				},
-				error: function(jqXHR, textStatus, errorThrown) {
-					this.connectionError();
-				},
-				timeout: 4000
-			});
-		},
-		connectionError: function() {
+		onConnectionError: function() {
 			console.log('connection lost...retrying...');
 			this.clearState();
-			this.initializeSession();
-		},
-		onInitializeSession: function(data) {
-			assert('session' in data);
-			this.session = data.session
-			console.log('connection established...');
-			this.fetch(data.session);
-		},
-		initializeSession: function() {
-			console.log('initializing connection');
-			this.queryClient('btappinit/', this.onInitializeSession);
+			this.fetch();
 		},
 		onFetch: function(data) {
 			assert('btapp' in data);
-			this.updateState(this.session, data.btapp, 'btapp/');
+			this.updateState(data.session, data.btapp, 'btapp/');
 			this.setEvents();
-			this.waitForEvents();
+			this.waitForEvents(data.session);
 		},
-		fetch: function(session) {
-			this.queryClient('btapp/?session=' + this.session, this.onFetch);
+		fetch: function() {
+			client.query(['btapp/torrent/all/*/properties/all/','btapp/torrent/all/*/file/all/','btapp/events/'], null, this.onFetch, this.onConnectionError);
 		},
 		onEvent: function(data) {
 			//there are two types of events...state updates and callbacks
@@ -149,14 +148,15 @@ $(function() {
 				window.btappCallbacks[data.callback](data.arguments);
 			} else assert(false);
 		},
-		onEvents: function(data) {
+		onEvents: function(time, session, data) {
+			console.log((new Date()).getTime() - time);
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(data[i]);
 			}
-			setTimeout(_.bind(this.waitForEvents, this), 250);
+			setTimeout(_.bind(this.waitForEvents, this, session), 1000);
 		},
-		waitForEvents: function() {
-			this.queryClient('btappevents/?session=' + this.session, this.onEvents);
+		waitForEvents: function(session) {
+			client.query(null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
 		},
 		onTorrentStatus: function(args) {
 			if(args.state == -1 && args.hash) {
