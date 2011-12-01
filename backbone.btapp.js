@@ -88,6 +88,14 @@ $(function() {
 			for(var v in data) {
 				var variable = data[v];
 				var param = {};
+
+				//special case all
+				if(v == 'all') {
+					this.updateState(this.session, variable, this.url + v + '/');
+					continue;
+				}
+
+
 				if(typeof variable === 'object') {
 					//don't recreate a variable we already have...just update it
 					var model = this.get(v);
@@ -149,7 +157,7 @@ $(function() {
 			} else assert(false);
 		},
 		onEvents: function(time, session, data) {
-			console.log((new Date()).getTime() - time);
+			console.log(((new Date()).getTime() - time) + ' ms - ' + JSON.stringify(data).length + ' bytes');
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(data[i]);
 			}
@@ -176,8 +184,12 @@ $(function() {
 			//so if you're using the model you can just do something like 
 			//btapp.bind('clientMessage', onClientMessage) and your handler will receive the info blog
 			//regarding that type of event...it also multiplexes the event handling very nicely
-			for(var ev in this.get('events').get('all').attributes) {
-				this.get('events').bt['set'](null, ev, _.bind(this.trigger, this, ev));
+			for(var ev in this.get('events').attributes) {
+				this.get('events').bt['set'](
+					_.bind(function(ev) { console.log('set(' + ev + ')'); }, this, ev),
+					ev, 
+					_.bind(this.trigger, this, ev)
+				);
 			}
 		}
 	});
