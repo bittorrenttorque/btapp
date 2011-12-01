@@ -1,4 +1,23 @@
-//i miss __asm int 3...this is why c/c++ devs shouldn't write javascript
+/**
+	Backbone.btapp.js 0.1
+	(c) 2012 Patrick Williams, BitTorrent Inc.
+	May be freely distributed under the MIT license.
+
+	Welcome to backbone.btapp.js
+	
+	This should provide a clean javascript layer above the utorrent/bittorrent
+	webui layer (the web interface to a client). It is intended to abstract away 
+	everything but the objects and the functions that can be called on them. 
+	There's no need for someone writing	a web app that interacts with the client to 
+	constantly be doing diffs to see what has changed. In addition, calling long specific 
+	urls to call a single function on a torrent object is pretty painful, so I added 
+	functions that dangle off of the objects (in the bt object) that will call the urls 
+	that will acheive the desired effect and will also handle passing functions as arguments...
+	this is similar to soap or rpc...so callbacks should *just work*...in fact, we internally 
+	rely on this as the	torrentStatus event function is set and the used to keep our models up to date
+**/
+
+//i miss __asm int 3...this is why c/c++ devs have a hard time writing javascript
 function assert(b) { if(!b) debugger; }
 
 $(function() {
@@ -244,7 +263,13 @@ $(function() {
 			this.waitForEvents(data.session);
 		},
 		fetch: function() {
-			client.query(['btapp/torrent/all/*/properties/all/','btapp/torrent/all/*/file/all/','btapp/events/'], null, this.onFetch, this.onConnectionError);
+			var queries = [
+				'btapp/torrent/all/*/properties/all/',
+				'btapp/torrent/all/*/file/all/',
+				'btapp/events/'
+			];
+			var session = null;
+			client.query(queries, session, this.onFetch, this.onConnectionError);
 		},
 		onEvent: function(data) {
 			//there are two types of events...state updates and callbacks
