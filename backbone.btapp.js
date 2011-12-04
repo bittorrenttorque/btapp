@@ -44,7 +44,7 @@ $(function() {
 		//the name and args back to us...we're responsible for making the call to the function 
 		//when we detect this...this is similar to the way that jsonp makes ajax callbacks
 		storeCallbackFunction: function(cb) {
-			cb = cb || function() { debugger; };
+			cb = cb || function() {};
 			var str = 'bt_';
 			for(var i = 0; i < 20; i++) { str += Math.floor(Math.random() * 10); }
 			this.btappCallbacks[str] = cb;
@@ -54,7 +54,7 @@ $(function() {
 		//result of that ajax request.
 		createFunction: function(session, url) {
 			return _.bind(function(cb) {
-				cb = cb || function() { debugger; };
+				cb = cb || function() {};
 				var path = url + '(';
 				for(var i = 1; i < arguments.length; i++) {
 					if(i > 1) path += ',';
@@ -67,19 +67,21 @@ $(function() {
 					}
 				}
 				path += ')/'
-				this.query([path], session, cb, function() {debugger;});
+				this.query('function', [path], session, cb, function() {});
 			}, this);
 		},
-		query: function(query, session, cb, err) {
+		query: function(type, queries, session, cb, err) {
+			assert(type == "update" || type == "state" || type == "function");
 			//do a bit of parameter validation
-			cb = cb || function() { debugger; };
-			err = err || function() { debugger; };
-			if(typeof query === 'string') query = [query];
+			cb = cb || function() {};
+			err = err || function() {};
+			if(typeof queries === 'string') queries = [queries];
 			
 			var url = this.host;
 			var args = {};
-			//add the query as a parameter
-			if(query) args['queries'] = $.toJSON(query);
+			args['type'] = type;
+			//add the queries as a parameter
+			if(queries) args['queries'] = $.toJSON(queries);
 			//add the session as a parameter if there is one
 			if(session) args['session'] = session;
 			$.ajax({
@@ -88,7 +90,7 @@ $(function() {
 				context: this,
 				data: args,
 				success: function(data) {
-					if('error' in data)	err();
+					if(!(typeof data === 'object') || 'error' in data)	err();
 					else cb(data);
 				},
 				error: err,
@@ -245,11 +247,19 @@ $(function() {
 	**/		
 	window.Btapp = BtappModel.extend({
 		initialize: function() {
+			//call the base model initializer
 			BtappModel.prototype.initialize.call(this);
+			//bind stuff
 			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
-			this.fetch();
-			
 			this.bind('torrentStatus', this.onTorrentStatus);
+			//in the future, the creator of Btapp should be able to specify the filters they want
+			//we can provide some defaults for people that just want torrents/files/rss/etc
+			this.queries = [
+				'btapp/torrent/all/*/properties/all/',
+				'btapp/torrent/all/*/file/all/',
+				'btapp/events/'
+			];
+			this.fetch();
 		},
 		onConnectionError: function() {
 			console.log('connection lost...retrying...');
@@ -258,23 +268,19 @@ $(function() {
 		},
 		onFetch: function(data) {
 			assert('btapp' in data);
+			this.trigger('update', data.btapp);
 			this.updateState(data.session, data.btapp, 'btapp/');
 			this.setEvents();
 			this.waitForEvents(data.session);
 		},
 		fetch: function() {
-			var queries = [
-				'btapp/torrent/all/*/properties/all/',
-				'btapp/torrent/all/*/file/all/',
-				'btapp/events/'
-			];
-			var session = null;
-			client.query(queries, session, this.onFetch, this.onConnectionError);
+			client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
 		},
 		onEvent: function(data) {
 			//there are two types of events...state updates and callbacks
 			//handle state updates the same way we handle the initial tree building
 			if('btapp' in data) {
+				this.trigger('update', data.btapp);
 				this.updateState(this.session, data.btapp, 'btapp/');
 			} else if('callback' in data && 'arguments' in data) {
 				window.btappCallbacks[data.callback](data.arguments);
@@ -288,7 +294,7 @@ $(function() {
 			setTimeout(_.bind(this.waitForEvents, this, session), 1000);
 		},
 		waitForEvents: function(session) {
-			client.query(null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
+			client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
 		},
 		onTorrentStatus: function(args) {
 			if(args.state == -1 && args.hash) {
