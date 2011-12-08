@@ -94,7 +94,7 @@ $(function() {
 					else cb(data);
 				},
 				error: err,
-				timeout: 4000
+				timeout: 3000
 			});
 		}
 	});
@@ -131,7 +131,7 @@ $(function() {
 
 				//special case all
 				if(v == 'all') {
-					this.updateState(this.session, variable, this.url + v + '/');
+					this.updateState(this.session, variable, url + v + '/');
 					continue;
 				}
 				
@@ -142,7 +142,7 @@ $(function() {
 						model = new BtappModel({'id':v});
 						this.add(model);
 					}
-					model.updateState(this.session, variable, this.url + v + '/');
+					model.updateState(this.session, variable, url + v + '/');
 				}
 			}
 		}
@@ -164,7 +164,7 @@ $(function() {
 		},
 		initializeValues: function() {
 			this.bt = {};
-			this.url = '';
+			this.url = null;
 			this.session = null;
 		},
 		clearState: function() {
@@ -179,14 +179,14 @@ $(function() {
 		},
 		updateState: function(session, data, url) {
 			this.session = session;
-			this.url = url;
+			if(!this.url) this.url = url;
 			for(var v in data) {
 				var variable = data[v];
 				var param = {};
-
+				
 				//special case all
 				if(v == 'all') {
-					this.updateState(this.session, variable, this.url + v + '/');
+					this.updateState(this.session, variable, url + v + '/');
 					continue;
 				}
 
@@ -201,12 +201,12 @@ $(function() {
 							model = new BtappModel;
 						}
 					}
-					model.updateState(this.session, variable, this.url + v + '/');
+					model.updateState(this.session, variable, url + v + '/');
 					param[v] = model;
 					this.set(param,{server:true});
 				} else if(variable === '[native function]') {
 					if(!(v in this.bt)) {
-						this.bt[v] = client.createFunction(session, this.url + v);
+						this.bt[v] = client.createFunction(session, url + v);
 						this.trigger('change');
 					}
 				} else {
@@ -283,7 +283,7 @@ $(function() {
 				this.trigger('update', data.btapp);
 				this.updateState(this.session, data.btapp, 'btapp/');
 			} else if('callback' in data && 'arguments' in data) {
-				window.btappCallbacks[data.callback](data.arguments);
+				client.btappCallbacks[data.callback](data.arguments);
 			} else assert(false);
 		},
 		onEvents: function(time, session, data) {
@@ -299,12 +299,12 @@ $(function() {
 		onTorrentStatus: function(args) {
 			if(args.state == -1 && args.hash) {
 				console.log('torrentStatus(' + args.hash + ')');
-				var torrents = this.get('torrent').get('all');
+				var torrents = this.get('torrent');
 				var torrent = torrents.get(args.hash);
 				if(torrent) {
 					torrent.clearState();
 				}
-				torrents.unset(args.hash);
+				torrents.remove(torrent);
 			}
 		},
 		setEvents: function() {
