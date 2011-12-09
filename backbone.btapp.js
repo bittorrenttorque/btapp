@@ -36,7 +36,7 @@ $(function() {
 	**/
 	window.TorrentClient = Backbone.Model.extend({
 		initialize: function() {
-			this.host = 'http://localhost:22907/btapp/';
+			this.host = 'http://localhost:' + this.get('port') + '/btapp/';
 			this.btappCallbacks = {};
 		},
 		//we can't send function pointers to the torrent client server, so we'll send
@@ -99,7 +99,7 @@ $(function() {
 		}
 	});
 	//this is the TorrentClient singleton that should be used
-	window.client = new TorrentClient;
+	window.client = new TorrentClient({port:22907});
 	
 	/**
 		BtappCollection is a collection of objects in the client...
@@ -274,7 +274,7 @@ $(function() {
 			this.waitForEvents(data.session);
 		},
 		fetch: function() {
-			client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
+			this.get('client').query('state', this.queries, null, this.onFetch, this.onConnectionError);
 		},
 		onEvent: function(data) {
 			//there are two types of events...state updates and callbacks
@@ -283,7 +283,7 @@ $(function() {
 				this.trigger('update', data.btapp);
 				this.updateState(this.session, data.btapp, 'btapp/');
 			} else if('callback' in data && 'arguments' in data) {
-				client.btappCallbacks[data.callback](data.arguments);
+				this.get('client').btappCallbacks[data.callback](data.arguments);
 			} else assert(false);
 		},
 		onEvents: function(time, session, data) {
@@ -294,7 +294,7 @@ $(function() {
 			setTimeout(_.bind(this.waitForEvents, this, session), 1000);
 		},
 		waitForEvents: function(session) {
-			client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
+			this.get('client').query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
 		},
 		onTorrentStatus: function(args) {
 			if(args.state == -1 && args.hash) {
@@ -323,5 +323,5 @@ $(function() {
 			}
 		}
 	});
-	window.btapp = new Btapp();
+	window.btapp = new Btapp({'client':window.client});
 });
