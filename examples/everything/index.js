@@ -1,0 +1,168 @@
+$(function() {
+	window.FileView = Backbone.View.extend({
+		initialize: function() {
+			_.bindAll(this, 'render', 'destroy');
+			this.model.bind('change', this.render);
+			this.model.get('properties').bind('change', this.render);
+		},
+		render: function() {
+			if(!this.model) return this;
+			
+			try {
+				$(this.el).empty();
+				var d = $('<div>' + this.model.id + ' - <font color="red">' + (100.0 * this.model.get('properties').get('downloaded') / this.model.get('properties').get('size')) + '</font></div>');
+				$(this.el).append(d);
+				
+				for(var f in this.model.bt) {
+					var button = $('<button type="button">' + f + '</button>');
+					button.click(_.bind(function(func) { 
+						func(); 
+					}, this, this.model.bt[f]));
+					d.append(button);
+				}
+			} catch(err) {
+				debugger;
+			}
+			return this;
+		},
+		destroy: function() {
+			$(this.el).empty();
+			$(this.el).remove();
+		}	
+	});
+
+	window.TorrentView = Backbone.View.extend({
+		initialize: function() {
+			_.bindAll(this, 'render', 'file', 'add_file', 'remove_file', 'destroy');
+			this.model.bind('change', this.render);
+			this.model.bind('change:file', this.file);
+			
+			this.files = null;
+			var existing = this.model.get('file');
+			if(existing) existing.each(this.file);
+		},
+		add_file: function(file) {
+			var view = new FileView({'model':file});
+			this.files.push(view);
+			$(this.el).append(view.render().el);
+		},
+		remove_file: function(file) {
+			//iterate over list of files and remove 
+			//the view that corresponds to the file
+			for(t in this.files) {
+				var view = this.files[t];
+				if(view.model.id == file.id) {
+					this.files[t].destroy();
+					delete this.files[t];
+					break;
+				}
+			}
+		},
+		file: function() {
+			//adding file collection?
+			if(!this.files && this.model.get('file')) {
+				this.files = [];
+				this.model.get('file').each(this.add_file);
+				//bind to the add/remove of the collection
+				this.model.get('file').bind('add', this.add_file);				
+				this.model.get('file').bind('remove', this.remove_file);
+			}
+			//removing file collection?
+			if(this.files && !this.model.get('file')) {
+				_.each(this.files, function(view) {
+					view.destroy();
+				});
+				
+				this.files = null;
+			}
+		},
+		render: function() {
+			if(!this.model) return this;
+
+			$(this.el).empty();
+			var d = $('<div>' + this.model.id + '</div>');
+			$(this.el).append(d);
+			
+			for(var f in this.model.bt) {
+				var button = $('<button type="button">' + f + '</button>');
+				button.click(_.bind(function(func) { 
+					func(); 
+				}, this, this.model.bt[f]));
+				d.append(button);
+			}
+			
+			for(var t in this.files) {
+				var view = this.files[t];
+				$(this.el).append(view.render().el);
+			}
+			return this;
+		},
+		destroy: function() {
+			_.each(this.files, this.remove_file);
+			$(this.el).empty();
+			$(this.el).remove();
+		}
+	});
+
+	window.BtappView = Backbone.View.extend({
+		initialize: function() {
+			_.bindAll(this, 'render', 'torrent', 'add_torrent', 'remove_torrent', 'destroy');
+			this.model.bind('change', this.render);
+			this.model.bind('change:torrent', this.torrent);
+			
+			this.torrents = null;
+		},
+		add_torrent: function(torrent) {
+			var view = new TorrentView({'model':torrent});
+			this.torrents.push(view);
+			$(this.el).append(view.render().el);
+		},
+		remove_torrent: function(torrent) {
+			//iterate over list of torrents and remove 
+			//the view that corresponds to the torrent
+			for(t in this.torrents) {
+				var view = this.torrents[t];
+				if(view.model.id == torrent.id) {
+					this.torrents[t].destroy();
+					delete this.torrents[t];
+					break;
+				}
+			}
+		},
+		torrent: function() {
+			//adding torrent collection?
+			if(!this.torrents && this.model.get('torrent')) {
+				this.torrents = [];
+				this.model.get('torrent').each(this.add_torrent);
+				//bind to the add/remove of the collection
+				this.model.get('torrent').bind('add', this.add_torrent);				
+				this.model.get('torrent').bind('remove', this.remove_torrent);
+			}
+			//removing torrent collection?
+			if(this.torrents && !this.model.get('torrent')) {
+				_.each(this.torrents, function(view) {
+					view.destroy();
+				});
+				
+				this.torrents = null;
+			}
+		},
+		render: function() {
+			$(this.el).empty();
+			$(this.el).append('<h1>WebUI - Pyro</h1>');
+			for(var t in this.torrents) {
+				var view = this.torrents[t];
+				$(this.el).append(view.render().el);
+			}
+			return this;
+		},
+		destroy: function() {
+			_.each(this.torrents, this.remove_torrent);
+			$(this.el).empty();
+			$(this.el).remove();
+		}
+	});
+	
+	window.btappview = new window.BtappView({'model':btapp, 'el':'body'});
+	window.btappview.render();
+});
