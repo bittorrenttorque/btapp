@@ -31,6 +31,7 @@ function display_counts() {
 }
 
 $(document).ready(function() {
+	window.btapp = new Btapp;
 	setInterval(display_counts, 10000);
 });
 

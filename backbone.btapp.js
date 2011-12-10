@@ -20,7 +20,7 @@
 //i miss __asm int 3...this is why c/c++ devs have a hard time writing javascript
 function assert(b) { if(!b) debugger; }
 
-$(function() {
+(function($) {
 	/**
 		TorrentClient provides a very thin wrapper around the web api
 		It should facilitate finding the correct port and connecting if
@@ -36,7 +36,12 @@ $(function() {
 	**/
 	window.TorrentClient = Backbone.Model.extend({
 		initialize: function() {
-			this.host = 'http://localhost:' + this.get('port') + '/btapp/';
+			//default to port 10000...on localhost we should start looking there
+			var port = this.get('port') || 10000;
+			var scheme = this.get('scheme') || 'http';
+			var host = this.get('host') || 'localhost';
+			this.set({'port': port,'scheme': scheme, 'host': host});
+			this.url = this.get('scheme') + '://' + this.get('host') + ':' + this.get('port') + '/btapp/';
 			this.btappCallbacks = {};
 		},
 		//we can't send function pointers to the torrent client server, so we'll send
@@ -53,6 +58,7 @@ $(function() {
 		//functions are simply urls that we make ajax request to...the cb is called with the
 		//result of that ajax request.
 		createFunction: function(session, url) {
+			assert(session);
 			return _.bind(function(cb) {
 				cb = cb || function() {};
 				var path = url + '(';
@@ -67,6 +73,7 @@ $(function() {
 					}
 				}
 				path += ')/'
+				console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
 		},
@@ -77,7 +84,6 @@ $(function() {
 			err = err || function() {};
 			if(typeof queries === 'string') queries = [queries];
 			
-			var url = this.host;
 			var args = {};
 			args['type'] = type;
 			//add the queries as a parameter
@@ -85,7 +91,7 @@ $(function() {
 			//add the session as a parameter if there is one
 			if(session) args['session'] = session;
 			$.ajax({
-				url: url,
+				url: this.url,
 				dataType: 'jsonp',
 				context: this,
 				data: args,
@@ -98,8 +104,6 @@ $(function() {
 			});
 		}
 	});
-	//this is the TorrentClient singleton that should be used
-	window.client = new TorrentClient({port:22907});
 	
 	/**
 		BtappCollection is a collection of objects in the client...
@@ -131,7 +135,7 @@ $(function() {
 
 				//special case all
 				if(v == 'all') {
-					this.updateState(this.session, variable, url + v + '/');
+					this.updateState(this.session, variable, url + escape(v) + '/');
 					continue;
 				}
 				
@@ -140,9 +144,10 @@ $(function() {
 					var model = this.get(v);
 					if(!model) {
 						model = new BtappModel({'id':v});
+						model.client = this.client;
 						this.add(model);
 					}
-					model.updateState(this.session, variable, url + v + '/');
+					model.updateState(this.session, variable, url + escape(v) + '/');
 				}
 			}
 		}
@@ -186,7 +191,7 @@ $(function() {
 				
 				//special case all
 				if(v == 'all') {
-					this.updateState(this.session, variable, url + v + '/');
+					this.updateState(this.session, variable, url + escape(v) + '/');
 					continue;
 				}
 
@@ -200,13 +205,14 @@ $(function() {
 						} else {
 							model = new BtappModel;
 						}
+						model.client = this.client;
 					}
-					model.updateState(this.session, variable, url + v + '/');
+					model.updateState(this.session, variable, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
 				} else if(variable === '[native function]') {
 					if(!(v in this.bt)) {
-						this.bt[v] = client.createFunction(session, url + v);
+						this.bt[v] = this.client.createFunction(session, url + escape(v));
 						this.trigger('change');
 					}
 				} else {
@@ -214,6 +220,24 @@ $(function() {
 					param[v] = variable;
 					this.set(param, {server:true});
 				}	
+			}
+		},
+		set: function(attributes, options) {
+			//if one of the options is server: true, then we shouldn't notify the
+			//server about the set request...otherwise this is likely the web app
+			//that is setting a variable and we should notify the client so it can
+			//update appropriately...in that case don't update our own models...they
+			//will be updated by the server if something in fact changes in the client
+			if(	(!options || !('server' in options) || !options['server']) &&
+				(this.bt && 'set' in this.bt)) {
+				var callback = (options && 'callback' in options) ? 
+					options['callback'] : 
+					function() { debugger; };
+				for(var a in attributes) {
+					this.bt['set'](callback, a, attributes[a]);
+				}
+			} else {
+				Backbone.Model.prototype.set.call(this, attributes, options);
 			}
 		}
 	});
@@ -244,7 +268,7 @@ $(function() {
 		torrentStatus is used internally to keep our objects up to date, but that and clientMessage are really the only
 		events that are generally used...these trigger events when they are received by the base object, so to listen in
 		on torrentStatus events, simply provide a callback to btapp.bind('torrentStatus', callback_func)
-	**/		
+	**/
 	window.Btapp = BtappModel.extend({
 		initialize: function() {
 			//call the base model initializer
@@ -255,10 +279,15 @@ $(function() {
 			//in the future, the creator of Btapp should be able to specify the filters they want
 			//we can provide some defaults for people that just want torrents/files/rss/etc
 			this.queries = [
+				'btapp/stash/all/',
 				'btapp/torrent/all/*/properties/all/',
 				'btapp/torrent/all/*/file/all/',
 				'btapp/events/'
 			];
+			
+			this.client = new TorrentClient;		
+			
+			//do this after everything has been setup...we're ready for info from the client
 			this.fetch();
 		},
 		onConnectionError: function() {
@@ -267,34 +296,31 @@ $(function() {
 			this.fetch();
 		},
 		onFetch: function(data) {
-			assert('btapp' in data);
-			this.trigger('update', data.btapp);
-			this.updateState(data.session, data.btapp, 'btapp/');
-			this.setEvents();
+			assert('session' in data);
 			this.waitForEvents(data.session);
 		},
 		fetch: function() {
-			this.get('client').query('state', this.queries, null, this.onFetch, this.onConnectionError);
+			this.client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
 		},
-		onEvent: function(data) {
+		onEvent: function(session, data) {
 			//there are two types of events...state updates and callbacks
 			//handle state updates the same way we handle the initial tree building
 			if('btapp' in data) {
 				this.trigger('update', data.btapp);
-				this.updateState(this.session, data.btapp, 'btapp/');
+				this.updateState(session, data.btapp, 'btapp/');
 			} else if('callback' in data && 'arguments' in data) {
-				this.get('client').btappCallbacks[data.callback](data.arguments);
+				this.client.btappCallbacks[data.callback](data.arguments);
 			} else assert(false);
 		},
 		onEvents: function(time, session, data) {
 			console.log(((new Date()).getTime() - time) + ' ms - ' + JSON.stringify(data).length + ' bytes');
 			for(var i = 0; i < data.length; i++) {
-				this.onEvent(data[i]);
+				this.onEvent(session, data[i]);
 			}
 			setTimeout(_.bind(this.waitForEvents, this, session), 1000);
 		},
 		waitForEvents: function(session) {
-			this.get('client').query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
+			this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
 		},
 		onTorrentStatus: function(args) {
 			if(args.state == -1 && args.hash) {
@@ -315,13 +341,11 @@ $(function() {
 			//btapp.bind('clientMessage', onClientMessage) and your handler will receive the info blog
 			//regarding that type of event...it also multiplexes the event handling very nicely
 			for(var ev in this.get('events').attributes) {
-				this.get('events').bt['set'](
-					_.bind(function(ev) { console.log('set(' + ev + ')'); }, this, ev),
-					ev, 
-					_.bind(this.trigger, this, ev)
-				);
+				var arguments = {};
+				arguments[ev] = _.bind(this.trigger, this, ev);
+				var options = {'callback':_.bind(function(ev) { console.log('set(' + ev + ')'); }, this, ev)};
+				this.get('events').set(arguments, options);
 			}
-		}
+		},
 	});
-	window.btapp = new Btapp({'client':window.client});
-});
+})(jQuery);

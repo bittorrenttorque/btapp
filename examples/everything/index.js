@@ -20,9 +20,7 @@ $(function() {
 					}, this, this.model.bt[f]));
 					d.append(button);
 				}
-			} catch(err) {
-				debugger;
-			}
+			} catch(err) {}
 			return this;
 		},
 		destroy: function() {
@@ -163,6 +161,6 @@ $(function() {
 		}
 	});
 	
-	window.btappview = new window.BtappView({'model':btapp, 'el':'body'});
+	window.btappview = new window.BtappView({'model':new Btapp, 'el':'body'});
 	window.btappview.render();
 });
