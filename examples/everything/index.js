@@ -1,9 +1,18 @@
 $(function() {
 	window.FileView = Backbone.View.extend({
 		initialize: function() {
-			_.bindAll(this, 'render', 'destroy');
+			_.bindAll(this, 'render', 'destroy', 'properties_change');
 			this.model.bind('change', this.render);
-			this.model.get('properties').bind('change', this.render);
+			if(this.model.get('properties')) {
+				this.model.get('properties').bind('change', this.render);
+			} else {
+				this.model.bind('change:properties', this.properties_change);
+			}
+		},
+		properties_change: function() {
+			if(this.model.get('properties') && !this.model.previous('properties')) {
+				this.model.get('properties').bind('change', this.render);
+			}
 		},
 		render: function() {
 			if(!this.model) return this;
@@ -31,13 +40,24 @@ $(function() {
 
 	window.TorrentView = Backbone.View.extend({
 		initialize: function() {
-			_.bindAll(this, 'render', 'file', 'add_file', 'remove_file', 'destroy');
+			_.bindAll(this, 'render', 'file', 'add_file', 'remove_file', 'destroy', 'properties_change');
 			this.model.bind('change', this.render);
 			this.model.bind('change:file', this.file);
 			
 			this.files = null;
 			var existing = this.model.get('file');
 			if(existing) existing.each(this.file);
+
+			if(this.model.get('properties')) {
+				this.model.get('properties').bind('change', this.render);
+			} else {
+				this.model.bind('change:properties', this.properties_change);
+			}
+		},
+		properties_change: function() {
+			if(this.model.get('properties') && !this.model.previous('properties')) {
+				this.model.get('properties').bind('change', this.render);
+			}
 		},
 		add_file: function(file) {
 			var view = new FileView({'model':file});
@@ -78,7 +98,9 @@ $(function() {
 			if(!this.model) return this;
 
 			$(this.el).empty();
-			var d = $('<div>' + this.model.id + '</div>');
+			var name = this.model.get('properties') ? this.model.get('properties').get('name') : this.model.id;
+			var started = this.model.get('properties') ? this.model.get('properties').get('status') == 201 : false;
+			var d = $('<div><font color=\"' + (started ? 'green' : 'red') + '\">' + name + '</font></div>');
 			$(this.el).append(d);
 			
 			for(var f in this.model.bt) {
