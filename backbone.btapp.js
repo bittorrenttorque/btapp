@@ -274,8 +274,9 @@ function assert(b) { if(!b) debugger; }
 			//call the base model initializer
 			BtappModel.prototype.initialize.call(this);
 			//bind stuff
-			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
+			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus', 'onEventChange');
 			this.bind('torrentStatus', this.onTorrentStatus);
+			this.bind('change:events', this.onEventChange);
 			//in the future, the creator of Btapp should be able to specify the filters they want
 			//we can provide some defaults for people that just want torrents/files/rss/etc
 			this.queries = [
@@ -331,6 +332,11 @@ function assert(b) { if(!b) debugger; }
 					torrent.clearState();
 				}
 				torrents.remove(torrent);
+			}
+		},
+		onEventChange: function(attributes) {
+			if(this.get('events') && !this.previous('events')) {
+				this.setEvents();
 			}
 		},
 		setEvents: function() {
