@@ -169,11 +169,6 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
-			var drag = $('<input type="file" multiple="multiple"/>');
-			drag.css('width', '100%');
-			drag.css('background-color', '#eee');
-			drag.change(_.bind(function(elem) { console.log(elem.text());}, this, drag));
-			$(this.el).append(drag);
 			$(this.el).append('<h1>WebUI - Pyro</h1>');
 			for(var t in this.torrents) {
 				var view = this.torrents[t];
