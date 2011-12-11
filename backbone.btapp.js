@@ -69,7 +69,7 @@ function assert(b) { if(!b) debugger; }
 					if(typeof arguments[i] === 'function') {
 						path += this.storeCallbackFunction(arguments[i]);
 					} else {
-						path += arguments[i];
+						path += escape(encodeURIComponent(encodeURI(arguments[i])));
 					}
 				}
 				path += ')/'
@@ -166,6 +166,13 @@ function assert(b) { if(!b) debugger; }
 		initialize: function() {
 			_.bindAll(this, 'clearState', 'updateState');
 			this.initializeValues();
+			
+			this.bind('change', _.bind(function() {
+				var attrs = this.attributes;
+				var prev = this.previousAttributes();
+				for(var a in attrs) if(!(a in prev)) this.trigger('add:' + a);
+				for(var p in prev) if(!(p in attrs)) this.trigger('remove:' + a);
+			}, this));
 		},
 		initializeValues: function() {
 			this.bt = {};
@@ -274,16 +281,17 @@ function assert(b) { if(!b) debugger; }
 			//call the base model initializer
 			BtappModel.prototype.initialize.call(this);
 			//bind stuff
-			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus', 'onEventChange');
+			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
 			this.bind('torrentStatus', this.onTorrentStatus);
-			this.bind('change:events', this.onEventChange);
+			this.bind('add:events', this.setEvents);
 			//in the future, the creator of Btapp should be able to specify the filters they want
 			//we can provide some defaults for people that just want torrents/files/rss/etc
 			this.queries = [
 				'btapp/stash/all/',
 				'btapp/torrent/all/*/properties/all/',
 				'btapp/torrent/all/*/file/all/',
-				'btapp/events/'
+				'btapp/events/',
+				'btapp/add/'
 			];
 			
 			this.client = new TorrentClient;		
@@ -334,12 +342,8 @@ function assert(b) { if(!b) debugger; }
 				torrents.remove(torrent);
 			}
 		},
-		onEventChange: function(attributes) {
-			if(this.get('events') && !this.previous('events')) {
-				this.setEvents();
-			}
-		},
 		setEvents: function() {
+			return;
 			//we assume that we just filled in the events information...we desperately want to
 			//set these so that get all the callbacks from the client...what we want to do is
 			//just have the default event handler trigger an event that has the same name as the event
