@@ -343,7 +343,6 @@ function assert(b) { if(!b) debugger; }
 			}
 		},
 		setEvents: function() {
-			return;
 			//we assume that we just filled in the events information...we desperately want to
 			//set these so that get all the callbacks from the client...what we want to do is
 			//just have the default event handler trigger an event that has the same name as the event
