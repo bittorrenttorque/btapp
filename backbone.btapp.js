@@ -35,11 +35,11 @@ function assert(b) { if(!b) debugger; }
 		effort on the part of the client
 	**/
 	window.TorrentClient = Backbone.Model.extend({
-		initialize: function() {
+		initialize: function(attributes) {
 			//default to port 10000...on localhost we should start looking there
-			var port = this.get('port') || 10000;
-			var scheme = this.get('scheme') || 'http';
-			var host = this.get('host') || 'localhost';
+			var port = attributes.port || 10000;
+			var scheme = attributes.scheme || 'http';
+			var host = attributes.host || 'localhost';
 			this.set({'port': port,'scheme': scheme, 'host': host});
 			this.url = this.get('scheme') + '://' + this.get('host') + ':' + this.get('port') + '/btapp/';
 			this.btappCallbacks = {};
@@ -277,7 +277,7 @@ function assert(b) { if(!b) debugger; }
 		on torrentStatus events, simply provide a callback to btapp.bind('torrentStatus', callback_func)
 	**/
 	window.Btapp = BtappModel.extend({
-		initialize: function() {
+		initialize: function(attributes) {
 			//call the base model initializer
 			BtappModel.prototype.initialize.call(this);
 			//bind stuff
@@ -295,7 +295,7 @@ function assert(b) { if(!b) debugger; }
 				'btapp/dht/'
 			];
 			
-			this.client = new TorrentClient;		
+			this.client = new TorrentClient(attributes);		
 			
 			//do this after everything has been setup...we're ready for info from the client
 			this.fetch();
@@ -323,7 +323,7 @@ function assert(b) { if(!b) debugger; }
 			} else assert(false);
 		},
 		onEvents: function(time, session, data) {
-			console.log(((new Date()).getTime() - time) + ' ms - ' + JSON.stringify(data).length + ' bytes');
+			//console.log(((new Date()).getTime() - time) + ' ms - ' + JSON.stringify(data).length + ' bytes');
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(session, data[i]);
 			}
