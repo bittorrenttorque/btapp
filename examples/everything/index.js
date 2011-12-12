@@ -172,7 +172,7 @@ $(function() {
 		}
 	});
 	
-	window.btappview = new window.BtappView({'model':new Btapp, 'el':'body'});
+	window.btappview = new window.BtappView({'model':new Btapp({'host':'10.10.90.166','port':'22907'}), 'el':'body'});
 	window.btappview.render();
 	
 	window.btappview.model.bind('add:add', _.bind(function() {

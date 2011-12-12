@@ -69,7 +69,7 @@ function assert(b) { if(!b) debugger; }
 					if(typeof arguments[i] === 'function') {
 						path += this.storeCallbackFunction(arguments[i]);
 					} else {
-						path += escape(encodeURIComponent(encodeURI(arguments[i])));
+						path += encodeURIComponent(arguments[i]);
 					}
 				}
 				path += ')/'
