@@ -40,9 +40,22 @@ $(function() {
 
 	window.TorrentView = Backbone.View.extend({
 		initialize: function() {
-			_.bindAll(this, 'render', 'file', 'add_file', 'remove_file', 'destroy', 'properties_change');
+			_.bindAll(this, 'render', 'add_file', 'remove_file', 'destroy', 'properties_change');
 			this.model.bind('change', this.render);
-			this.model.bind('change:file', this.file);
+			this.model.bind('add:file', _.bind(function() {
+				this.files = [];
+				this.model.get('file').each(this.add_file);
+				//bind to the add/remove of the collection
+				this.model.get('file').bind('add', this.add_file);				
+				this.model.get('file').bind('remove', this.remove_file);
+			}, this));
+			this.model.bind('remove:file', _.bind(function() {
+				_.each(this.files, function(view) {
+					view.destroy();
+				});
+				
+				this.files = null;
+			}, this));
 			
 			this.files = null;
 			var existing = this.model.get('file');
@@ -74,24 +87,6 @@ $(function() {
 					delete this.files[t];
 					break;
 				}
-			}
-		},
-		file: function() {
-			//adding file collection?
-			if(!this.files && this.model.get('file')) {
-				this.files = [];
-				this.model.get('file').each(this.add_file);
-				//bind to the add/remove of the collection
-				this.model.get('file').bind('add', this.add_file);				
-				this.model.get('file').bind('remove', this.remove_file);
-			}
-			//removing file collection?
-			if(this.files && !this.model.get('file')) {
-				_.each(this.files, function(view) {
-					view.destroy();
-				});
-				
-				this.files = null;
 			}
 		},
 		render: function() {
@@ -126,9 +121,21 @@ $(function() {
 
 	window.BtappView = Backbone.View.extend({
 		initialize: function() {
-			_.bindAll(this, 'render', 'torrent', 'add_torrent', 'remove_torrent', 'destroy');
+			_.bindAll(this, 'render', 'add_torrent', 'remove_torrent', 'destroy');
 			this.model.bind('change', this.render);
-			this.model.bind('change:torrent', this.torrent);
+			this.model.bind('add:torrent', _.bind(function() {
+				this.torrents = [];
+				this.model.get('torrent').each(this.add_torrent);
+				this.model.get('torrent').bind('add', this.add_torrent);				
+				this.model.get('torrent').bind('remove', this.remove_torrent);
+			}, this));
+			this.model.bind('remove:torrent', _.bind(function() {
+				_.each(this.torrents, function(view) {
+					view.destroy();
+				});
+				
+				this.torrents = null;
+			}, this));
 			
 			this.torrents = null;
 		},
@@ -147,24 +154,6 @@ $(function() {
 					delete this.torrents[t];
 					break;
 				}
-			}
-		},
-		torrent: function() {
-			//adding torrent collection?
-			if(!this.torrents && this.model.get('torrent')) {
-				this.torrents = [];
-				this.model.get('torrent').each(this.add_torrent);
-				//bind to the add/remove of the collection
-				this.model.get('torrent').bind('add', this.add_torrent);				
-				this.model.get('torrent').bind('remove', this.remove_torrent);
-			}
-			//removing torrent collection?
-			if(this.torrents && !this.model.get('torrent')) {
-				_.each(this.torrents, function(view) {
-					view.destroy();
-				});
-				
-				this.torrents = null;
 			}
 		},
 		render: function() {
@@ -189,6 +178,6 @@ $(function() {
 	window.btappview.model.bind('add:add', _.bind(function() {
 		var link = 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent';
 		var func = this.get('add').bt['torrent'];
-		func(function(data) { console.log('btapp.add.torrent(' + link + ') -> ' + $.toJSON(data)); }, link);
+		func(function() { }, link);
 	}, window.btappview.model));
 });
