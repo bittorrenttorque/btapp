@@ -291,7 +291,8 @@ function assert(b) { if(!b) debugger; }
 				'btapp/torrent/all/*/properties/all/',
 				'btapp/torrent/all/*/file/all/',
 				'btapp/events/',
-				'btapp/add/'
+				'btapp/add/',
+				'btapp/dht/'
 			];
 			
 			this.client = new TorrentClient;		

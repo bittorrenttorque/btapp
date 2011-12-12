@@ -158,7 +158,7 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
-			$(this.el).append('<h1>WebUI - Pyro</h1>');
+			$(this.el).append('<h1>Crysalis</h1>');
 			for(var t in this.torrents) {
 				var view = this.torrents[t];
 				$(this.el).append(view.render().el);
