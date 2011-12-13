@@ -62,17 +62,18 @@ function assert(b) { if(!b) debugger; }
 			return _.bind(function(cb) {
 				cb = cb || function() {};
 				var path = url + '(';
+				var args = [];
 				for(var i = 1; i < arguments.length; i++) {
-					if(i > 1) path += ',';
 					//we are responsible for converting functions to variable names...
 					//this will be called later via a event with a callback and arguments variables
 					if(typeof arguments[i] === 'function') {
-						path += this.storeCallbackFunction(arguments[i]);
+						args.push(this.storeCallbackFunction(arguments[i]));
 					} else {
-						path += encodeURIComponent(arguments[i]);
+						args.push(arguments[i]);
 					}
 				}
-				path += ')/'
+				path += encodeURIComponent($.toJSON(args));
+				path += ')/';
 				console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
