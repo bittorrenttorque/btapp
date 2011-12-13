@@ -146,9 +146,11 @@ function assert(b) { if(!b) debugger; }
 					if(!model) {
 						model = new BtappModel({'id':v});
 						model.client = this.client;
+						model.updateState(this.session, variable, url + escape(v) + '/');
 						this.add(model);
+					} else {
+						model.updateState(this.session, variable, url + escape(v) + '/');
 					}
-					model.updateState(this.session, variable, url + escape(v) + '/');
 				}
 			}
 		}
