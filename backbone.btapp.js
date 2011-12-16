@@ -51,7 +51,7 @@ function assert(b) { if(!b) debugger; }
 		storeCallbackFunction: function(cb) {
 			cb = cb || function() {};
 			var str = 'bt_';
-			for(var i = 0; i < 20; i++) { str += Math.floor(Math.random() * 10); }
+			for(var i = 0; i < 20 || (str in this.btappCallbacks); i++) { str += Math.floor(Math.random() * 10); }
 			this.btappCallbacks[str] = cb;
 			return str;
 		},
@@ -59,7 +59,7 @@ function assert(b) { if(!b) debugger; }
 		//result of that ajax request.
 		createFunction: function(session, url) {
 			assert(session);
-			return _.bind(function(cb) {
+			var func = _.bind(function(cb) {
 				cb = cb || function() {};
 				var path = url + '(';
 				var args = [];
@@ -77,6 +77,8 @@ function assert(b) { if(!b) debugger; }
 				console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
+			func.valueOf = function() { return url; }
+			return func;
 		},
 		query: function(type, queries, session, cb, err) {
 			assert(type == "update" || type == "state" || type == "function");
@@ -173,8 +175,18 @@ function assert(b) { if(!b) debugger; }
 			this.bind('change', _.bind(function() {
 				var attrs = this.attributes;
 				var prev = this.previousAttributes();
-				for(var a in attrs) if(!(a in prev)) this.trigger('add:' + a);
-				for(var p in prev) if(!(p in attrs)) this.trigger('remove:' + a);
+				for(var a in attrs) {
+					if(!(a in prev)) {
+						this.trigger('add:' + a, attrs[a]);
+						this.trigger('add', attrs[a]);
+					}
+				}
+				for(var p in prev) {
+					if(!(p in attrs)) {
+						this.trigger('remove:' + a, prev[p]);
+						this.trigger('remove', prev[p]);
+					}
+				}
 			}, this));
 		},
 		initializeValues: function() {
@@ -326,7 +338,7 @@ function assert(b) { if(!b) debugger; }
 			} else assert(false);
 		},
 		onEvents: function(time, session, data) {
-			//console.log(((new Date()).getTime() - time) + ' ms - ' + JSON.stringify(data).length + ' bytes');
+			console.log(((new Date()).getTime() - time) + ' ms - ' + JSON.stringify(data).length + ' bytes');
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(session, data[i]);
 			}

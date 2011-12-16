@@ -59,7 +59,10 @@ $(function() {
 			
 			this.files = null;
 			var existing = this.model.get('file');
-			if(existing) existing.each(this.file);
+			if(existing) {
+				this.files = [];
+				existing.each(this.add_file);
+			}
 
 			if(this.model.get('properties')) {
 				this.model.get('properties').bind('change', this.render);
@@ -172,7 +175,7 @@ $(function() {
 		}
 	});
 	
-	window.btappview = new window.BtappView({'model':new Btapp({'host':'10.10.90.166','port':'22907'}), 'el':'body'});
+	window.btappview = new window.BtappView({'model':new Btapp({'host':'127.0.0.1','port':'10000'}), 'el':'body'});
 	window.btappview.render();
 	
 	window.btappview.model.bind('add:add', _.bind(function() {

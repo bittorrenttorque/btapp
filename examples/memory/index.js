@@ -32,6 +32,10 @@ function display_counts() {
 
 $(document).ready(function() {
 	window.btapp = new Btapp;
-	setInterval(display_counts, 10000);
+	setInterval(display_counts, 5000);
+	btapp.bind('add:torrent', function() {
+		display_counts();
+	});
+	
 });
 
