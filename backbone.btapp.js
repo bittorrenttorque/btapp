@@ -40,7 +40,8 @@ function assert(b) { if(!b) debugger; }
 			var port = attributes.port || 10000;
 			var scheme = attributes.scheme || 'http';
 			var host = attributes.host || 'localhost';
-			this.set({'port': port,'scheme': scheme, 'host': host});
+			var falcon = attributes.falcon || null;
+			this.set({'port': port,'scheme': scheme, 'host': host, 'falcon': falcon});
 			this.url = this.get('scheme') + '://' + this.get('host') + ':' + this.get('port') + '/btapp/';
 			this.btappCallbacks = {};
 		},
@@ -93,18 +94,28 @@ function assert(b) { if(!b) debugger; }
 			if(queries) args['queries'] = $.toJSON(queries);
 			//add the session as a parameter if there is one
 			if(session) args['session'] = session;
-			$.ajax({
-				url: this.url,
-				dataType: 'jsonp',
-				context: this,
-				data: args,
-				success: function(data) {
-					if(!(typeof data === 'object') || 'error' in data)	err();
-					else cb(data);
-				},
-				error: err,
-				timeout: 3000
-			});
+			
+			var success_callback = function(data) {
+				if(!(typeof data === 'object') || 'error' in data)	err();
+				else cb(data);
+			};
+			//are we connecting to the client on the local machine or through a falcon account?
+			var falcon = this.get('falcon');
+			if(falcon) {
+				var url_params = {};
+				var options = {};
+				falcon.request('POST', 'https://remote-staging.utorrent.com', url_params, args, success_callback, err, options);
+			} else {
+				$.ajax({
+					url: this.url,
+					dataType: 'jsonp',
+					context: this,
+					data: args,
+					success: success_callback,
+					error: err,
+					timeout: 3000
+				});
+			}
 		}
 	});
 	
