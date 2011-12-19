@@ -242,10 +242,11 @@ function assert(b) { if(!b) debugger; }
 					model.updateState(this.session, variable, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
-				} else if(typeof variable === 'string' && variable.match('[native function]')) {
+				} else if(typeof variable === 'string' && (variable.search('[native function]') == 1)) {
 					if(!(v in this.bt)) {
-						this.bt[v] = this.client.createFunction(session, url + escape(v), variable);
-						this.bt[v].valueOf = _.bind(function(signature) { return signature; }, this, variable);
+						this.bt[v] = this.client.createFunction(session, url + escape(v));
+						this.bt[v].valueOf = _.bind(function(value) { return value; }, this, variable);
+						
 						this.trigger('change');
 					}
 				} else {
