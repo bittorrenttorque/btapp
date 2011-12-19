@@ -78,7 +78,6 @@ function assert(b) { if(!b) debugger; }
 				console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
-			func.valueOf = function() { return url; }
 			return func;
 		},
 		query: function(type, queries, session, cb, err) {
@@ -243,9 +242,10 @@ function assert(b) { if(!b) debugger; }
 					model.updateState(this.session, variable, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
-				} else if(variable === '[native function]') {
+				} else if(typeof variable === 'string' && variable.match('[native function]')) {
 					if(!(v in this.bt)) {
-						this.bt[v] = this.client.createFunction(session, url + escape(v));
+						this.bt[v] = this.client.createFunction(session, url + escape(v), variable);
+						this.bt[v].valueOf = _.bind(function(signature) { return signature; }, this, variable);
 						this.trigger('change');
 					}
 				} else {
