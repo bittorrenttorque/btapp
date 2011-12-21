@@ -227,7 +227,7 @@ function assert(b) { if(!b) debugger; }
 					continue;
 				}
 
-
+				var FUNCTION_IDENTIFIER = '[native function]';
 				if(typeof variable === 'object') {
 					//don't recreate a variable we already have...just update it
 					var model = this.get(v);
@@ -242,7 +242,7 @@ function assert(b) { if(!b) debugger; }
 					model.updateState(this.session, variable, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
-				} else if(typeof variable === 'string' && (variable.search('[native function]') == 1)) {
+				} else if(typeof variable === 'string' && variable.substr(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
 					if(!(v in this.bt)) {
 						this.bt[v] = this.client.createFunction(session, url + escape(v));
 						this.bt[v].valueOf = _.bind(function(value) { return value; }, this, variable);
