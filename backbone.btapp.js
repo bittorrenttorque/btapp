@@ -34,6 +34,10 @@ function assert(b) { if(!b) debugger; }
 		stop on a torrent file, the torrent specific url is accessed without any
 		effort on the part of the client
 	**/
+	function verifyFunctionArguments(signatures, arguments) {
+		debugger;
+	}
+
 	window.TorrentClient = Backbone.Model.extend({
 		initialize: function(attributes) {
 			//default to port 10000...on localhost we should start looking there
@@ -58,12 +62,23 @@ function assert(b) { if(!b) debugger; }
 		},
 		//functions are simply urls that we make ajax request to...the cb is called with the
 		//result of that ajax request.
-		createFunction: function(session, url) {
+		createFunction: function(session, url, signatures) {
+			//signatures is at this point something along the lines of "FUNCTION_IDENTIFIER () () ()"
+			//where each () wraps a valid list of argument types...lets parse that into an array of
+			//valid signatures that is more useable
+			var native_signatures = [];
+			
+		
 			assert(session);
 			var func = _.bind(function(cb) {
 				cb = cb || function() {};
+				assert(typeof cb === 'function');
 				var path = url + '(';
 				var args = [];
+				
+				//lets do a bit of validation of the arguments that we're passing into the client
+				//var native_args = arguments.slice(1, arguments.length);
+
 				for(var i = 1; i < arguments.length; i++) {
 					//we are responsible for converting functions to variable names...
 					//this will be called later via a event with a callback and arguments variables
@@ -78,6 +93,7 @@ function assert(b) { if(!b) debugger; }
 				console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
+			func.valueOf = function() { return signatures; };
 			return func;
 		},
 		query: function(type, queries, session, cb, err) {
@@ -101,9 +117,15 @@ function assert(b) { if(!b) debugger; }
 			//are we connecting to the client on the local machine or through a falcon account?
 			var falcon = this.get('falcon');
 			if(falcon) {
-				var url_params = {};
+				var url_params = {'btapp':'backbone.btapp.js'};
 				var options = {};
-				falcon.request('POST', 'https://remote-staging.utorrent.com', url_params, args, success_callback, err, options);
+				var type = 'POST';
+				var url = '/client/gui/';
+				falcon.request(type, url, url_params, args, function(data) {
+					assert('build' in data);
+					assert('result' in data);
+					success_callback(data.result);
+				}, err, options);
 			} else {
 				$.ajax({
 					url: this.url,
@@ -112,7 +134,7 @@ function assert(b) { if(!b) debugger; }
 					data: args,
 					success: success_callback,
 					error: err,
-					timeout: 3000
+					timeout: 10000
 				});
 			}
 		}
@@ -242,10 +264,9 @@ function assert(b) { if(!b) debugger; }
 					model.updateState(this.session, variable, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
-				} else if(typeof variable === 'string' && variable.substr(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
+				} else if(typeof variable === 'string' && variable.substring(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
 					if(!(v in this.bt)) {
-						this.bt[v] = this.client.createFunction(session, url + escape(v));
-						this.bt[v].valueOf = _.bind(function(value) { return value; }, this, variable);
+						this.bt[v] = this.client.createFunction(session, url + escape(v), variable);
 						
 						this.trigger('change');
 					}
