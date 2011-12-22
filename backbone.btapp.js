@@ -147,7 +147,8 @@ config = {
 			//set up some connection variables
 			var opts = {
 				stay_signed_in: true, 
-				success: _.bind(function() { 
+				success: _.bind(function() {
+					console.log('raptor connected successfully');
 					assert('client' in window && 'raptor' in window.client && 'api' in window.client.raptor);
 					this.falcon = window.client.raptor.api;
 					this.trigger('ready');
