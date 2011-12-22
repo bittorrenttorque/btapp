@@ -109,8 +109,8 @@ $(function() {
 				d.append(button);
 			}
 			
-			for(var t in this.files) {
-				var view = this.files[t];
+			for(var i = 0; this.files && i < this.files.length; i++) {
+				var view = this.files[i];
 				$(this.el).append(view.render().el);
 			}
 			return this;
@@ -150,11 +150,11 @@ $(function() {
 		remove_torrent: function(torrent) {
 			//iterate over list of torrents and remove 
 			//the view that corresponds to the torrent
-			for(t in this.torrents) {
-				var view = this.torrents[t];
+			for(var i = 0; this.torrents && i < this.torrents.length; i++) {
+				var view = this.torrents[i];
 				if(view.model.id == torrent.id) {
-					this.torrents[t].destroy();
-					delete this.torrents[t];
+					this.torrents[i].destroy();
+					delete this.torrents[i];
 					break;
 				}
 			}
@@ -162,9 +162,11 @@ $(function() {
 		render: function() {
 			$(this.el).empty();
 			$(this.el).append('<h1>Crysalis</h1>');
-			for(var t in this.torrents) {
-				var view = this.torrents[t];
-				$(this.el).append(view.render().el);
+			if(this.torrents) {
+				for(var i = 0; this.torrents && i < this.torrents.length; i++) {
+					var view = this.torrents[i];
+					$(this.el).append(view.render().el);
+				}
 			}
 			return this;
 		},
@@ -175,7 +177,7 @@ $(function() {
 		}
 	});
 	
-	window.btappview = new window.BtappView({'model':new Btapp({'host':'127.0.0.1','port':'10000'}), 'el':'body'});
+	window.btappview = new window.BtappView({'model':new Btapp({'username':'username','password':'password'}), 'el':'body'});
 	window.btappview.render();
 	
 	window.btappview.model.bind('add:add', _.bind(function() {

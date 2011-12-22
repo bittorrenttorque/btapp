@@ -124,10 +124,23 @@ config = {
 			TorrentClient.prototype.initialize.call(this, attributes);
 
 			assert(typeof attributes === 'object' && 'username' in attributes && 'password' in attributes);
-			//add some entropy
-			for (var i = 0; i < 3000; i++) sjcl.random.addEntropy(Math.random(), 2);
-			window.clients = new ClientManager;
-			this.reset();
+			
+			console.log('initializing falcon client');
+			console.log('loading falcon external dependencies');
+			var jsload = 'https://remote-staging.utorrent.com/static/js/jsloadv2.js?v=0.57';
+			$.getScript(jsload, _.bind(function(data, textStatus){
+				console.log('loaded ' + jsload);
+				var tagsv2 = 'https://remote-staging.utorrent.com/static/js/tagsv2.js?v=0.57';
+				$.getScript(tagsv2, _.bind(function(data, textStatus) {
+					console.log('loaded ' + tagsv2);
+					//add some entropy
+					(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['lib/remoteapi'], _.bind(function() {
+						for (var i = 0; i < 3000; i++) sjcl.random.addEntropy(Math.random(), 2);
+						window.clients = new ClientManager;
+						this.reset();
+					}, this));
+				}, this));
+			}, this));
 		},
 		connect: function() {
 			assert(!this.falcon);
@@ -402,6 +415,9 @@ config = {
 			} else {
 				this.client = new LocalTorrentClient(attributes);
 			}
+			this.client.bind('all', _.bind(function(eventName) {
+				this.trigger('client:' + eventName);
+			}, this));
 			
 			this.client.bind('ready', this.fetch);
 		},

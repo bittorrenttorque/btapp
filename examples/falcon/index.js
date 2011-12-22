@@ -1,3 +1,3 @@
-function create_btapp() {
+$(function() {
 	window.btapp = new Btapp({'username':'username', 'password':'password'});
-}
+});
