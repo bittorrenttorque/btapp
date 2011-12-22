@@ -40,13 +40,6 @@ function assert(b) { if(!b) debugger; }
 
 	window.TorrentClient = Backbone.Model.extend({
 		initialize: function(attributes) {
-			//default to port 10000...on localhost we should start looking there
-			var port = attributes.port || 10000;
-			var scheme = attributes.scheme || 'http';
-			var host = attributes.host || 'localhost';
-			var falcon = attributes.falcon || null;
-			this.set({'port': port,'scheme': scheme, 'host': host, 'falcon': falcon});
-			this.url = this.get('scheme') + '://' + this.get('host') + ':' + this.get('port') + '/btapp/';
 			this.btappCallbacks = {};
 		},
 		//we can't send function pointers to the torrent client server, so we'll send
@@ -114,31 +107,44 @@ function assert(b) { if(!b) debugger; }
 				if(!(typeof data === 'object') || 'error' in data)	err();
 				else cb(data);
 			};
-			//are we connecting to the client on the local machine or through a falcon account?
-			var falcon = this.get('falcon');
-			if(falcon) {
-				var url_params = {'btapp':'backbone.btapp.js'};
-				var options = {};
-				var type = 'POST';
-				var url = '/client/gui/';
-				falcon.request(type, url, url_params, args, function(data) {
-					assert('build' in data);
-					assert('result' in data);
-					success_callback(data.result);
-				}, err, options);
-			} else {
-				$.ajax({
-					url: this.url,
-					dataType: 'jsonp',
-					context: this,
-					data: args,
-					success: success_callback,
-					error: err,
-					timeout: 10000
-				});
-			}
+			this.send_query(args, success_callback, err);
+		},
+	});
+
+	window.FalconTorrentClient = TorrentClient.extend({
+		initialize: function(attributes) {
+			TorrentClient.prototype.initialize.call(this, attributes);
+		},		
+		send_query: function(args, cb, err) {
+			var url_params = {'btapp':'backbone.btapp.js'};
+			var options = {};
+			var type = 'POST';
+			var url = '/client/gui/';
+			falcon.request(type, url, url_params, args, function(data) {
+				assert('build' in data);
+				assert('result' in data);
+				cb(data.result);
+			}, err, options);
 		}
 	});
+	
+	window.LocalTorrentClient = TorrentClient.extend({
+		initialize: function(attributes) {
+			TorrentClient.prototype.initialize.call(this, attributes);
+			this.url = 'http://localhost:10000/btapp/';
+		},
+		send_query: function(args, cb, err) {
+			$.ajax({
+				url: this.url,
+				dataType: 'jsonp',
+				context: this,
+				data: args,
+				success: cb,
+				error: err,
+				timeout: 10000
+			});
+		}
+	});	
 	
 	/**
 		BtappCollection is a collection of objects in the client...
@@ -343,7 +349,7 @@ function assert(b) { if(!b) debugger; }
 				'btapp/dht/'
 			];
 			
-			this.client = new TorrentClient(attributes);		
+			this.client = new LocalTorrentClient(attributes);		
 			
 			//do this after everything has been setup...we're ready for info from the client
 			this.fetch();
