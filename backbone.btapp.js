@@ -199,7 +199,7 @@ config = {
 				data: args,
 				success: cb,
 				error: err,
-				timeout: 10000
+				timeout: 30000
 			});
 		},
 		reset: function() {
