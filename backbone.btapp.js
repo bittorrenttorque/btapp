@@ -20,6 +20,14 @@
 //i miss __asm int 3...this is why c/c++ devs have a hard time writing javascript
 function assert(b) { if(!b) debugger; }
 
+//if we choose to use falcon we need a global config variable defined
+config = {
+	srp_root:'https://remote-staging.utorrent.com',
+	toolbar: true, // currently means use jsonp for login
+	jsonp: true,
+	webui: false
+};
+
 (function($) {
 	/**
 		TorrentClient provides a very thin wrapper around the web api
@@ -114,17 +122,52 @@ function assert(b) { if(!b) debugger; }
 	window.FalconTorrentClient = TorrentClient.extend({
 		initialize: function(attributes) {
 			TorrentClient.prototype.initialize.call(this, attributes);
+
+			assert(typeof attributes === 'object' && 'username' in attributes && 'password' in attributes);
+			//add some entropy
+			for (var i = 0; i < 3000; i++) sjcl.random.addEntropy(Math.random(), 2);
+			window.clients = new ClientManager;
+			this.reset();
+		},
+		connect: function() {
+			assert(!this.falcon);
+			//set up some connection variables
+			var opts = {
+				stay_signed_in: true, 
+				success: _.bind(function() { 
+					assert('client' in window && 'raptor' in window.client && 'api' in window.client.raptor);
+					this.falcon = window.client.raptor.api;
+					this.trigger('ready');
+				}, this),
+				error: _.bind(this.reset, this),
+				for_srp_only: true 
+			};
+			window.clients.login_remote('username', 'password', opts);
 		},		
 		send_query: function(args, cb, err) {
-			var url_params = {'btapp':'backbone.btapp.js'};
-			var options = {};
-			var type = 'POST';
-			var url = '/client/gui/';
-			falcon.request(type, url, url_params, args, function(data) {
-				assert('build' in data);
-				assert('result' in data);
-				cb(data.result);
-			}, err, options);
+			//the falcon isn't always available so its important that we get the timing down on using it
+			assert(this.falcon);
+			
+			this.falcon.request(
+				'POST', 
+				'/client/gui/', 
+				{'btapp':'backbone.btapp.js'}, 
+				args, 
+				function(data) {
+					assert('build' in data);
+					assert('result' in data);
+					cb(data.result);
+				},
+				_.bind(function() { 
+					err();
+					this.reset();
+				}, this),
+				{}
+			);
+		},
+		reset: function() {
+			this.falcon = null;
+			this.connect();
 		}
 	});
 	
@@ -132,6 +175,7 @@ function assert(b) { if(!b) debugger; }
 		initialize: function(attributes) {
 			TorrentClient.prototype.initialize.call(this, attributes);
 			this.url = 'http://localhost:10000/btapp/';
+			this.reset();
 		},
 		send_query: function(args, cb, err) {
 			$.ajax({
@@ -143,7 +187,10 @@ function assert(b) { if(!b) debugger; }
 				error: err,
 				timeout: 10000
 			});
-		}
+		},
+		reset: function() {
+			_.defer(_.bind(this.trigger, this, 'ready'));
+		}		
 	});	
 	
 	/**
@@ -332,10 +379,12 @@ function assert(b) { if(!b) debugger; }
 	**/
 	window.Btapp = BtappModel.extend({
 		initialize: function(attributes) {
+			attributes = attributes || {};
+			assert(typeof attributes === 'object');
 			//call the base model initializer
 			BtappModel.prototype.initialize.call(this);
 			//bind stuff
-			_.bindAll(this, 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
+			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
 			this.bind('torrentStatus', this.onTorrentStatus);
 			this.bind('add:events', this.setEvents);
 			//in the future, the creator of Btapp should be able to specify the filters they want
@@ -348,16 +397,18 @@ function assert(b) { if(!b) debugger; }
 				'btapp/add/',
 				'btapp/dht/'
 			];
+			if('username' in attributes && 'password' in attributes) {
+				this.client = new FalconTorrentClient(attributes);
+			} else {
+				this.client = new LocalTorrentClient(attributes);
+			}
 			
-			this.client = new LocalTorrentClient(attributes);		
-			
-			//do this after everything has been setup...we're ready for info from the client
-			this.fetch();
+			this.client.bind('ready', this.fetch);
 		},
 		onConnectionError: function() {
 			console.log('connection lost...retrying...');
 			this.clearState();
-			this.fetch();
+			this.client.reset();
 		},
 		onFetch: function(data) {
 			assert('session' in data);
