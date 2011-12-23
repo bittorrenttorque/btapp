@@ -175,7 +175,6 @@ config = {
 			window.clients.login_remote('username', 'password', opts);
 		},		
 		send_query: function(args, cb, err) {
-			console.log('falcon send query');
 			//the falcon isn't always available so its important that we get the timing down on using it
 			assert(this.falcon);
 			
@@ -185,7 +184,6 @@ config = {
 				{'btapp':'backbone.btapp.js'}, 
 				args, 
 				function(data) {
-					console.log('falcon request succeeded');
 					assert('build' in data);
 					assert('result' in data);
 					cb(data.result);
@@ -218,7 +216,7 @@ config = {
 				data: args,
 				success: cb,
 				error: err,
-				timeout: 30000
+				timeout: 5000
 			});
 		},
 		reset: function() {
@@ -301,7 +299,7 @@ config = {
 				}
 				for(var p in prev) {
 					if(!(p in attrs)) {
-						this.trigger('remove:' + a, prev[p]);
+						this.trigger('remove:' + p, prev[p]);
 						this.trigger('remove', prev[p]);
 					}
 				}
