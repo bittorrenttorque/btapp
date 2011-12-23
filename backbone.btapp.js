@@ -42,10 +42,7 @@ config = {
 		stop on a torrent file, the torrent specific url is accessed without any
 		effort on the part of the client
 	**/
-	function verifyFunctionArguments(signatures, arguments) {
-		debugger;
-	}
-
+	
 	window.TorrentClient = Backbone.Model.extend({
 		initialize: function(attributes) {
 			this.btappCallbacks = {};
@@ -61,24 +58,42 @@ config = {
 			this.btappCallbacks[str] = cb;
 			return str;
 		},
+		//seeing as we're interfacing with a strongly typed language c/c++ we need to 
+		//ensure that our types are at least close enough to coherse into the desired types
+		//takes something along the lines of "[native function](string,unknown)(string)"
+		validateArguments: function(functionValue, variables) {
+			assert(typeof functionValue === 'string' && typeof variables === 'object');
+			var signatures = functionValue.match(/\(.*?\)/g);
+			return _.any(signatures, function(signature) {
+				var signature = signature.match(/\w+/g) || []; //["string","unknown"]
+				return _.all(signature, function(type,index) { 
+					return (type == 'unknown') || (typeof variables[index] === type);
+				});
+			});
+		},
 		//functions are simply urls that we make ajax request to...the cb is called with the
 		//result of that ajax request.
 		createFunction: function(session, url, signatures) {
-			//signatures is at this point something along the lines of "FUNCTION_IDENTIFIER () () ()"
-			//where each () wraps a valid list of argument types...lets parse that into an array of
-			//valid signatures that is more useable
-			var native_signatures = [];
-			
-		
 			assert(session);
 			var func = _.bind(function(cb) {
-				cb = cb || function() {};
+				assert(arguments.length >= 1); //they at least need to provide the callback
 				assert(typeof cb === 'function');
 				var path = url + '(';
 				var args = [];
 				
 				//lets do a bit of validation of the arguments that we're passing into the client
-				//var native_args = arguments.slice(1, arguments.length);
+				//unfortunately arguments isn't a completely authetic javascript array, so we'll have
+				//to "splice" by hand...all this just to validate the correct types! sheesh...
+				var native_args = [];
+				for(var i = 1; i < arguments.length; i++) native_args.push(arguments[i]);
+				//this is as close to a static class function as you can get in javascript i guess
+				//we should be able to use verifySignaturesArguments to determine if the client will
+				//consider the arguments that we're passing to be valid
+				if(!TorrentClient.prototype.validateArguments.call(this, signatures, native_args)) {
+					alert(signatures + ' cannot accept ' + $.toJSON(native_args));
+					return;
+				}
+				
 
 				for(var i = 1; i < arguments.length; i++) {
 					//we are responsible for converting functions to variable names...
@@ -135,6 +150,7 @@ config = {
 					console.log('loaded ' + tagsv2);
 					//add some entropy
 					(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['lib/remoteapi'], _.bind(function() {
+						console.log('falcon dependencies loaded...begin exchanging btapp webui information');
 						for (var i = 0; i < 3000; i++) sjcl.random.addEntropy(Math.random(), 2);
 						window.clients = new ClientManager;
 						this.reset();
@@ -159,6 +175,7 @@ config = {
 			window.clients.login_remote('username', 'password', opts);
 		},		
 		send_query: function(args, cb, err) {
+			console.log('falcon send query');
 			//the falcon isn't always available so its important that we get the timing down on using it
 			assert(this.falcon);
 			
@@ -168,11 +185,13 @@ config = {
 				{'btapp':'backbone.btapp.js'}, 
 				args, 
 				function(data) {
+					console.log('falcon request succeeded');
 					assert('build' in data);
 					assert('result' in data);
 					cb(data.result);
 				},
 				_.bind(function() { 
+					console.log('falcon request failed');
 					err();
 					this.reset();
 				}, this),
