@@ -25,7 +25,7 @@ $(function() {
 				for(var f in this.model.bt) {
 					var button = $('<button type="button">' + f + '</button>');
 					button.click(_.bind(function(func) { 
-						func(); 
+						func(function(data) {}); 
 					}, this, this.model.bt[f]));
 					d.append(button);
 				}
@@ -104,7 +104,7 @@ $(function() {
 			for(var f in this.model.bt) {
 				var button = $('<button type="button">' + f + '</button>');
 				button.click(_.bind(function(func) { 
-					func(); 
+					func(function(data) {}); 
 				}, this, this.model.bt[f]));
 				d.append(button);
 			}
