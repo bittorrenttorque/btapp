@@ -248,7 +248,7 @@ config = {
 		},
 		updateState: function(session, data, url) {
 			this.session = session;
-			this.url = url;
+			if(!this.url) this.url = url;
 			for(var v in data) {
 				var variable = data[v];
 
