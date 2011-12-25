@@ -22,10 +22,10 @@ function display_counts() {
 			return b.allocations-a.allocations;
 		});
 
-		$('#holder').empty();
+		$('body').empty();
 		for(var e in entries) {
 			var entry = entries[e];
-			$('#holder').append('<div>' + entry.line + ' -> ' + entry.allocations + '/' + entry.memory + '</div>');
+			$('body').append('<div>' + entry.line + ' -> ' + entry.allocations + '/' + entry.memory + '</div>');
 		}
 	});
 }
