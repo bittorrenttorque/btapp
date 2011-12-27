@@ -356,6 +356,9 @@ config = {
 					}
 				} else {
 					//set as attributes
+					if(typeof variable === 'string') {
+						variable = unescape(variable);
+					}
 					param[v] = variable;
 					this.set(param, {server:true});
 				}	
