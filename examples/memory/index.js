@@ -8,34 +8,40 @@ function dump_memory(cb) {
 	cb({});
 }
 
-function display_counts() {
-	dump_memory(function(data) {
-		var mem = {};
-		if(typeof data === 'object' && 'btapp' in data && 'dump_memory' in data.btapp) {
-			mem = data.btapp.dump_memory;
-		}
-		var entries = [];
-		for(var l in mem) {
-			entries.push({allocations:mem[l].allocations,memory:mem[l].size,line:l});
-		}
-		entries.sort(function(a,b) {
-			return b.allocations-a.allocations;
-		});
-
-		$('body').empty();
-		for(var e in entries) {
-			var entry = entries[e];
-			$('body').append('<div>' + entry.line + ' -> ' + entry.allocations + '/' + entry.memory + '</div>');
-		}
+function display_counts(mem) {
+	var entries = [];
+	for(var l in mem) {
+		entries.push({allocations:mem[l].allocations,memory:mem[l].size,line:l});
+	}
+	entries.sort(function(a,b) {
+		return b.allocations-a.allocations;
 	});
+
+	$('body').empty();
+	for(var e in entries) {
+		var entry = entries[e];
+		$('body').append('<div>' + entry.line + ' -> ' + entry.allocations + '/' + entry.memory + '</div>');
+	}
 }
 
 $(document).ready(function() {
-	window.btapp = new Btapp;
-	setInterval(display_counts, 5000);
-	btapp.bind('add:torrent', function() {
-		display_counts();
+	window.client = new LocalTorrentClient;
+	window.client.bind('ready', function() {
+		window.client.query('state', ['btapp/dump_memory/'], null, 
+			function(data) {
+				window.client.query('function', ['btapp/dump_memory(' + $.toJSON([]) + ')'], data.session, 
+					function(data) {
+						display_counts(data.btapp.dump_memory);
+					},
+					function(data) {
+						debugger;
+					}
+				);
+			}, 
+			function(data) {
+				debugger;
+			}
+		);
 	});
-	
 });
 
