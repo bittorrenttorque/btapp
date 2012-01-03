@@ -385,7 +385,9 @@ config = {
 						var childurl = url + escape(v) + '/';
 						if(	childurl.match(/btapp\/torrent\/$/) ||
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
-							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/)) {
+							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
+							childurl.match(/btapp\/rss_feed\/$/) ||
+							childurl.match(/btapp\/rss_filter\/$/) ) {
 							model = new BtappCollection;
 						} else {
 							model = new BtappModel;
