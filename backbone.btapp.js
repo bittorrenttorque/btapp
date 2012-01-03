@@ -246,28 +246,52 @@ config = {
 			this.reset();
 			this.initializeValues();
 		},
-		updateState: function(session, data, url) {
+		updateState: function(session, add, remove, url) {
 			this.session = session;
 			if(!this.url) this.url = url;
-			for(var v in data) {
-				var variable = data[v];
+			
+			add = add || {};
+			remove = remove || {};
+			for(var v in remove) {
+				var added = add[v];
+				var removed = remove[v];
+				
+				//hey, it was actually removed!
+				if(!added) {
+					if(v == 'all') {
+						this.updateState(this.session, added, removed, url + escape(v) + '/');
+						continue;
+					}
+
+					//it only should have showed up in this collection if it was an object
+					assert(typeof removed === 'object');
+					//update state downstream from here...then remove from the collection
+					var model = this.get(v);
+					assert(model);
+					model.updateState(session, added, removed, url + escape(v) + '/');
+					this.remove(model);
+				}
+			}
+			for(var v in add) {
+				var added = add[v];
+				var removed = remove[v];
 
 				//special case all
 				if(v == 'all') {
-					this.updateState(this.session, variable, url + escape(v) + '/');
+					this.updateState(this.session, added, removed, url + escape(v) + '/');
 					continue;
 				}
 				
-				if(typeof variable === 'object') {
+				if(typeof added === 'object') {
 					//don't recreate a variable we already have...just update it
 					var model = this.get(v);
 					if(!model) {
 						model = new BtappModel({'id':v});
 						model.client = this.client;
-						model.updateState(this.session, variable, url + escape(v) + '/');
+						model.updateState(this.session, added, removed, url + escape(v) + '/');
 						this.add(model);
 					} else {
-						model.updateState(this.session, variable, url + escape(v) + '/');
+						model.updateState(this.session, added, removed, url + escape(v) + '/');
 					}
 				}
 			}
@@ -320,46 +344,69 @@ config = {
 			this.clear();
 			this.initializeValues();
 		},
-		updateState: function(session, data, url) {
+		updateState: function(session, add, remove, url) {
 			this.session = session;
 			if(!this.url) this.url = url;
-			for(var v in data) {
-				var variable = data[v];
+
+			add = add || {};
+			remove = remove || {};
+
+			for(var v in remove) {
+				var added = add[v];
+				var removed = remove[v];
+			
+				if(!added) {
+					//special case all
+					if(v == 'all') {
+						this.updateState(this.session, added, removed, url + escape(v) + '/');
+						continue;
+					}
+				}
+			}
+			
+			for(var v in add) {
+				var added = add[v];
+				var removed = remove[v];
 				var param = {};
 				
 				//special case all
 				if(v == 'all') {
-					this.updateState(this.session, variable, url + escape(v) + '/');
+					this.updateState(this.session, added, removed, url + escape(v) + '/');
 					continue;
 				}
 
 				var FUNCTION_IDENTIFIER = '[native function]';
-				if(typeof variable === 'object') {
+				if(typeof added === 'object') {
 					//don't recreate a variable we already have...just update it
 					var model = this.get(v);
 					if(!model) {
-						if(v == 'torrent' || v == 'file') {
+						//this is the only hard coding that we should do in this library...
+						//as a convenience, torrents and their file/peer lists are treated as backbone collections
+						var childurl = url + escape(v) + '/';
+						if(	childurl.match(/btapp\/torrent\/$/) ||
+							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
+							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/)) {
 							model = new BtappCollection;
 						} else {
 							model = new BtappModel;
 						}
 						model.client = this.client;
 					}
-					model.updateState(this.session, variable, url + escape(v) + '/');
+					model.updateState(this.session, added, removed, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
-				} else if(typeof variable === 'string' && variable.substring(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
+				} else if(typeof added === 'string' && added.substring(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
 					if(!(v in this.bt)) {
-						this.bt[v] = this.client.createFunction(session, url + escape(v), variable);
+						this.bt[v] = this.client.createFunction(session, url + escape(v), added);
 						
 						this.trigger('change');
 					}
 				} else {
 					//set as attributes
-					if(typeof variable === 'string') {
-						variable = unescape(variable);
+					if(typeof added === 'string') {
+						added = unescape(added);
 					}
-					param[v] = variable;
+					param[v] = added;
 					this.set(param, {server:true});
 				}	
 			}
@@ -418,19 +465,11 @@ config = {
 			//call the base model initializer
 			BtappModel.prototype.initialize.call(this);
 			//bind stuff
-			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError', 'onTorrentStatus');
-			this.bind('torrentStatus', this.onTorrentStatus);
+			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
 			this.bind('add:events', this.setEvents);
 			//in the future, the creator of Btapp should be able to specify the filters they want
 			//we can provide some defaults for people that just want torrents/files/rss/etc
-			this.queries = [
-				'btapp/stash/all/',
-				'btapp/torrent/all/*/properties/all/',
-				'btapp/torrent/all/*/file/all/',
-				'btapp/events/',
-				'btapp/add/',
-				'btapp/dht/'
-			];
+			this.queries = ['btapp/'];
 			if('username' in attributes && 'password' in attributes) {
 				this.client = new FalconTorrentClient(attributes);
 			} else {
@@ -455,14 +494,19 @@ config = {
 			this.client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
 		},
 		onEvent: function(session, data) {
+			this.trigger('event', data);
 			//there are two types of events...state updates and callbacks
 			//handle state updates the same way we handle the initial tree building
-			if('btapp' in data) {
-				this.trigger('update', data.btapp);
-				this.updateState(session, data.btapp, 'btapp/');
+			if('add' in data || 'remove' in data) {
+				data.add = data.add || {};
+				data.remove = data.remove || {};
+				this.updateState(session, data.add.btapp, data.remove.btapp, 'btapp/');
+				console.log($.toJSON(data.add).length + '/' + $.toJSON(data.remove).length + ' bytes added/removed');
 			} else if('callback' in data && 'arguments' in data) {
 				this.client.btappCallbacks[data.callback](data.arguments);
-			} else assert(false);
+			} else {
+				debugger;
+			}
 		},
 		onEvents: function(time, session, data) {
 			console.log(((new Date()).getTime() - time) + ' ms - ' + JSON.stringify(data).length + ' bytes');
@@ -473,17 +517,6 @@ config = {
 		},
 		waitForEvents: function(session) {
 			this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
-		},
-		onTorrentStatus: function(args) {
-			if(args.state == -1 && args.hash) {
-				console.log('torrentStatus(' + args.hash + ')');
-				var torrents = this.get('torrent');
-				var torrent = torrents.get(args.hash);
-				if(torrent) {
-					torrent.clearState();
-				}
-				torrents.remove(torrent);
-			}
 		},
 		setEvents: function() {
 			//we assume that we just filled in the events information...we desperately want to
