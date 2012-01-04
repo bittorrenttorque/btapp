@@ -28,6 +28,8 @@ config = {
 	webui: false
 };
 
+FUNCTION_IDENTIFIER = '[native function]';
+
 (function($) {
 	/**
 		TorrentClient provides a very thin wrapper around the web api
@@ -361,6 +363,22 @@ config = {
 						this.updateState(this.session, added, removed, url + escape(v) + '/');
 						continue;
 					}
+					
+					if(typeof removed === 'object') {
+						//update state downstream from here...then remove from the collection
+						var model = this.get(v);
+						assert(model);
+						assert('updateState' in model);
+						model.updateState(session, added, removed, url + escape(v) + '/');
+						this.unset(v);
+					} else if(typeof removed === 'string' && removed.substring(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
+						assert(v in this.bt);
+						delete this.bt[v];
+						this.trigger('change');
+					} else {
+						assert(this.get(v) == unescape(removed));
+						this.unset(v);
+					}
 				}
 			}
 			
@@ -375,7 +393,6 @@ config = {
 					continue;
 				}
 
-				var FUNCTION_IDENTIFIER = '[native function]';
 				if(typeof added === 'object') {
 					//don't recreate a variable we already have...just update it
 					var model = this.get(v);
