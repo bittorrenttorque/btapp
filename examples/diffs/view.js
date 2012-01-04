@@ -4,11 +4,11 @@ $(function() {
 				case 'function':
 				case 'string':
 				case 'number':
-					element.append($('<div style="padding-left:15px; font-size:0.9em;">' + data + '</div>'));
+					element.append($('<div style="padding-left:30px; font-size:0.8em;">' + data + '</div>'));
 					break;
 				case 'object':
 					for(d in data) {
-						var child = $('<div style="padding-left:15px; font-size:0.9em;">' + d + '</div>');
+						var child = $('<div style="padding-left:30px; font-size:0.8em;">' + d + '</div>');
 						element.append(child);
 						appendData(data[d], child);
 					}
@@ -31,8 +31,12 @@ $(function() {
 			this.render();
 		},
 		render: function() {
-			$(this.el).empty();
-			appendData(this.data, $(this.el));
+			$('#add').empty();
+			if(this.data.add)
+				appendData(this.data.add, $('#add'));
+			$('#remove').empty();
+			if(this.data.remove)
+				appendData(this.data.remove, $('#remove'));
 			return this;
 		}
 	});
