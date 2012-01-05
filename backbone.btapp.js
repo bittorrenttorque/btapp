@@ -175,6 +175,7 @@ function isFunctionSignature(f) {
                                                        var tags = create_tags(dependencies);
 					(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
 						console.log('falcon dependencies loaded...begin exchanging btapp webui information');
+                                                                                                                                                           this.reset();
 					}, this));
 
 			}, this));
@@ -186,14 +187,14 @@ function isFunctionSignature(f) {
 				stay_signed_in: true, 
 				success: _.bind(function() {
 					console.log('raptor connected successfully');
-					assert('client' in window && 'raptor' in window.client && 'api' in window.client.raptor);
-					this.falcon = window.client.raptor.api;
+					this.falcon = this.session.api;
 					this.trigger('ready');
 				}, this),
 				error: _.bind(this.reset, this),
 				for_srp_only: true 
 			};
-			window.clients.login_remote('username', 'password', opts);
+                    this.session = new falcon.session;
+                    this.session.negotiate('kylevm','pass', { success: opts.success } );
 		},		
 		send_query: function(args, cb, err) {
 			//the falcon isn't always available so its important that we get the timing down on using it
