@@ -23,9 +23,6 @@ function assert(b) { if(!b) debugger; }
 //if we choose to use falcon we need a global config variable defined
 config = {
 	srp_root:'https://remote-staging.utorrent.com',
-	toolbar: true, // currently means use jsonp for login
-	jsonp: true,
-	webui: false
 };
 
 function isFunctionSignature(f) {
@@ -143,40 +140,42 @@ function isFunctionSignature(f) {
 			TorrentClient.prototype.initialize.call(this, attributes);
 
 			assert(typeof attributes === 'object' && 'username' in attributes && 'password' in attributes);
+			this.username = attributes.username;
+			this.password = attributes.password;
 			
 			console.log('initializing falcon client');
 			console.log('loading falcon external dependencies');
 			var jsload = 'https://remote-staging.utorrent.com/static/js/jsloadv2.js?v=0.57';
-			$.getScript(jsload, _.bind(function(data, textStatus){
+			$.getScript(jsload, _.bind(function(data, textStatus) {
 				console.log('loaded ' + jsload);
-                                                       function create_tags(list) {
-                                                           var tags = [];
-                                                           var deps = [];
-                                                           for (var i = 0; i < list.length - 1; i++) {
-                                                               var current = list[i];
-                                                               tags.push( { name: current } );
-                                                               deps.push( current );
-                                                           }
-                                                           tags.push( { name: list[list.length-1],
-                                                                        requires: deps } );
-                                                           return tags;
-                                                       }
+				function create_tags(list) {
+					var tags = [];
+					var deps = [];
+					for (var i = 0; i < list.length - 1; i++) {
+						var current = list[i];
+						tags.push( { name: current } );
+						deps.push( current );
+					}
+					tags.push( { name: list[list.length-1],
+					requires: deps } );
+					return tags;
+				}
 				dependencies = [
-                                    'falcon/deps/SHA-1.js',
-                                    'falcon/deps/jsbn.js',
-                                    'falcon/deps/jsbn2.js',
-                                    'falcon/deps/sjcl.js',
-                                    'falcon/deps/sjcl.js',
-                                    'falcon/falcon.js',
-                                    'falcon/falcon.encryption.js',
-                                    'falcon/falcon.api.js',
-                                    'falcon/falcon.session.js'
-                                ];
-                                                       var tags = create_tags(dependencies);
-					(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
-						console.log('falcon dependencies loaded...begin exchanging btapp webui information');
-                                                                                                                                                           this.reset();
-					}, this));
+					'falcon/deps/SHA-1.js',
+					'falcon/deps/jsbn.js',
+					'falcon/deps/jsbn2.js',
+					'falcon/deps/sjcl.js',
+					'falcon/deps/sjcl.js',
+					'falcon/falcon.js',
+					'falcon/falcon.encryption.js',
+					'falcon/falcon.api.js',
+					'falcon/falcon.session.js'
+				];
+				var tags = create_tags(dependencies);
+				(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
+					console.log('falcon dependencies loaded...begin exchanging btapp webui information');
+					this.reset();
+				}, this));
 
 			}, this));
 		},
@@ -184,17 +183,15 @@ function isFunctionSignature(f) {
 			assert(!this.falcon);
 			//set up some connection variables
 			var opts = {
-				stay_signed_in: true, 
 				success: _.bind(function() {
 					console.log('raptor connected successfully');
 					this.falcon = this.session.api;
 					this.trigger('ready');
 				}, this),
 				error: _.bind(this.reset, this),
-				for_srp_only: true 
 			};
-                    this.session = new falcon.session;
-                    this.session.negotiate('kylevm','pass', { success: opts.success } );
+			this.session = new falcon.session;
+			this.session.negotiate(this.username,this.password, { success: opts.success } );
 		},		
 		send_query: function(args, cb, err) {
 			//the falcon isn't always available so its important that we get the timing down on using it
