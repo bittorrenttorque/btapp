@@ -176,7 +176,6 @@ function isFunctionSignature(f) {
 					console.log('falcon dependencies loaded...begin exchanging btapp webui information');
 					this.reset();
 				}, this));
-
 			}, this));
 		},
 		connect: function() {
@@ -509,6 +508,9 @@ function isFunctionSignature(f) {
 			assert(typeof attributes === 'object');
 			//call the base model initializer
 			BtappModel.prototype.initialize.call(this);
+			//initialize variables
+			this.poll_frequency = attributes.poll_frequency || 1000;
+
 			//bind stuff
 			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
 			this.bind('add:events', this.setEvents);
@@ -558,7 +560,7 @@ function isFunctionSignature(f) {
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(session, data[i]);
 			}
-			setTimeout(_.bind(this.waitForEvents, this, session), 1000);
+			setTimeout(_.bind(this.waitForEvents, this, session), this.poll_frequency);
 		},
 		waitForEvents: function(session) {
 			this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
