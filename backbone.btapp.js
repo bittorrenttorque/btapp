@@ -149,17 +149,34 @@ function isFunctionSignature(f) {
 			var jsload = 'https://remote-staging.utorrent.com/static/js/jsloadv2.js?v=0.57';
 			$.getScript(jsload, _.bind(function(data, textStatus){
 				console.log('loaded ' + jsload);
-				var tagsv2 = 'https://remote-staging.utorrent.com/static/js/tagsv2.js?v=0.57';
-				$.getScript(tagsv2, _.bind(function(data, textStatus) {
-					console.log('loaded ' + tagsv2);
-					//add some entropy
-					(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['lib/remoteapi'], _.bind(function() {
+                                                       function create_tags(list) {
+                                                           var tags = [];
+                                                           var deps = [];
+                                                           for (var i = 0; i < list.length - 1; i++) {
+                                                               var current = list[i];
+                                                               tags.push( { name: current } );
+                                                               deps.push( current );
+                                                           }
+                                                           tags.push( { name: list[list.length-1],
+                                                                        requires: deps } );
+                                                           return tags;
+                                                       }
+				dependencies = [
+                                    'falcon/deps/SHA-1.js',
+                                    'falcon/deps/jsbn.js',
+                                    'falcon/deps/jsbn2.js',
+                                    'falcon/deps/sjcl.js',
+                                    'falcon/deps/sjcl.js',
+                                    'falcon/falcon.js',
+                                    'falcon/falcon.encryption.js',
+                                    'falcon/falcon.api.js',
+                                    'falcon/falcon.session.js'
+                                ];
+                                                       var tags = create_tags(dependencies);
+					(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
 						console.log('falcon dependencies loaded...begin exchanging btapp webui information');
-						for (var i = 0; i < 3000; i++) sjcl.random.addEntropy(Math.random(), 2);
-						window.clients = new ClientManager;
-						this.reset();
 					}, this));
-				}, this));
+
 			}, this));
 		},
 		connect: function() {
