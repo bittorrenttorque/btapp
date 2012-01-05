@@ -28,7 +28,9 @@ config = {
 	webui: false
 };
 
-FUNCTION_IDENTIFIER = '[native function]';
+function isFunctionSignature(f) {
+	return f.match(/\[native function\](\([^\)]*\))+/);
+}
 
 (function($) {
 	/**
@@ -353,10 +355,18 @@ FUNCTION_IDENTIFIER = '[native function]';
 			add = add || {};
 			remove = remove || {};
 
+			//we're going to iterate over both the added and removed diff trees
+			//because elements that change exist in both trees, we won't delete
+			//elements that exist in remove if they also exist in add...
+			//as a nice verification step, we're also going to verify that the remove
+			//diff tree contains the old value when we change it to the value in the add
+			//diff tree...this should help ensure that we're completely up to date
+			//and haven't missed any state dumps
 			for(var v in remove) {
 				var added = add[v];
 				var removed = remove[v];
 			
+				//this must truely be a remove...lets figure out how to get rid of it
 				if(!added) {
 					//special case all
 					if(v == 'all') {
@@ -371,7 +381,7 @@ FUNCTION_IDENTIFIER = '[native function]';
 						assert('updateState' in model);
 						model.updateState(session, added, removed, url + escape(v) + '/');
 						this.unset(v);
-					} else if(typeof removed === 'string' && removed.substring(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
+					} else if(typeof removed === 'string' && isFunctionSignature(removed)) {
 						assert(v in this.bt);
 						delete this.bt[v];
 						this.trigger('change');
@@ -399,6 +409,7 @@ FUNCTION_IDENTIFIER = '[native function]';
 					if(!model) {
 						//this is the only hard coding that we should do in this library...
 						//as a convenience, torrents and their file/peer lists are treated as backbone collections
+						//the same is true of rss_feeds and filters...its just a more intuitive way of using them
 						var childurl = url + escape(v) + '/';
 						if(	childurl.match(/btapp\/torrent\/$/) ||
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
@@ -414,7 +425,7 @@ FUNCTION_IDENTIFIER = '[native function]';
 					model.updateState(this.session, added, removed, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
-				} else if(typeof added === 'string' && added.substring(0, FUNCTION_IDENTIFIER.length) == FUNCTION_IDENTIFIER) {
+				} else if(typeof added === 'string' && isFunctionSignature(added)) {
 					if(!(v in this.bt)) {
 						this.bt[v] = this.client.createFunction(session, url + escape(v), added);
 						
