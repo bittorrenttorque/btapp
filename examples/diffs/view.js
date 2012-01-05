@@ -4,11 +4,11 @@ $(function() {
 				case 'function':
 				case 'string':
 				case 'number':
-					element.append($('<div style="padding-left:30px; font-size:0.8em;">' + data + '</div>'));
+					element.append($('<div style="padding-left:30px; font-size:1em;">' + data + '</div>'));
 					break;
 				case 'object':
 					for(d in data) {
-						var child = $('<div style="padding-left:30px; font-size:0.8em;">' + d + '</div>');
+						var child = $('<div style="padding-left:30px; font-size:1em;">' + d + '</div>');
 						element.append(child);
 						appendData(data[d], child);
 					}
