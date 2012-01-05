@@ -21,7 +21,7 @@ $(function() {
 		initialize: function() {
 			this.color = get_darker_color(get_darker_color('#ffffff'));
 			this.views = {};
-			_.bindAll(this, 'render', 'add');
+			_.bindAll(this, 'render', 'add', 'remove');
 			this.model.bind('change', this.render);
 			if('length' in this.model) {
 				this.model.bind('add', this.add);
@@ -40,6 +40,7 @@ $(function() {
 		add: function(attr) {
 			if(typeof attr === 'object' && 'updateState' in attr) {
 				this.views[attr.cid] = new BtappView({'model':attr});
+				attr.bind('change', this.render);
 				this.trigger('change');
 			}
 		},
