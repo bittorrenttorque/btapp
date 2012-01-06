@@ -144,6 +144,9 @@ function isFunctionSignature(f) {
 			this.username = attributes.username;
 			this.password = attributes.password;
 			
+			//we only have to load all those expensive js dependencies once...
+			//we can just skip straight to the good stuff (signing in) if we've
+			//done this previously
 			if(falcon_initialized) {
 				_.defer(_.bind(this.reset, this));
 				return;
@@ -192,7 +195,7 @@ function isFunctionSignature(f) {
 				success: _.bind(function() {
 					console.log('raptor connected successfully');
 					this.falcon = this.session.api;
-					this.trigger('ready');
+					this.trigger('connected');
 				}, this),
 				error: _.bind(this.reset, this),
 			};
@@ -245,7 +248,7 @@ function isFunctionSignature(f) {
 			});
 		},
 		reset: function() {
-			_.defer(_.bind(this.trigger, this, 'ready'));
+			_.defer(_.bind(this.trigger, this, 'connected'));
 		}		
 	});	
 	
@@ -257,17 +260,22 @@ function isFunctionSignature(f) {
 	**/
 	window.BtappCollection = Backbone.Collection.extend({
 		initialize: function() {
-			_.bindAll(this, 'clearState', 'updateState');
+			_.bindAll(this, 'destructor', 'clearState', 'updateState');
 			this.initializeValues();
 		},
 		initializeValues: function() {
 			this.url = '';
 			this.session = null;
 		},
+		destructor: function() {
+			console.log('Destructing ' + this.url + ',' + this.id);
+			this.trigger('destroy');
+		},
 		clearState: function() {
 			this.each(function(model) {
 				model.clearState();
 			});
+			this.destructor();
 			this.reset();
 			this.initializeValues();
 		},
@@ -334,25 +342,31 @@ function isFunctionSignature(f) {
 	**/	
 	window.BtappModel = Backbone.Model.extend({
 		initialize: function() {
-			_.bindAll(this, 'clearState', 'updateState');
+			_.bindAll(this, 'clearState', 'destructor', 'updateState', 'triggerCustomEvents');
 			this.initializeValues();
 			
-			this.bind('change', _.bind(function() {
-				var attrs = this.attributes;
-				var prev = this.previousAttributes();
-				for(var a in attrs) {
-					if(!(a in prev)) {
-						this.trigger('add:' + a, attrs[a]);
-						this.trigger('add', attrs[a]);
-					}
+			this.bind('change', this.triggerCustomEvents);
+		},
+		destructor: function() {
+			console.log('Destructing ' + this.url + ',' + this.id);
+			this.unbind('change', this.triggerCustomEvents);
+			this.trigger('destroy');
+		},
+		triggerCustomEvents: function() {
+			var attrs = this.attributes;
+			var prev = this.previousAttributes();
+			for(var a in attrs) {
+				if(!(a in prev)) {
+					this.trigger('add:' + a, attrs[a]);
+					this.trigger('add', attrs[a]);
 				}
-				for(var p in prev) {
-					if(!(p in attrs)) {
-						this.trigger('remove:' + p, prev[p]);
-						this.trigger('remove', prev[p]);
-					}
+			}
+			for(var p in prev) {
+				if(!(p in attrs)) {
+					this.trigger('remove:' + p, prev[p]);
+					this.trigger('remove', prev[p]);
 				}
-			}, this));
+			}
 		},
 		initializeValues: function() {
 			this.bt = {};
@@ -366,6 +380,7 @@ function isFunctionSignature(f) {
 					attribute.clearState();
 				}
 			}
+			this.destructor();
 			this.clear();
 			this.initializeValues();
 		},
@@ -533,7 +548,12 @@ function isFunctionSignature(f) {
 				this.trigger('client:' + eventName);
 			}, this));
 			
-			this.client.bind('ready', this.fetch);
+			this.client.bind('connected', this.fetch);
+		},
+		destructor: function() {
+			//we don't want to destruct the base object even when we can't connect...
+			//its event bindings are the only way we'll known when we've re-connected
+			//WARNING: this might leak a wee bit if you have numerous connections in your app
 		},
 		onConnectionError: function() {
 			console.log('connection lost...retrying...');
