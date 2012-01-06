@@ -135,6 +135,7 @@ function isFunctionSignature(f) {
 		},
 	});
 
+	var falcon_initialized = false;
 	window.FalconTorrentClient = TorrentClient.extend({
 		initialize: function(attributes) {
 			TorrentClient.prototype.initialize.call(this, attributes);
@@ -142,6 +143,11 @@ function isFunctionSignature(f) {
 			assert(typeof attributes === 'object' && 'username' in attributes && 'password' in attributes);
 			this.username = attributes.username;
 			this.password = attributes.password;
+			
+			if(falcon_initialized) {
+				_.defer(_.bind(this.reset, this));
+				return;
+			}
 			
 			console.log('initializing falcon client');
 			console.log('loading falcon external dependencies');
@@ -174,6 +180,7 @@ function isFunctionSignature(f) {
 				var tags = create_tags(dependencies);
 				(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
 					console.log('falcon dependencies loaded...begin exchanging btapp webui information');
+					falcon_initialized = true;
 					this.reset();
 				}, this));
 			}, this));
