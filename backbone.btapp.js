@@ -494,6 +494,16 @@ function isFunctionSignature(f) {
 			} else {
 				Backbone.Model.prototype.set.call(this, attributes, options);
 			}
+		},
+		get: function(attribute) {
+			var ret =  Backbone.Model.prototype.get.call(this, attribute);
+			//as long as we're retrieving actual non-model/collection information,
+			//we can use this as a filter to trim down the amount 
+			if(ret && (!(typeof ret === 'object') || !('updateState' in ret))) {
+				var filter = (this.url || 'btapp/') + attribute;
+				this.trigger('filter', filter);
+			}
+			return ret;
 		}
 	});
 
@@ -538,7 +548,8 @@ function isFunctionSignature(f) {
 			this.bind('add:events', this.setEvents);
 			//in the future, the creator of Btapp should be able to specify the filters they want
 			//we can provide some defaults for people that just want torrents/files/rss/etc
-			this.queries = ['btapp/'];
+			this.queries = attributes.queries || ['btapp/'];
+			this.bind('filter', function(filter) { console.log('FILTER: ' + filter); });
 			if('username' in attributes && 'password' in attributes) {
 				this.client = new FalconTorrentClient(attributes);
 			} else {
