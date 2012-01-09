@@ -26,7 +26,7 @@ function display_counts(mem) {
 
 $(document).ready(function() {
 	window.client = new LocalTorrentClient;
-	window.client.bind('ready', function() {
+	window.client.bind('connected', function() {
 		window.client.query('state', ['btapp/dump_memory/'], null, 
 			function(data) {
 				window.client.query('function', ['btapp/dump_memory(' + $.toJSON([]) + ')'], data.session, 
