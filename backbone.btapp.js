@@ -266,6 +266,7 @@ function isFunctionSignature(f) {
 		initializeValues: function() {
 			this.url = '';
 			this.session = null;
+			this.bt = {};
 		},
 		destructor: function() {
 			console.log('Destructing ' + this.url + ',' + this.id);
@@ -296,13 +297,19 @@ function isFunctionSignature(f) {
 						continue;
 					}
 
-					//it only should have showed up in this collection if it was an object
-					assert(typeof removed === 'object');
-					//update state downstream from here...then remove from the collection
-					var model = this.get(v);
-					assert(model);
-					model.updateState(session, added, removed, url + escape(v) + '/');
-					this.remove(model);
+					//it only should have showed up in this collection if it was an object or a function
+					if(typeof removed === 'object') {
+						var model = this.get(v);
+						assert(model);
+						model.updateState(session, added, removed, url + escape(v) + '/');
+						this.remove(model);
+					} else if(typeof removed === 'string' && isFunctionSignature(removed)) {
+						assert(v in this.bt);
+						delete this.bt[v];
+						this.trigger('change');
+					} else {
+						assert(false);
+					}					
 				}
 			}
 			for(var v in add) {
@@ -326,6 +333,14 @@ function isFunctionSignature(f) {
 					} else {
 						model.updateState(this.session, added, removed, url + escape(v) + '/');
 					}
+				} else if(typeof added === 'string' && isFunctionSignature(added)) {
+					if(!(v in this.bt)) {
+						this.bt[v] = this.client.createFunction(session, url + escape(v), added);
+						
+						this.trigger('change');
+					}
+				} else {
+					assert(false);
 				}
 			}
 		}
