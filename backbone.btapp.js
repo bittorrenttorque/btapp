@@ -15,20 +15,23 @@
 // this is similar to soap or rpc...so callbacks should *just work*...in fact, we internally 
 // rely on this as the	torrentStatus event function is set and the used to keep our models up to date
 
-//some of us are lost in the world without __asm int 3;
+// some of us are lost in the world without __asm int 3;
 function assert(b) { if(!b) debugger; }
 
-//If we choose to use falcon we need a global config variable defined/
+// If we choose to use falcon we need a global config variable defined/
 config = {
 	srp_root:'https://remote-staging.utorrent.com',
 };
 
-//We expect function signatures that come from the client to have a specific syntax
+// We expect function signatures that come from the client to have a specific syntax
 function isFunctionSignature(f) {
 	return f.match(/\[native function\](\([^\)]*\))+/);
 }
 
 (function() {
+	// Torrent Client (base functionality for Falcon/Local Torrent Clients)
+	// -------------
+
 	// TorrentClient provides a very thin wrapper around the web api
 	// It should facilitate finding the correct port and connecting if
 	// necessary to the user computer through falcon...by default uses localhost
@@ -41,17 +44,17 @@ function isFunctionSignature(f) {
 	// stop on a torrent file, the torrent specific url is accessed without any
 	// effort on the part of the client
 	
-	//Keep in mind that because jsonp won't time out naturally, we impose our own
-	//timeouts...this can lead to some less than desirable code :(
+	// Keep in mind that because jsonp won't time out naturally, we impose our own
+	// timeouts...this can lead to some less than desirable code :(
 	
 	window.TorrentClient = Backbone.Model.extend({
 		initialize: function(attributes) {
 			this.btappCallbacks = {};
 		},
-		//We can't send function pointers to the torrent client server, so we'll send
-		//the name of the callback, and the server can call this by sending an event with
-		//the name and args back to us. We're responsible for making the call to the function 
-		//when we detect this. This is similar to the way that jsonp makes ajax callbacks.
+		// We can't send function pointers to the torrent client server, so we'll send
+		// the name of the callback, and the server can call this by sending an event with
+		// the name and args back to us. We're responsible for making the call to the function 
+		// when we detect this. This is similar to the way that jsonp makes ajax callbacks.
 		storeCallbackFunction: function(cb) {
 			cb = cb || function() {};
 			var str = 'bt_';
@@ -59,9 +62,9 @@ function isFunctionSignature(f) {
 			this.btappCallbacks[str] = cb;
 			return str;
 		},
-		//Seeing as we're interfacing with a strongly typed language c/c++ we need to 
-		//ensure that our types are at least close enough to coherse into the desired types
-		//takes something along the lines of "[native function](string,unknown)(string)".
+		// Seeing as we're interfacing with a strongly typed language c/c++ we need to 
+		// ensure that our types are at least close enough to coherse into the desired types
+		// takes something along the lines of "[native function](string,unknown)(string)".
 		validateArguments: function(functionValue, variables) {
 			assert(typeof functionValue === 'string' && typeof variables === 'object');
 			var signatures = functionValue.match(/\(.*?\)/g);
@@ -72,8 +75,8 @@ function isFunctionSignature(f) {
 				});
 			});
 		},
-		//Functions are simply urls that we make ajax request to. The cb is called with the
-		//result of that ajax request.
+		// Functions are simply urls that we make ajax request to. The cb is called with the
+		// result of that ajax request.
 		createFunction: function(session, url, signatures) {
 			assert(session);
 			var func = _.bind(function(cb) {
@@ -82,14 +85,14 @@ function isFunctionSignature(f) {
 				var path = url + '(';
 				var args = [];
 				
-				//Lets do a bit of validation of the arguments that we're passing into the client
-				//unfortunately arguments isn't a completely authetic javascript array, so we'll have
-				//to "splice" by hand. All this just to validate the correct types! sheesh...
+				// Lets do a bit of validation of the arguments that we're passing into the client
+				// unfortunately arguments isn't a completely authetic javascript array, so we'll have
+				// to "splice" by hand. All this just to validate the correct types! sheesh...
 				var native_args = [];
 				for(var i = 1; i < arguments.length; i++) native_args.push(arguments[i]);
-				//This is as close to a static class function as you can get in javascript i guess
-				//we should be able to use verifySignaturesArguments to determine if the client will
-				//consider the arguments that we're passing to be valid
+				// This is as close to a static class function as you can get in javascript i guess
+				// we should be able to use verifySignaturesArguments to determine if the client will
+				// consider the arguments that we're passing to be valid
 				if(!TorrentClient.prototype.validateArguments.call(this, signatures, native_args)) {
 					alert(signatures + ' cannot accept ' + $.toJSON(native_args));
 					return;
@@ -97,8 +100,8 @@ function isFunctionSignature(f) {
 				
 
 				for(var i = 1; i < arguments.length; i++) {
-					//We are responsible for converting functions to variable names...
-					//this will be called later via a event with a callback and arguments variables
+					// We are responsible for converting functions to variable names...
+					// this will be called later via a event with a callback and arguments variables
 					if(typeof arguments[i] === 'function') {
 						args.push(this.storeCallbackFunction(arguments[i]));
 					} else {
@@ -117,7 +120,7 @@ function isFunctionSignature(f) {
 			assert(type == "update" || type == "state" || type == "function");
 			cb = cb || function() {};
 			err = err || function() {};
-			//Handle either an array of strings or just a single query.
+			// Handle either an array of strings or just a single query.
 			if(typeof queries === 'string') queries = [queries];
 			
 			var args = {};
@@ -133,10 +136,13 @@ function isFunctionSignature(f) {
 		},
 	});
 
-	//Falcon torrent client connections are a bit more involved than a client on the local machine
-	//We have additional javascript dependencies that are substantial enough that we don't load them
-	//unless you open a falcon connection. In addition we have some handshaking with the falcon proxy
-	//that we need to wait for. 
+	// Falcon Torrent Client
+	// -------------
+	
+	// Falcon torrent client connections are a bit more involved than a client on the local machine
+	// We have additional javascript dependencies that are substantial enough that we don't load them
+	// unless you open a falcon connection. In addition we have some handshaking with the falcon proxy
+	// that we need to wait for. 
 	var falcon_initialized = false;
 	window.FalconTorrentClient = TorrentClient.extend({
 		initialize: function(attributes) {
@@ -146,9 +152,9 @@ function isFunctionSignature(f) {
 			this.username = attributes.username;
 			this.password = attributes.password;
 			
-			//We only have to load all those expensive js dependencies once...
-			//We can just skip straight to the good stuff (signing in) if we've
-			//done this previously.
+			// We only have to load all those expensive js dependencies once...
+			// We can just skip straight to the good stuff (signing in) if we've
+			// done this previously.
 			if(falcon_initialized) {
 				_.defer(_.bind(this.reset, this));
 				return;
@@ -192,7 +198,7 @@ function isFunctionSignature(f) {
 		},
 		connect: function() {
 			assert(!this.falcon);
-			//set up some connection variables
+			// set up some connection variables
 			var opts = {
 				success: _.bind(function() {
 					console.log('raptor connected successfully');
@@ -204,8 +210,8 @@ function isFunctionSignature(f) {
 			this.session = new falcon.session;
 			this.session.negotiate(this.username,this.password, { success: opts.success } );
 		},
-		//This is the Btapp object's gateway to the actual client requests. These requests look slightly
-		//different than those headed to a local client because they are encrypted.
+		// This is the Btapp object's gateway to the actual client requests. These requests look slightly
+		// different than those headed to a local client because they are encrypted.
 		send_query: function(args, cb, err) {
 			assert(this.falcon);
 			
@@ -233,10 +239,13 @@ function isFunctionSignature(f) {
 		}
 	});
 	
-	//For clients on the local machine very little setup is neeeded. We have a known port that
-	//the client listens on, so we can just make requests to that. We can also immediately
-	//consider ourselves "connected", which indicates that we're connected to the machine
-	//(for falcon clients we may not ever reach the client even if it is logged into falcon)
+	// Local Torrent Client
+	// -------------
+
+	// For clients on the local machine very little setup is neeeded. We have a known port that
+	// the client listens on, so we can just make requests to that. We can also immediately
+	// consider ourselves "connected", which indicates that we're connected to the machine
+	// (for falcon clients we may not ever reach the client even if it is logged into falcon)
 	window.LocalTorrentClient = TorrentClient.extend({
 		initialize: function(attributes) {
 			TorrentClient.prototype.initialize.call(this, attributes);
@@ -258,6 +267,9 @@ function isFunctionSignature(f) {
 			_.defer(_.bind(this.trigger, this, 'connected'));
 		}		
 	});	
+
+	// BtappCollection
+	// -------------
 	
 	// BtappCollection is a collection of objects in the client...
 	// currently this can only be used to represent the list of torrents,
@@ -294,23 +306,23 @@ function isFunctionSignature(f) {
 			add = add || {};
 			remove = remove || {};
 			
-			//Iterate over the diffs that came from the client to see what has been added (only in add),
-			//removed (only in remove), or changed (old value in remove, new value in add)
+			// Iterate over the diffs that came from the client to see what has been added (only in add),
+			// removed (only in remove), or changed (old value in remove, new value in add)
 			for(var v in remove) {
 				var added = add[v];
 				var removed = remove[v];
 				
-				//Elements that are in remove aren't necessarily being removed,
-				//they might alternatively be the old value of a variable that has changed
+				// Elements that are in remove aren't necessarily being removed,
+				// they might alternatively be the old value of a variable that has changed
 				if(!added) {
-					//Most native objects coming from the client have an "all" layer before their variables,
-					//There is no need for the additional layer in javascript so we just flatten the tree a bit.
+					// Most native objects coming from the client have an "all" layer before their variables,
+					// There is no need for the additional layer in javascript so we just flatten the tree a bit.
 					if(v == 'all') {
 						this.updateState(this.session, added, removed, url + escape(v) + '/');
 						continue;
 					}
 
-					//We only expect objects and functions to be added to collections
+					// We only expect objects and functions to be added to collections
 					if(typeof removed === 'object') {
 						var model = this.get(v);
 						assert(model);
@@ -329,8 +341,8 @@ function isFunctionSignature(f) {
 				var added = add[v];
 				var removed = remove[v];
 
-				//Most native objects coming from the client have an "all" layer before their variables,
-				//There is no need for the additional layer in javascript so we just flatten the tree a bit.
+				// Most native objects coming from the client have an "all" layer before their variables,
+				// There is no need for the additional layer in javascript so we just flatten the tree a bit.
 				if(v == 'all') {
 					this.updateState(this.session, added, removed, url + escape(v) + '/');
 					continue;
@@ -359,6 +371,9 @@ function isFunctionSignature(f) {
 		}
 	});
 	
+	// BtappModel
+	// -------------
+
 	// BtappModel is the base model for most things in the client
 	// a torrent is a BtappModel, a file is a BtappModel, properties that 
 	// hang off of most BtappModels is also a BtappModel...both BtappModel
@@ -378,9 +393,9 @@ function isFunctionSignature(f) {
 			this.unbind('change', this.triggerCustomEvents);
 			this.trigger('destroy');
 		},
-		//Because there is so much turbulance in the properties of models (they can come and go
-		//as clients are disconnected, torrents/peers added/removed, it made sense to be able to
-		//bind to add/remove events on a model for when its attributes change
+		// Because there is so much turbulance in the properties of models (they can come and go
+		// as clients are disconnected, torrents/peers added/removed, it made sense to be able to
+		// bind to add/remove events on a model for when its attributes change
 		triggerCustomEvents: function() {
 			var attrs = this.attributes;
 			var prev = this.previousAttributes();
@@ -420,13 +435,13 @@ function isFunctionSignature(f) {
 			add = add || {};
 			remove = remove || {};
 
-			//W're going to iterate over both the added and removed diff trees
-			//because elements that change exist in both trees, we won't delete
-			//elements that exist in remove if they also exist in add...
-			//As a nice verification step, we're also going to verify that the remove
-			//diff tree contains the old value when we change it to the value in the add
-			//diff tree. This should help ensure that we're completely up to date
-			//and haven't missed any state dumps
+			// W're going to iterate over both the added and removed diff trees
+			// because elements that change exist in both trees, we won't delete
+			// elements that exist in remove if they also exist in add...
+			// As a nice verification step, we're also going to verify that the remove
+			// diff tree contains the old value when we change it to the value in the add
+			// diff tree. This should help ensure that we're completely up to date
+			// and haven't missed any state dumps
 			for(var v in remove) {
 				var added = add[v];
 				var removed = remove[v];
@@ -461,19 +476,19 @@ function isFunctionSignature(f) {
 				var removed = remove[v];
 				var param = {};
 				
-				//special case all
+				// Special case all. It is a redundant layer that exist for the benefit of the torrent client
 				if(v == 'all') {
 					this.updateState(this.session, added, removed, url + escape(v) + '/');
 					continue;
 				}
 
 				if(typeof added === 'object') {
-					//Don't recreate a variable we already have. Just update it.
+					// Don't recreate a variable we already have. Just update it.
 					var model = this.get(v);
 					if(!model) {
-						//This is the only hard coding that we should do in this library...
-						//As a convenience, torrents and their file/peer lists are treated as backbone collections
-						//the same is true of rss_feeds and filters...its just a more intuitive way of using them
+						// This is the only hard coding that we should do in this library...
+						// As a convenience, torrents and their file/peer lists are treated as backbone collections
+						// the same is true of rss_feeds and filters...its just a more intuitive way of using them
 						var childurl = url + escape(v) + '/';
 						if(	childurl.match(/btapp\/torrent\/$/) ||
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
@@ -496,26 +511,26 @@ function isFunctionSignature(f) {
 						this.trigger('change');
 					}
 				} else {
-					//Set non function/object variables as model attributes
+					// Set non function/object variables as model attributes
 					if(typeof added === 'string') {
 						added = unescape(added);
 					}
 					param[v] = added;
-					//We need to specify server:true so that our overwritten set function 
-					//doesn't try to update the client.
+					// We need to specify server:true so that our overwritten set function 
+					// doesn't try to update the client.
 					this.set(param, {server:true});
 				}	
 			}
 		},
-		//As a convenience, if you change an attribute on a model, it tries to set that value to the client
-		//This allows you to do things like btapp.get('events').set('torrentStatus', function() {})
-		//In that case, we'll automatically tell the client to set that value.
+		// As a convenience, if you change an attribute on a model, it tries to set that value to the client
+		// This allows you to do things like btapp.get('events').set('torrentStatus', function() {})
+		// In that case, we'll automatically tell the client to set that value.
 		set: function(attributes, options) {
-			//If one of the options is server: true, then we shouldn't notify the
-			//server about the set request...otherwise this is likely the web app
-			//that is setting a variable and we should notify the client so it can
-			//update appropriately...in that case don't update our own models...they
-			//will be updated by the server if something in fact changes in the client
+			// If one of the options is server: true, then we shouldn't notify the
+			// server about the set request...otherwise this is likely the web app
+			// that is setting a variable and we should notify the client so it can
+			// update appropriately...in that case don't update our own models...they
+			// will be updated by the server if something in fact changes in the client
 			if(	(!options || !('server' in options) || !options['server']) &&
 				(this.bt && 'set' in this.bt)) {
 				var callback = (options && 'callback' in options) ? 
@@ -541,27 +556,31 @@ function isFunctionSignature(f) {
 		}
 	});
 
-	// Btapp is the root of the client objects' tree...this mirrors the original api
-	// where document.btapp was the root of everything. generally, this api attempts to be
+	// Btapp
+	// -------------
+
+	
+	// Btapp is the root of the client objects' tree, and generally the only object that clients should instantiate.
+	// This mirrors the original api where document.btapp was the root of everything. generally, this api attempts to be
 	// as similar as possible to that one...
 	
 	// BEFORE: btapp.torrent.get('XXX').file.get('XXX').properties.get('name');
 	// AFTER: btapp.get('torrent').get('XXX').get('file').get('XXX').get('properties').get('name');
 	
-	// the primary difference is that in the original you got the state at that exact moment, where
+	// The primary difference is that in the original you got the state at that exact moment, where
 	// we now simply keep the backbone objects up to date (by quick polling and updating as diffs are returned)
 	// so you can query at your leisure.
 	
 	// EVENTS: there are the following events
-		// appDownloadProgress
-		// filesDragDrop
-		// appStopping
-		// appUninstall
-		// clientMessage
-		// commentNotice
-		// filesAction
-		// rssStatus
-		// torrentStatus
+		//appDownloadProgress
+		//filesDragDrop
+		//appStopping
+		//appUninstall
+		//clientMessage
+		//commentNotice
+		//filesAction
+		//rssStatus
+		//torrentStatus
 		
 	// torrentStatus is used internally to keep our objects up to date, but that and clientMessage are really the only
 	// events that are generally used...these trigger events when they are received by the base object, so to listen in
