@@ -10,4 +10,5 @@ $(function() {
 **/
 	var attributes = { queries: QUERIES };
 	window.btapp = new Btapp(attributes);
+	window.falcon = new Btapp({queries:QUERIES, username:'username', password:'password'});
 });
