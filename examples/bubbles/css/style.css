@@ -1,0 +1,106 @@
+body {
+	font:10px helvetica;
+	background: #888 url(http://www.infinityweb.co.nz/resources/images/lines.png) !important;
+}
+a {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	text-decoration: none;
+	color: black;
+}
+#bubbles {
+	background-color: #335; 
+	position:absolute; 
+	left:50%; 
+	top:50%; 
+	border:1px solid black; 
+	margin:-330px 0 0 -330px;
+	width:660px;
+	height:660px; 
+	border-radius:330px;
+}
+#files {
+	background-color:white; 
+	position:absolute; 
+	left:50%; 
+	top:50%; 
+	border:1px solid black; 
+	margin:-250px 0 0 -250px;
+	width:500px;
+	height:500px; 
+	border-radius:250px;
+}
+#files_list {
+	background-color:white; 
+	position:absolute; 
+	left:50%; 
+	top:50%; 
+	margin:-190px 0 0 -150px;
+	width:300px;
+	height:380px;
+}
+#files_list_up {
+	border-color: transparent transparent #555 transparent;
+	border-style: solid;
+	border-width: 30px;
+	height:0;
+	width:0;
+	position:absolute;
+	left:50%;
+	margin-left:-30px;
+	top: -15px;
+}
+#files_list_down {
+	border-color: #555 transparent transparent transparent;
+	border-style: solid;
+	border-width: 30px;
+	height:0;
+	width:0;
+	position:absolute;
+	left:50%;
+	margin-left:-30px;
+	bottom: -15px;
+}
+.userbubble {
+	position: absolute;
+	width: 70px;
+	height: 70px;
+	margin-left:-35px;
+	margin-top:-35px;
+	background-color: #eee;
+	border-radius:35px;
+	line-height:70px;
+	text-align: center;
+	border: 1px solid black;
+}
+.userbubble.selected {
+	background-color: #aaa;
+	border: 2px solid #ffe800;
+}
+.userbubble:hover, .userbubble.selected:hover {
+	background-color: #888;
+	color: #fefefe;
+   -webkit-transition:background-color 0.3s linear;
+   -moz-transition:background-color 0.3s linear;
+   -o-transition:background-color 0.3s linear;
+   transition:background-color 0.3s linear;
+}
+.userbubble div img {
+	position:absolute;
+	bottom:4px;
+	right:8px;
+	width:12px;
+	height:12px;
+}
+.dropzoneDroppable {
+	border: 2px solid white;
+}
+.dropzoneEnabled {
+	background-color: #ffe888;
+}
+#userform {
+	position:absolute; 
+	left:50%; 
+	margin-left:-240px;
+}
