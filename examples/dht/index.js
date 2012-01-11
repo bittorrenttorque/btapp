@@ -1,5 +1,10 @@
 $(function() {
-	app = new Btapp;
+	var QUERIES = [
+		'btapp/dht/get_any_hash/',
+		'btapp/add/torrent/'
+	];
+
+	app = new Btapp({'queries':QUERIES});
 	app.bind('add:dht', function() {
 		app.get('dht').bt.get_any_hash(function() {}, function(hash) {
 			$('body').append('<div>' + hash + '</div>');
