@@ -18,11 +18,6 @@
 // some of us are lost in the world without __asm int 3;
 function assert(b) { if(!b) debugger; }
 
-// If we choose to use falcon we need a global config variable defined/
-config = {
-	srp_root:'https://remote-staging.utorrent.com',
-};
-
 // We expect function signatures that come from the client to have a specific syntax
 function isFunctionSignature(f) {
 	return f.match(/\[native function\](\([^\)]*\))+/);
@@ -162,6 +157,12 @@ function isFunctionSignature(f) {
 			
 			console.log('initializing falcon client');
 			console.log('loading falcon external dependencies');
+			
+			// If we choose to use falcon we need this specific global config variable defined
+			window.config = {
+				srp_root:'https://remote-staging.utorrent.com',
+			};
+			
 			var jsload = 'https://remote-staging.utorrent.com/static/js/jsloadv2.js?v=0.57';
 			$.getScript(jsload, _.bind(function(data, textStatus) {
 				console.log('loaded ' + jsload);
