@@ -435,7 +435,7 @@ function assert(b) { if(!b) debugger; }
 			add = add || {};
 			remove = remove || {};
 
-			// W're going to iterate over both the added and removed diff trees
+			// We're going to iterate over both the added and removed diff trees
 			// because elements that change exist in both trees, we won't delete
 			// elements that exist in remove if they also exist in add...
 			// As a nice verification step, we're also going to verify that the remove
@@ -565,9 +565,9 @@ function assert(b) { if(!b) debugger; }
 	// as similar as possible to that one...
 	
 	//BEFORE: 
-	//btapp.torrent.get('XXX').file.get('XXX').properties.get('name');
+	//*btapp.torrent.get('XXX').file.get('XXX').properties.get('name');*
 	//AFTER: 
-	//btapp.get('torrent').get('XXX').get('file').get('XXX').get('properties').get('name');
+	//*btapp.get('torrent').get('XXX').get('file').get('XXX').get('properties').get('name');*
 	
 	// The primary difference is that in the original you got the state at that exact moment, where
 	// we now simply keep the backbone objects up to date (by quick polling and updating as diffs are returned)
@@ -667,7 +667,7 @@ function assert(b) { if(!b) debugger; }
 			//set these so that get all the callbacks from the client...what we want to do is
 			//just have the default event handler trigger an event that has the same name as the event
 			//so if you're using the model you can just do something like 
-			//btapp.bind('clientMessage', onClientMessage) and your handler will receive the info blog
+			//*btapp.bind('clientMessage', onClientMessage)* and your handler will receive the info blog
 			//regarding that type of event...it also multiplexes the event handling very nicely
 			for(var ev in this.get('events').attributes) {
 				var arguments = {};
