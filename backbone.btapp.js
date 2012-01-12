@@ -18,11 +18,6 @@
 // some of us are lost in the world without __asm int 3;
 function assert(b) { if(!b) debugger; }
 
-// We expect function signatures that come from the client to have a specific syntax
-function isFunctionSignature(f) {
-	return f.match(/\[native function\](\([^\)]*\))+/);
-}
-
 (function() {
 	// Torrent Client (base functionality for Falcon/Local Torrent Clients)
 	// -------------
@@ -56,6 +51,10 @@ function isFunctionSignature(f) {
 			for(var i = 0; i < 20 || (str in this.btappCallbacks); i++) { str += Math.floor(Math.random() * 10); }
 			this.btappCallbacks[str] = cb;
 			return str;
+		},
+		// We expect function signatures that come from the client to have a specific syntax
+		isFunctionSignature: function(f) {
+			return f.match(/\[native function\](\([^\)]*\))+/);
 		},
 		// Seeing as we're interfacing with a strongly typed language c/c++ we need to 
 		// ensure that our types are at least close enough to coherse into the desired types
@@ -329,7 +328,7 @@ function isFunctionSignature(f) {
 						assert(model);
 						model.updateState(session, added, removed, url + escape(v) + '/');
 						this.remove(model);
-					} else if(typeof removed === 'string' && isFunctionSignature(removed)) {
+					} else if(typeof removed === 'string' && this.client.isFunctionSignature(removed)) {
 						assert(v in this.bt);
 						delete this.bt[v];
 						this.trigger('change');
@@ -359,7 +358,7 @@ function isFunctionSignature(f) {
 					} else {
 						model.updateState(this.session, added, removed, url + escape(v) + '/');
 					}
-				} else if(typeof added === 'string' && isFunctionSignature(added)) {
+				} else if(typeof added === 'string' && this.client.isFunctionSignature(added)) {
 					if(!(v in this.bt)) {
 						this.bt[v] = this.client.createFunction(session, url + escape(v), added);
 						
@@ -461,7 +460,7 @@ function isFunctionSignature(f) {
 						assert('updateState' in model);
 						model.updateState(session, added, removed, url + escape(v) + '/');
 						this.unset(v);
-					} else if(typeof removed === 'string' && isFunctionSignature(removed)) {
+					} else if(typeof removed === 'string' && this.client.isFunctionSignature(removed)) {
 						assert(v in this.bt);
 						delete this.bt[v];
 						this.trigger('change');
@@ -505,7 +504,7 @@ function isFunctionSignature(f) {
 					model.updateState(this.session, added, removed, url + escape(v) + '/');
 					param[v] = model;
 					this.set(param,{server:true});
-				} else if(typeof added === 'string' && isFunctionSignature(added)) {
+				} else if(typeof added === 'string' && this.client.isFunctionSignature(added)) {
 					if(!(v in this.bt)) {
 						this.bt[v] = this.client.createFunction(session, url + escape(v), added);
 						
