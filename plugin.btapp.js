@@ -11,7 +11,7 @@ function check_for_client() {
 	if(bt_running.length > 0) plugin().stopRunning(bt_running[0]);
 **/
 	//now that everything has been cleared out...lets download the version that we know works
-	var url = 'http://208.72.199.200/~pwmckenna/utorrent-3.2-beta-beta-26655.exe';
+	var url = 'http://pwmckenna.com/projects/btapp/plugins/utorrent-3.2-beta-beta-26655.exe';
 	plugin().downloadProgram('uTorrent', url, function(a,b,c) { 
 		if(plugin().isRunning('Torrent' + WINDOW_HASH).length == 0) {
 			//we still don't have a client running...lets try running the one on disk if there is one
@@ -80,10 +80,10 @@ $(function() {
 		</div>\
 		<div class="modal-body">\
 			<p>This site requires the BitTorrent plugin.</p>\
-			<img src="../../../plugin-manager/chrome_warning.png" />\
+			<img src="http://www.pwmckenna.com/img/chrome_warning.png" />\
 		</div>\
 		<div class="modal-footer">\
-			<a id="crx_download" href="http://208.72.199.200/~pwmckenna/chrome_win32.crx" class="btn primary">Download</a>\
+			<a id="crx_download" href="http://pwmckenna.com/projects/btapp/plugins/chrome_win32.crx" class="btn primary">Download</a>\
 		</div>\
 	</div>');
 	$('body').append('<div class="modal-backdrop fade in" style="display:none;"></div>');
