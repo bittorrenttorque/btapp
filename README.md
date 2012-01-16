@@ -6,7 +6,8 @@ __Dependencies__:
 [jquery json](http://code.google.com/p/jquery-json/ "jquery json")  
 [underscore](http://documentcloud.github.com/underscore/ "underscore")  
 [backbone](http://documentcloud.github.com/backbone/ "backbone")  
-# backbone.btapp.js #
+  
+# plugin.btapp.js #
 __plugin.btapp.js__ is responsible for ensuring that a client is run on your local machine. It provides an install path for the browser plugins that will in turn install/run uTorrent/BitTorrent as needed. Do not include if your app doesn't require a client running on the local machine. Keep in mind that you don't need the dependencies. You're more than welcome to style the dialog to your taste. The goal is simply to get the client on the local machine so you can get back to programming, assuming its there.
 
 __Dependencies:__  
