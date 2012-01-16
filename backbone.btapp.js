@@ -1,6 +1,6 @@
 // Backbone.btapp.js 0.1
 // (c) 2012 Patrick Williams, BitTorrent Inc.
-// May be freely distributed under the MIT license.
+// Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 
 // Welcome to backbone.btapp.js
 

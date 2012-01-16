@@ -18,3 +18,17 @@ __Dependencies:__
 	
 Documentation and annotated source code is available at:
 http://pwmckenna.com/projects/btapp/
+
+#Authors
+
+Patrick Williams  
+http://github.com/pwmckenna
+  
+Kyle Graehl
+https://github.com/kzahel
+  
+  
+#License
+  
+Copyright 2012 BitTorrent, Inc.  
+Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
