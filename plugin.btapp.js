@@ -81,6 +81,7 @@ $(function() {
 		<div class="modal-body">\
 			<p>This site requires the BitTorrent plugin.</p>\
 			<img src="http://www.pwmckenna.com/img/chrome_warning.png" />\
+			<img src="http://www.pwmckenna.com/img/crx_install.png" />\
 		</div>\
 		<div class="modal-footer">\
 			<a id="crx_download" href="http://pwmckenna.com/projects/btapp/plugins/chrome_win32.crx" class="btn primary">Download</a>\
