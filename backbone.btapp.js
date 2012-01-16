@@ -44,7 +44,7 @@ function assert(b) { if(!b) debugger; }
 		// We can't send function pointers to the torrent client server, so we'll send
 		// the name of the callback, and the server can call this by sending an event with
 		// the name and args back to us. We're responsible for making the call to the function 
-		// when we detect this. This is similar to the way that jsonp makes ajax callbacks.
+		// when we detect this. This is the same way that jquery handles ajax callbacks.
 		storeCallbackFunction: function(cb) {
 			cb = cb || function() {};
 			var str = 'bt_';
@@ -610,6 +610,9 @@ function assert(b) { if(!b) debugger; }
 			} else {
 				this.client = new LocalTorrentClient(attributes);
 			}
+			//While we don't want app writers having to interact with the client directly,
+			//it would be nice to be able to listen in on what's going on...so lets just bubble
+			//them up as client:XXX messages
 			this.client.bind('all', _.bind(function(eventName) {
 				this.trigger('client:' + eventName);
 			}, this));
