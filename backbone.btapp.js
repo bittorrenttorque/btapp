@@ -301,7 +301,10 @@ function assert(b) { if(!b) debugger; }
 		},
 		updateState: function(session, add, remove, url) {
 			this.session = session;
-			if(!this.url) this.url = url;
+			if(!this.url) {
+				this.url = url;
+				this.trigger('change');
+			}
 			
 			add = add || {};
 			remove = remove || {};
@@ -430,7 +433,10 @@ function assert(b) { if(!b) debugger; }
 		},
 		updateState: function(session, add, remove, url) {
 			this.session = session;
-			if(!this.url) this.url = url;
+			if(!this.url) {
+				this.url = url;
+				this.trigger('change');
+			}
 
 			add = add || {};
 			remove = remove || {};
