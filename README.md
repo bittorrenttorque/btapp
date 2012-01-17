@@ -1,5 +1,5 @@
-Documentation and annotated source code is available at:
-http://pwmckenna.com/projects/btapp/  
+[Documentation](http://pwmckenna.com/projects/btapp/documentation.html "documentation")  
+[Annotated source code](http://pwmckenna.com/projects/btapp/backbone.btapp.html "source")  
   
 #backbone.btapp.js
 backbone.btapp.js is an extension built on Backbone.js that keeps an up-to-date representation of your uTorrent client's state/torrents/etc. It runs in your browser and can connect to an arbitrary number of clients on your local machine, or remotely through uTorrent/BitTorrent's remote feature.
