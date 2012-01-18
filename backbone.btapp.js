@@ -501,9 +501,9 @@ function assert(b) { if(!b) debugger; }
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
 							childurl.match(/btapp\/rss_feed\/$/) ||
 							childurl.match(/btapp\/rss_filter\/$/) ) {
-							model = new BtappCollection({'id':v});
+							model = new BtappCollection({'id':escape(v)});
 						} else {
-							model = new BtappModel({'id':v});
+							model = new BtappModel({'id':escape(v)});
 						}
 						model.client = this.client;
 					}
