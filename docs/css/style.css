@@ -1,0 +1,105 @@
+html {
+	overflow:hidden;
+}
+body {
+	font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+	font-size: 15px;
+	line-height: 22px;
+	color: #252519;
+	white-space: wrap;
+}
+.documentation {
+	display: none;
+}
+#introduction {
+	padding-top: 10px;
+	padding-bottom: 25px;
+}
+#introduction img {
+
+}
+#introduction h1 {
+	margin: 34px 0px 15px 0px;
+	padding-bottom: 10px;
+	font-weight: bold;
+}
+#introduction #license {
+	padding-top: 10px;
+}
+#container {
+	position:absolute;
+	top:0px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	overflow:hidden;
+}
+#sidebar {
+	position:absolute;
+	top:0px;
+	height:100%;
+	left:0px;
+	width:450px;
+	background:#fff;
+	border-right: 1px solid green;
+	padding-left: 50px;
+}
+#sidebar a {
+	font-size: 13px;
+	font-weight: normal;
+	line-height: 18px;
+	margin-bottom: 9px;
+	color: #333;
+}
+#sidebar .toggle {
+	width: 18px;
+	height: 18px;
+	background-repeat: no-repeat;
+	background-position: center;
+	float: left;
+	cursor: pointer;
+}
+#sidebar .right {
+	background-image: url('../img/right.png') !important;
+}
+#sidebar .down {
+	background-image: url('../img/down.png') !important;
+}
+#content {
+	position:absolute;
+	top:0px;
+	height:100%;
+	right:0px;
+	left:500px;
+	background:#f5f5ff;
+	border-left: 1px solid #e5e5ee;
+	padding-left: 25px;
+}
+#content div {
+	padding: 10px 0px 25px 0px;
+}
+#sidebar, #content {
+	overflow-x:hidden;
+	overflow-y:auto;
+	padding: 0px 25px px 50px;
+	text-align: left;
+	vertical-align: top;
+}
+#sidebar .children {
+	padding-left: 15px;
+	margin-left: 8px;
+	border-left: 1px dotted #bbb;
+}
+#sidebar .children div {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.content .function {
+	color: #954121;
+	font-weight: bold;
+}
+.content .variable {
+	color: #219161;
+}
+
+
