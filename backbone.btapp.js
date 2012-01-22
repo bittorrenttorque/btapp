@@ -455,7 +455,7 @@ function assert(b) { if(!b) debugger; }
 				if(!added) {
 					//special case all
 					if(v == 'all') {
-						this.updateState(this.session, added, removed, url + escape(v) + '/');
+						_.defer(_.bind(this.updateState, this, this.session, added, removed, url + escape(v) + '/'));
 						continue;
 					}
 					
@@ -464,7 +464,7 @@ function assert(b) { if(!b) debugger; }
 						var model = this.get(v);
 						assert(model);
 						assert('updateState' in model);
-						model.updateState(session, added, removed, url + escape(v) + '/');
+						_.defer(_.bind(model.updateState, model, session, added, removed, url + escape(v) + '/'));
 						this.unset(v);
 					} else if(typeof removed === 'string' && this.client.isFunctionSignature(removed)) {
 						assert(v in this.bt);
@@ -484,7 +484,7 @@ function assert(b) { if(!b) debugger; }
 				
 				// Special case all. It is a redundant layer that exist for the benefit of the torrent client
 				if(v == 'all') {
-					this.updateState(this.session, added, removed, url + escape(v) + '/');
+					_.defer(_.bind(this.updateState, this, this.session, added, removed, url + escape(v) + '/'));
 					continue;
 				}
 
@@ -508,7 +508,7 @@ function assert(b) { if(!b) debugger; }
 						}
 						model.client = this.client;
 					}
-					model.updateState(this.session, added, removed, url + escape(v) + '/');
+					_.defer(_.bind(model.updateState, model, this.session, added, removed, url + escape(v) + '/'));
 					param[v] = model;
 					this.set(param,{server:true});
 				} else if(typeof added === 'string' && this.client.isFunctionSignature(added)) {
