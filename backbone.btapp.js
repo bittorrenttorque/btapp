@@ -300,6 +300,7 @@ function assert(b) { if(!b) debugger; }
 			this.initializeValues();
 		},
 		updateState: function(session, add, remove, url) {
+			console.log('updateState(' + url + ')');
 			this.session = session;
 			if(!this.url) {
 				this.url = url;
@@ -432,6 +433,7 @@ function assert(b) { if(!b) debugger; }
 			this.initializeValues();
 		},
 		updateState: function(session, add, remove, url) {
+			console.log('updateState(' + url + ')');
 			this.session = session;
 			if(!this.url) {
 				this.url = url;
