@@ -64,12 +64,12 @@ $(function() {
 		},
 		_add: function(model) {
 			assert(typeof model === 'object' && 'bt' in model);
-			console.log('_add(' + model.cid + ')');
+			console.log('_add(' + $.toJSON(model) + ')');
 			this._views[model.cid] = new BtappModelSidebarView({'model':model});
 		},
 		_remove: function(model) {
 			assert(typeof model === 'object' && 'bt' in model);
-			console.log('_remove(' + model.cid + ')');
+			console.log('_remove(' + $.toJSON(model) + ')');
 			this._views[model.cid].destructor();
 			delete this._views[model.cid];
 		},
@@ -135,8 +135,8 @@ $(function() {
 			$('#content').append(this.content.render().el);
 		},
 		_add: function(attribute) {
+			console.log('_add(' + $.toJSON(attribute) + ')');
 			if(typeof attribute === 'object' && 'bt' in attribute) {
-				console.log('_add(' + attribute.url + ')');
 				if('length' in attribute) {
 					this._views[attribute.url] = new BtappCollectionSidebarView({'model':attribute});
 				} else {
@@ -145,6 +145,7 @@ $(function() {
 			}
 		},
 		_remove: function(attribute) {
+			console.log('_remove(' + $.toJSON(attribute) + ')');
 			if(typeof attribute === 'object' && 'bt' in attribute) {
 				for(var v in this._views) {
 					if(this._views[v].model.cid == attribute.cid) {
