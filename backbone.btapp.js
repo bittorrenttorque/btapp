@@ -610,7 +610,7 @@ function assert(b) { if(!b) debugger; }
 			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
 			//Special case the events because we like to offer the convenience of having bindable
 			//backbone events triggered when the client triggers a btapp event
-			this.bind('add:events', this.setEvents);
+			//this.bind('add:events', this.setEvents);
 			this.bind('filter', function(filter) { console.log('FILTER: ' + filter); });
 			//At this point, if a username password combo is provided we assume that we're trying to
 			//access a falcon client. If not, default to the client running on your local machine
