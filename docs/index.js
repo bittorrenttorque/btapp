@@ -13,6 +13,9 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
+			
+			if(!this.model.url) return this;
+			
 			var url = $('<div><h4>url:</h4></div>');
 			url.append('<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + this.model.url + '</p>');
 			url.addClass('url');
@@ -64,54 +67,53 @@ $(function() {
 		},
 		_add: function(model) {
 			assert(typeof model === 'object' && 'bt' in model);
-			console.log('_add(' + $.toJSON(model) + ')');
 			this._views[model.cid] = new BtappModelSidebarView({'model':model});
 		},
 		_remove: function(model) {
 			assert(typeof model === 'object' && 'bt' in model);
-			console.log('_remove(' + $.toJSON(model) + ')');
 			this._views[model.cid].destructor();
 			delete this._views[model.cid];
 		},
 		render: function() {
 			$(this.el).empty();
-			if(this.model.url) {
-				var toggle = $('<div></div>');
-				toggle.addClass('toggle');
-				if(_.keys(this._views).length > 0) {
-					toggle.addClass(this.expanded ? 'down' : 'right');
-				}
-				$(this.el).append(toggle);
-				toggle.click(_.bind(function(toggle) {
-					if(!toggle.hasClass('right') && !toggle.hasClass('down')) return;
 
-					$(this.el).children('.children').toggle();
-					if(toggle.hasClass('right')) {
-						toggle.removeClass('right');
-						toggle.addClass('down');
-					} else {
-						toggle.removeClass('down');
-						toggle.addClass('right');
-					}
-					this.expanded = !this.expanded;
-				}, this, toggle));
+			if(!this.model.url) return this;
 
-				var toks = this.model.url.split('/');
-				var link = $('<a href="#">' + unescape(toks[toks.length-2]) + '</a>');
-				link.click(this.content.show);
-				$(this.el).append(link);
-				
-				if(_.keys(this._views).length > 0) {
-					var children = $('<div></div>');
-					children.addClass('children');
-					for(var v in this._views) {
-						children.append($(this._views[v].render().el));
-					}
-					if(!this.expanded) {
-						children.hide();
-					}
-					$(this.el).append(children);
+			var toggle = $('<div></div>');
+			toggle.addClass('toggle');
+			if(_.keys(this._views).length > 0) {
+				toggle.addClass(this.expanded ? 'down' : 'right');
+			}
+			$(this.el).append(toggle);
+			toggle.click(_.bind(function(toggle) {
+				if(!toggle.hasClass('right') && !toggle.hasClass('down')) return;
+
+				$(this.el).children('.children').toggle();
+				if(toggle.hasClass('right')) {
+					toggle.removeClass('right');
+					toggle.addClass('down');
+				} else {
+					toggle.removeClass('down');
+					toggle.addClass('right');
 				}
+				this.expanded = !this.expanded;
+			}, this, toggle));
+
+			var toks = this.model.url.split('/');
+			var link = $('<a href="#">' + unescape(toks[toks.length-2]) + '</a>');
+			link.click(this.content.show);
+			$(this.el).append(link);
+			
+			if(_.keys(this._views).length > 0) {
+				var children = $('<div></div>');
+				children.addClass('children');
+				for(var v in this._views) {
+					children.append($(this._views[v].render().el));
+				}
+				if(!this.expanded) {
+					children.hide();
+				}
+				$(this.el).append(children);
 			}
 			return this;
 		}
@@ -135,17 +137,15 @@ $(function() {
 			$('#content').append(this.content.render().el);
 		},
 		_add: function(attribute) {
-			console.log('_add(' + $.toJSON(attribute) + ')');
 			if(typeof attribute === 'object' && 'bt' in attribute) {
 				if('length' in attribute) {
-					this._views[attribute.url] = new BtappCollectionSidebarView({'model':attribute});
+					this._views[attribute.cid] = new BtappCollectionSidebarView({'model':attribute});
 				} else {
-					this._views[attribute.url] = new BtappModelSidebarView({'model':attribute});
+					this._views[attribute.cid] = new BtappModelSidebarView({'model':attribute});
 				}
 			}
 		},
 		_remove: function(attribute) {
-			console.log('_remove(' + $.toJSON(attribute) + ')');
 			if(typeof attribute === 'object' && 'bt' in attribute) {
 				for(var v in this._views) {
 					if(this._views[v].model.cid == attribute.cid) {
@@ -156,49 +156,52 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
-			if(this.model.url) {
-				var toggle = $('<div></div>');
-				toggle.addClass('toggle');
-				if(_.keys(this._views).length > 0) {
-					toggle.addClass(this.expanded ? 'down' : 'right');
-				}
-				$(this.el).append(toggle);
-				toggle.click(_.bind(function(toggle) {
-					if(!toggle.hasClass('right') && !toggle.hasClass('down')) return;
 
-					$(this.el).children('.children').toggle();
-					if(toggle.hasClass('right')) {
-						toggle.removeClass('right');
-						toggle.addClass('down');
-					} else {
-						toggle.removeClass('down');
-						toggle.addClass('right');
-					}
-					this.expanded = !this.expanded;
-				}, this, toggle));
+			if(!this.model.url) return this;
 
-				var toks = this.model.url.split('/');
-				var link = $('<a href="#">' + unescape(toks[toks.length-2]) + '</a>');
-				link.click(this.content.show);
-				$(this.el).append(link);
-				
-				if(_.keys(this._views).length > 0) {
-					var children = $('<div></div>');
-					children.addClass('children');
-					for(var v in this._views) {
-						children.append($(this._views[v].render().el));
-					}
-					if(!this.expanded) {
-						children.hide();
-					}
-					$(this.el).append(children);
+			var toggle = $('<div></div>');
+			toggle.addClass('toggle');
+			if(_.keys(this._views).length > 0) {
+				toggle.addClass(this.expanded ? 'down' : 'right');
+			}
+			$(this.el).append(toggle);
+			toggle.click(_.bind(function(toggle) {
+				if(!toggle.hasClass('right') && !toggle.hasClass('down')) return;
+
+				$(this.el).children('.children').toggle();
+				if(toggle.hasClass('right')) {
+					toggle.removeClass('right');
+					toggle.addClass('down');
+				} else {
+					toggle.removeClass('down');
+					toggle.addClass('right');
 				}
+				this.expanded = !this.expanded;
+			}, this, toggle));
+
+			var toks = this.model.url.split('/');
+			var link = $('<a href="#">' + unescape(toks[toks.length-2]) + '</a>');
+			link.click(this.content.show);
+			$(this.el).append(link);
+			
+			if(_.keys(this._views).length > 0) {
+				var children = $('<div></div>');
+				children.addClass('children');
+				for(var v in this._views) {
+					children.append($(this._views[v].render().el));
+				}
+				if(!this.expanded) {
+					children.hide();
+				}
+				$(this.el).append(children);
 			}
 			return this;
 		}
 	});
+});
 
-	window.btappview = new window.BtappModelSidebarView({'model':new Btapp({'id':'btapp'})});
+$(document).ready(function() {
+	window.btappview = new window.BtappModelSidebarView({'model':new Btapp({'id':'btapp', 'url':'btapp/'})});
 	window.btappview.expanded = true;
 	$('#sidebar').append(window.btappview.render().el);
 	btappview.content.show();
