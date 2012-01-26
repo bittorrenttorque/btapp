@@ -94,11 +94,11 @@ body {
 	padding-top: 2px;
 	padding-bottom: 2px;
 }
-.content .function {
+.content .functions span{
 	color: #954121;
 	font-weight: bold;
 }
-.content .variable {
+.content .variables span {
 	color: #219161;
 }
 

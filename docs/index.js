@@ -1,5 +1,5 @@
 $(function() {
-	function assert(condition) { if(!condition) debugger; }
+	function color() { return '#'+Math.floor(Math.random()*55+200).toString(16)+Math.floor(Math.random()*55+200).toString(16)+Math.floor(Math.random()*55+200).toString(16); }
 
 	window.BtappContentView = Backbone.View.extend({
 		tagName: "div",
@@ -10,39 +10,41 @@ $(function() {
 			this.model.bind('destroy', this.remove);
 			
 			$(this.el).hide();
+			this.changes = 0;
 		},
 		render: function() {
+			this.changes++;
 			$(this.el).empty();
+			$(this.el).css('background-color', color());
 			
 			if(!this.model.url) return this;
+			var html = '';
 			
-			var url = $('<div><h4>url:</h4></div>');
-			url.append('<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + this.model.url + '</p>');
-			url.addClass('url');
-			$(this.el).append(url);
+			html += '<div class="url"><h4>model changes:<p>' + this.changes + '</p></h4></div>';
+			html += '<div class="url"><h4>url:<p>' + this.model.url + '</p></h4></div>';
 			
 			//add the attributes
-			var attributes = $('<div><h4>attributes:</h4></div>');
+			html += '<div class="variables"><h4>attributes:';
 			for(var a in this.model.attributes) {
 				var attribute = this.model.attributes[a];
 				if(!(typeof attribute === 'object') || !('bt' in attribute)) {
-					attributes.append('<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">' + a + '</span>: ' + attribute + '</p>');
+					html += '<p><span>' + a + '</span>: ' + attribute + '</p>';
 				}
 			}
-			$(this.el).append(attributes);
+			html += '</h4></div>';
 			
 			//add function information
-			var functions = $('<div><h4>functions:</h4></div>');
+			html += '<div class="functions"><h4>functions:';
 			for(var b in this.model.bt) {
 				var signatures = this.model.bt[b].valueOf().split('(');
-				functions.append('<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + b + ':</p>');
+				html += '<p>' + b + ':</p>';
 				for(var i = 1; i < signatures.length; i++) {
-					functions.append('<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">function</span>(' + signatures[i] + '</p>');
+					html += '<p><span>function</span>(' + signatures[i] + '</p>';
 				}
 			}
-			functions.addClass('functions');
-			$(this.el).append(functions);
 			
+			html += '</h4></div>';
+			$(this.el).append(html);
 			return this;
 		},
 		show: function() {
@@ -59,23 +61,22 @@ $(function() {
 			this.model.remove('remove', this._remove);
 			this.model.bind('destroy', this.remove);
 			
-			this.expanded = false;
+			this.expanded = true;
 			this._views = {};
 			this.model.each(this._add);
 			this.content = new BtappContentView({'model':this.model});
 			$('#content').append(this.content.render().el);
 		},
 		_add: function(model) {
-			assert(typeof model === 'object' && 'bt' in model);
 			this._views[model.cid] = new BtappModelSidebarView({'model':model});
 		},
 		_remove: function(model) {
-			assert(typeof model === 'object' && 'bt' in model);
 			this._views[model.cid].destructor();
 			delete this._views[model.cid];
 		},
 		render: function() {
 			$(this.el).empty();
+			$(this.el).css('background-color', color());
 
 			if(!this.model.url) return this;
 
@@ -127,7 +128,7 @@ $(function() {
 			this.model.bind('change', this.render);
 			this.model.bind('destroy', this.remove);
 			
-			this.expanded = false;
+			this.expanded = true;
 			this._views = {};
 			_.each(this.model.attributes, _.bind(function(value, key) {
 				this._add(value);
@@ -156,6 +157,7 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
+			$(this.el).css('background-color', color());
 
 			if(!this.model.url) return this;
 
@@ -198,11 +200,8 @@ $(function() {
 			return this;
 		}
 	});
-});
 
-$(document).ready(function() {
 	window.btappview = new window.BtappModelSidebarView({'model':new Btapp({'id':'btapp', 'url':'btapp/'})});
-	window.btappview.expanded = true;
 	$('#sidebar').append(window.btappview.render().el);
 	btappview.content.show();
 });
