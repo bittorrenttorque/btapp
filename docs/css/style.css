@@ -94,7 +94,11 @@ body {
 	padding-top: 2px;
 	padding-bottom: 2px;
 }
+.content p {
+	padding-left: 20px;
+}
 .content .functions span{
+	padding-left: 20px;
 	color: #954121;
 	font-weight: bold;
 }
