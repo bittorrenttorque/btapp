@@ -333,13 +333,7 @@ function assert(b) { if(!b) debugger; }
 			this.initializeValues();
 		},
 		updateState: function(session, add, remove, url) {
-			var that = this;
-			setTimeout(function() {
-				console.log('updating ' + url);
-				that.updateStateDelayed(session, add, remove, url);
-			}, 100);
-		},
-		updateStateDelayed: function(session, add, remove, url) {
+			var time = (new Date()).getTime();	
 			this.session = session;
 			if(!this.url) {
 				this.url = url;
@@ -403,6 +397,8 @@ function assert(b) { if(!b) debugger; }
 					}
 				}
 			}
+			var delta = ((new Date()).getTime() - time);
+			console.log('updateStateDelayed(' + this.url + ') - ' + delta);
 		}
 	});
 	
@@ -465,17 +461,12 @@ function assert(b) { if(!b) debugger; }
 			this.initializeValues();
 		},
 		updateState: function(session, add, remove, url) {
-			var that = this;
-			setTimeout(function() {
-				console.log('updating ' + url);
-				that.updateStateDelayed(session, add, remove, url);
-			}, 10);
-		},
-		updateStateDelayed: function(session, add, remove, url) {
+			var time = (new Date()).getTime();	
+			var changed = false;
 			this.session = session;
 			if(!this.url) {
 				this.url = url;
-				this.trigger('change');
+				changed = true;
 			}
 
 			add = add || {};
@@ -507,14 +498,16 @@ function assert(b) { if(!b) debugger; }
 						assert(model);
 						assert('updateState' in model);
 						model.updateState(session, added, removed, childurl);
-						this.unset(v);
+						this.unset(v, {silent: true});
+						changed = true;
 					} else if(typeof removed === 'string' && this.client.isFunctionSignature(removed)) {
 						assert(v in this.bt);
 						delete this.bt[v];
-						this.trigger('change');
+						changed = true;
 					} else if(v != 'id') {
 						assert(this.get(v) == unescape(removed));
-						this.unset(v);
+						this.unset(v, {silent: true});
+						changed = true;
 					}
 				}
 			}
@@ -553,13 +546,14 @@ function assert(b) { if(!b) debugger; }
 						model.url = childurl;
 						model.client = this.client;
 						param[v] = model;
-						this.set(param,{server:true});
+						this.set(param, {server:true, silent:true});
+						changed = true;
 					}
 					model.updateState(this.session, added, removed, childurl);
 				} else if(typeof added === 'string' && this.client.isFunctionSignature(added)) {
 					assert(!(v in this.bt));
 					this.bt[v] = this.client.createFunction(session, url + v, added);
-					this.trigger('change');
+					changed = true;
 				} else {
 					// Set non function/object variables as model attributes
 					if(typeof added === 'string') {
@@ -568,9 +562,13 @@ function assert(b) { if(!b) debugger; }
 					param[escape(v)] = added;
 					// We need to specify server:true so that our overwritten set function 
 					// doesn't try to update the client.
-					this.set(param, {server:true});
+					this.set(param, {server:true, silent:true});
+					changed = true;
 				}	
 			}
+			this.trigger('change');
+			var delta = ((new Date()).getTime() - time);
+			console.log('updateStateDelayed(' + this.url + ') - ' + delta);
 		},
 		// As a convenience, if you change an attribute on a model, it tries to set that value to the client
 		// This allows you to do things like btapp.get('events').set('torrentStatus', function() {})
