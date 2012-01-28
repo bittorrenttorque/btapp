@@ -398,7 +398,7 @@ function assert(b) { if(!b) debugger; }
 				}
 			}
 			var delta = ((new Date()).getTime() - time);
-			console.log('updateStateDelayed(' + this.url + ') - ' + delta);
+			console.log('updateState(' + this.url + ') - ' + delta);
 		}
 	});
 	
@@ -568,7 +568,7 @@ function assert(b) { if(!b) debugger; }
 			}
 			this.trigger('change');
 			var delta = ((new Date()).getTime() - time);
-			console.log('updateStateDelayed(' + this.url + ') - ' + delta);
+			console.log('updateState(' + this.url + ') - ' + delta);
 		},
 		// As a convenience, if you change an attribute on a model, it tries to set that value to the client
 		// This allows you to do things like btapp.get('events').set('torrentStatus', function() {})
@@ -591,11 +591,11 @@ function assert(b) { if(!b) debugger; }
 					this.bt['set'](callback, a, attributes[a]);
 				}
 			} else {
-				Backbone.Model.prototype.set.call(this, attributes, options);
+				Backbone.Model.prototype.set.apply(this, arguments);
 			}
 		},
 		get: function(attribute) {
-			var ret =  Backbone.Model.prototype.get.call(this, attribute);
+			var ret =  Backbone.Model.prototype.get.apply(this, arguments);
 			//we record model attributes that are accessed so that we can provide trimer
 			//query sets that put much less strain on the client and result in faster/smaller
 			//replies for the client to handle.
