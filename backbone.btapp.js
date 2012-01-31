@@ -566,7 +566,9 @@ function assert(b) { if(!b) debugger; }
 					changed = true;
 				}	
 			}
-			this.trigger('change');
+			if(changed) {
+				this.trigger('change');
+			}
 			var delta = ((new Date()).getTime() - time);
 			console.log('updateState(' + this.url + ') - ' + delta);
 		},
