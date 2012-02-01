@@ -19,6 +19,7 @@
 function assert(b) { if(!b) debugger; }
 
 (function() {
+	var console = { 'log' : function() {} };
 	// Torrent Client (base functionality for Falcon/Local Torrent Clients)
 	// -------------
 
@@ -104,7 +105,7 @@ function assert(b) { if(!b) debugger; }
 				}
 				path += encodeURIComponent($.toJSON(args));
 				path += ')/';
-				console.log('CUSTOM FUNCTION: ' + path);
+				//console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
 			func.valueOf = function() { return signatures; };
