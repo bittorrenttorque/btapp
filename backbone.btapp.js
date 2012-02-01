@@ -571,42 +571,7 @@ function assert(b) { if(!b) debugger; }
 			}
 			var delta = ((new Date()).getTime() - time);
 			console.log('updateState(' + this.url + ') - ' + delta);
-		},
-		// As a convenience, if you change an attribute on a model, it tries to set that value to the client
-		// This allows you to do things like btapp.get('events').set('torrentStatus', function() {})
-		// In that case, we'll automatically tell the client to set that value.
-		set: function(attributes, options) {
-			//assert(!('id' in attributes) || typeof attributes['id'] === 'string');
-			if('id' in attributes && options && 'server' in options && options['server']) return null;
-			
-			// If one of the options is server: true, then we shouldn't notify the
-			// server about the set request...otherwise this is likely the web app
-			// that is setting a variable and we should notify the client so it can
-			// update appropriately...in that case don't update our own models...they
-			// will be updated by the server if something in fact changes in the client
-			if(	(!options || !('server' in options) || !options['server']) &&
-				(this.bt && 'set' in this.bt)) {
-				var callback = (options && 'callback' in options) ? 
-					options['callback'] : 
-					function() { debugger; };
-				for(var a in attributes) {
-					this.bt['set'](callback, a, attributes[a]);
-				}
-			} else {
-				return Backbone.Model.prototype.set.apply(this, arguments);
-			}
-		},
-		get: function(attribute) {
-			var ret =  Backbone.Model.prototype.get.apply(this, arguments);
-			//we record model attributes that are accessed so that we can provide trimer
-			//query sets that put much less strain on the client and result in faster/smaller
-			//replies for the client to handle.
-			if(ret && (!(typeof ret === 'object') || !('updateState' in ret))) {
-				var filter = (this.url || 'btapp/') + attribute;
-				this.trigger('filter', filter);
-			}
-			return ret;
-		}		
+		}
 	});
 
 	// Btapp
