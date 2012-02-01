@@ -252,6 +252,10 @@ function assert(b) { if(!b) debugger; }
 			TorrentClient.prototype.initialize.call(this, attributes);
 			this.url = 'http://localhost:10000/btapp/';
 			this.reset();
+			$.getScript(
+				'https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', 
+				function(data, textStatus) {}
+			);
 		},
 		send_query: function(args, cb, err) {
 			$.ajax({
