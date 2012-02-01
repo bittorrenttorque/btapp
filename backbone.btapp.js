@@ -577,7 +577,7 @@ function assert(b) { if(!b) debugger; }
 		// In that case, we'll automatically tell the client to set that value.
 		set: function(attributes, options) {
 			//assert(!('id' in attributes) || typeof attributes['id'] === 'string');
-			if('id' in attributes && 'server' in options && options['server']) return;
+			if('id' in attributes && 'server' in options && options['server']) return null;
 			
 			// If one of the options is server: true, then we shouldn't notify the
 			// server about the set request...otherwise this is likely the web app
@@ -593,7 +593,7 @@ function assert(b) { if(!b) debugger; }
 					this.bt['set'](callback, a, attributes[a]);
 				}
 			} else {
-				Backbone.Model.prototype.set.apply(this, arguments);
+				return Backbone.Model.prototype.set.apply(this, arguments);
 			}
 		},
 		get: function(attribute) {
