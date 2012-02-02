@@ -61,6 +61,7 @@ function assert(b) { if(!b) debugger; }
 		// ensure that our types are at least close enough to coherse into the desired types
 		// takes something along the lines of "[native function](string,unknown)(string)".
 		validateArguments: function(functionValue, variables) {
+			return true;
 			assert(typeof functionValue === 'string' && typeof variables === 'object');
 			var signatures = functionValue.match(/\(.*?\)/g);
 			return _.any(signatures, function(signature) {
