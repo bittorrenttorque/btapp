@@ -144,9 +144,12 @@ function assert(b) { if(!b) debugger; }
 		initialize: function(attributes) {
 			TorrentClient.prototype.initialize.call(this, attributes);
 
-			assert(typeof attributes === 'object' && 'username' in attributes && 'password' in attributes);
+			assert(typeof attributes === 'object' && (('username' in attributes && 'password' in attributes) || 'remote_data' in attributes));
 			this.username = attributes.username;
 			this.password = attributes.password;
+			if ('remote_data' in attributes) {
+			    this.remote_data = attributes.remote_data;
+			}
 			if ('login_success' in attributes) {
 			    this.login_success = attributes.login_success;
 			}
@@ -200,9 +203,17 @@ function assert(b) { if(!b) debugger; }
 				];
 				var tags = create_tags(dependencies);
 				(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
+																		   if (this.remote_data) {
+																		       this.session = new falcon.session( { client_data: this.remote_data } );
+																		       this.falcon = this.session.api;
+																		       falcon_initialized = true;
+																		       debugger;
+																		       this.trigger('connected');
+																		   } else {
 					console.log('falcon dependencies loaded...begin exchanging btapp webui information');
 					falcon_initialized = true;
 					this.reset();
+																		   }
 				}, this));
 			}, this));
 		},
@@ -621,8 +632,9 @@ function assert(b) { if(!b) debugger; }
 			//this.bind('filter', function(filter) { console.log('FILTER: ' + filter); });
 			
 			//At this point, if a username password combo is provided we assume that we're trying to
-			//access a falcon client. If not, default to the client running on your local machine
-			if('username' in attributes && 'password' in attributes) {
+			//access a falcon client. If not, default to the client running on your local machine. 
+			// You can also pass in "remote_data" that is returned from a falcon.serialize()
+			if(('username' in attributes && 'password' in attributes) || 'remote_data' in attributes) {
 				this.client = new FalconTorrentClient(attributes);
 			} else {
 				this.client = new LocalTorrentClient(attributes);
