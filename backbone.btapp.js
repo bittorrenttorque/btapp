@@ -273,6 +273,7 @@ function assert(b) { if(!b) debugger; }
 		initialize: function(attributes) {
 			TorrentClient.prototype.initialize.call(this, attributes);
 			this.url = 'http://localhost:10000/btapp/';
+			this.btapp = attributes.btapp;
 			this.reset();
 			$.getScript('https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', _.bind(function(data, textStatus) {
 					// todo -- provide callback for plugin (this code works when plugin is installed already)
