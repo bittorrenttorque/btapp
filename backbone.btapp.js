@@ -184,7 +184,6 @@ function assert(b) { if(!b) debugger; }
 					'falcon/deps/jsbn.js',
 					'falcon/deps/jsbn2.js',
 					'falcon/deps/sjcl.js',
-					'falcon/deps/sjcl.js',
 					'falcon/falcon.js',
 					'falcon/falcon.encryption.js',
 					'falcon/falcon.api.js',
