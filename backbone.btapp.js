@@ -664,13 +664,13 @@ function assert(b) { if(!b) debugger; }
 			//Its event bindings are the only way we'll known when we've re-connected
 			//WARNING: this might leak a wee bit if you have numerous connections in your app
 		},
-					     stop: function() {
-						 if (this.next_timeout) {
-						     clearTimeout( this.next_timeout );
-						 }
-						 this.client.btapp = null;
-						 this.client = null;
-					     },
+		stop: function() {
+			if (this.next_timeout) {
+				clearTimeout( this.next_timeout );
+			}
+			this.client.btapp = null;
+			this.client = null;
+		},
 		onConnectionError: function() {
 			console.log('connection lost...retrying...');
 			this.clearState();
