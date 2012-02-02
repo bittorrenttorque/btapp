@@ -293,7 +293,7 @@ function assert(b) { if(!b) debugger; }
 						    }
 						}
 					    }
-					    this.btapp.destructor();
+					    this.btapp.stop();
 					    if ('torque' in attributes && attributes.torque.error) {
 						return attributes.torque.error();
 					    }
@@ -661,15 +661,14 @@ function assert(b) { if(!b) debugger; }
 			//We don't want to destruct the base object even when we can't connect...
 			//Its event bindings are the only way we'll known when we've re-connected
 			//WARNING: this might leak a wee bit if you have numerous connections in your app
-		    if (this.next_timeout) {
-			clearTimeout( this.next_timeout );
-		    }
-		    if (this.client) {
-			this.client.btapp = null;
-			this.client.trigger('destroy');
-			this.client = null;
-		    }
 		},
+					     stop: function() {
+						 if (this.next_timeout) {
+						     clearTimeout( this.next_timeout );
+						 }
+						 this.client.btapp = null;
+						 this.client = null;
+					     },
 		onConnectionError: function() {
 			console.log('connection lost...retrying...');
 			this.clearState();
