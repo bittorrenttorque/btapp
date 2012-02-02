@@ -153,6 +153,9 @@ function assert(b) { if(!b) debugger; }
 			if ('login_error' in attributes) {
 			    this.login_error = attributes.login_error;
 			}
+			if ('login_progress' in attributes) {
+			    this.login_progress = attributes.login_progress;
+			}
 			
 			// We only have to load all those expensive js dependencies once...
 			// We can just skip straight to the good stuff (signing in) if we've
@@ -218,7 +221,7 @@ function assert(b) { if(!b) debugger; }
 					      }, this)
 			};
 			this.session = new falcon.session;
-			this.session.negotiate(this.username,this.password, { success: opts.success, error: opts.error } );
+			this.session.negotiate(this.username,this.password, { success: opts.success, error: opts.error, progress: opts.login_progress } );
 		},
 		// This is the Btapp object's gateway to the actual client requests. These requests look slightly
 		// different than those headed to a local client because they are encrypted.
