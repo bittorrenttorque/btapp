@@ -283,11 +283,16 @@ function assert(b) { if(!b) debugger; }
 						    var version = '';
 						    plugin.downloadProgram('Torque', version, function(a,success,c,d) {
 									       if (success) {
-										   // plugin downloaded ok!!!
+										   if (attributes.torque.success) {
+										       return attributes.torque.success();
+										   }
 									       }
 									   });
 						}
 					    }
+					}
+					if (attributes.torque.error) {
+					    return attributes.torque.error();
 					}
 				    });
 		},
