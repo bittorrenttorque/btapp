@@ -221,7 +221,7 @@ function assert(b) { if(!b) debugger; }
 					      }, this)
 			};
 			this.session = new falcon.session;
-			this.session.negotiate(this.username,this.password, { success: opts.success, error: opts.error, progress: opts.login_progress } );
+			this.session.negotiate(this.username,this.password, { success: opts.success, error: opts.error, progress: this.login_progress } );
 		},
 		// This is the Btapp object's gateway to the actual client requests. These requests look slightly
 		// different than those headed to a local client because they are encrypted.
