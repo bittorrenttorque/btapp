@@ -274,7 +274,7 @@ function assert(b) { if(!b) debugger; }
 			TorrentClient.prototype.initialize.call(this, attributes);
 			this.url = 'http://localhost:10000/btapp/';
 			this.reset();
-			$.getScript('https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', function(data, textStatus) {
+			$.getScript('https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', _.bind(function(data, textStatus) {
 					// todo -- provide callback for plugin (this code works when plugin is installed already)
 					var plugin = document.getElementById('btapp_plugin');
 					if (attributes) {
@@ -297,7 +297,7 @@ function assert(b) { if(!b) debugger; }
 						return attributes.torque.error();
 					    }
 					}
-				    });
+				    },this));
 		},
 		send_query: function(args, cb, err) {
 			$.ajax({
