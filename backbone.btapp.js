@@ -147,6 +147,12 @@ function assert(b) { if(!b) debugger; }
 			assert(typeof attributes === 'object' && 'username' in attributes && 'password' in attributes);
 			this.username = attributes.username;
 			this.password = attributes.password;
+			if ('login_success' in attributes) {
+			    this.login_success = attributes.login_success;
+			}
+			if ('login_error' in attributes) {
+			    this.login_error = attributes.login_error;
+			}
 			
 			// We only have to load all those expensive js dependencies once...
 			// We can just skip straight to the good stuff (signing in) if we've
@@ -201,15 +207,18 @@ function assert(b) { if(!b) debugger; }
 			assert(!this.falcon);
 			// set up some connection variables
 			var opts = {
-				success: _.bind(function() {
+				success: _.bind(function(session) {
+						    if (this.login_success) { this.login_success(session); }
 					console.log('raptor connected successfully');
 					this.falcon = this.session.api;
 					this.trigger('connected');
 				}, this),
-				error: _.bind(this.reset, this)
+				error: _.bind(function(xhr, status, data) {
+						  if (this.login_error) { this.login_error(xhr, status, data); }
+					      }, this)
 			};
 			this.session = new falcon.session;
-			this.session.negotiate(this.username,this.password, { success: opts.success } );
+			this.session.negotiate(this.username,this.password, { success: opts.success, error: opts.error } );
 		},
 		// This is the Btapp object's gateway to the actual client requests. These requests look slightly
 		// different than those headed to a local client because they are encrypted.
