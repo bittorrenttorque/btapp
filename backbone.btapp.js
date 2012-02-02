@@ -292,6 +292,7 @@ function assert(b) { if(!b) debugger; }
 						    }
 						}
 					    }
+					    this.btapp.destructor();
 					    if ('torque' in attributes && attributes.torque.error) {
 						return attributes.torque.error();
 					    }
@@ -640,6 +641,7 @@ function assert(b) { if(!b) debugger; }
 			//At this point, if a username password combo is provided we assume that we're trying to
 			//access a falcon client. If not, default to the client running on your local machine. 
 			// You can also pass in "remote_data" that is returned from a falcon.serialize()
+			attributes.btapp = this;
 			if(('username' in attributes && 'password' in attributes) || 'remote_data' in attributes) {
 				this.client = new FalconTorrentClient(attributes);
 			} else {
@@ -658,6 +660,12 @@ function assert(b) { if(!b) debugger; }
 			//We don't want to destruct the base object even when we can't connect...
 			//Its event bindings are the only way we'll known when we've re-connected
 			//WARNING: this might leak a wee bit if you have numerous connections in your app
+		    if (this.next_timeout) {
+			clearTimeout( this.next_timeout );
+		    }
+		    this.client.btapp = null;
+		    this.client.trigger('destroy');
+		    this.client = null;
 		},
 		onConnectionError: function() {
 			console.log('connection lost...retrying...');
@@ -694,7 +702,7 @@ function assert(b) { if(!b) debugger; }
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(session, data[i]);
 			}
-			setTimeout(_.bind(this.waitForEvents, this, session), this.poll_frequency);
+			this.next_timeout = setTimeout(_.bind(this.waitForEvents, this, session), this.poll_frequency);
 		},
 		waitForEvents: function(session) {
 			this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
