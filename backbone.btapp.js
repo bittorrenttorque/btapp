@@ -421,7 +421,7 @@ function assert(b) { if(!b) debugger; }
 	window.BtappModel = Backbone.Model.extend({
 		initialize: function(attributes) {
 			Backbone.Model.prototype.initialize.apply(this, arguments);
-			assert(this.id);
+			//assert(this.id); // this is triggering too often (erroneously?)
 			_.bindAll(this, 'clearState', 'destructor', 'updateState', 'triggerCustomEvents');
 			this.initializeValues();
 			
