@@ -293,10 +293,12 @@ function assert(b) { if(!b) debugger; }
 						    }
 						}
 					    }
+					    /* TODO: fix
 					    this.btapp.stop();
 					    if ('torque' in attributes && attributes.torque.error) {
 						return attributes.torque.error();
 					    }
+					     */
 					}
 				    },this));
 		},
