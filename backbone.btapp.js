@@ -207,7 +207,6 @@ function assert(b) { if(!b) debugger; }
 																		       this.session = new falcon.session( { client_data: this.remote_data } );
 																		       this.falcon = this.session.api;
 																		       falcon_initialized = true;
-																		       debugger;
 																		       this.trigger('connected');
 																		   } else {
 					console.log('falcon dependencies loaded...begin exchanging btapp webui information');
