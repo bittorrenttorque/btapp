@@ -664,9 +664,11 @@ function assert(b) { if(!b) debugger; }
 		    if (this.next_timeout) {
 			clearTimeout( this.next_timeout );
 		    }
-		    this.client.btapp = null;
-		    this.client.trigger('destroy');
-		    this.client = null;
+		    if (this.client) {
+			this.client.btapp = null;
+			this.client.trigger('destroy');
+			this.client = null;
+		    }
 		},
 		onConnectionError: function() {
 			console.log('connection lost...retrying...');
