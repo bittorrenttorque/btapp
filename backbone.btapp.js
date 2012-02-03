@@ -553,6 +553,9 @@ function assert(b) { if(!b) debugger; }
 						if(	childurl.match(/btapp\/torrent\/$/) ||
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
+							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/$/) ||
+							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/$/) ||
+							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/$/) ||
 							childurl.match(/btapp\/rss_feed\/$/) ||
 							childurl.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/$/) ||
 							childurl.match(/btapp\/rss_filter\/$/) ) {
@@ -575,7 +578,7 @@ function assert(b) { if(!b) debugger; }
 					// Set non function/object variables as model attributes
 					if(typeof added === 'string') {
 						added = unescape(added);
-					}
+					
 					param[escape(v)] = added;
 					// We need to specify server:true so that our overwritten set function 
 					// doesn't try to update the client.
