@@ -553,6 +553,7 @@ function assert(b) { if(!b) debugger; }
 						if(	childurl.match(/btapp\/torrent\/$/) ||
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
 							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
+							childurl.match(/btapp\/label\/$/) ||
 							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/$/) ||
 							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/$/) ||
 							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/$/) ||
