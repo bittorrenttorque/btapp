@@ -578,7 +578,7 @@ function assert(b) { if(!b) debugger; }
 					// Set non function/object variables as model attributes
 					if(typeof added === 'string') {
 						added = unescape(added);
-					
+					}
 					param[escape(v)] = added;
 					// We need to specify server:true so that our overwritten set function 
 					// doesn't try to update the client.
