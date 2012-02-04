@@ -66,7 +66,23 @@ function assert(b) { if(!b) debugger; }
 			return _.any(signatures, function(signature) {
 				var signature = signature.match(/\w+/g) || []; //["string","unknown"]
 				return _.all(signature, function(type,index) { 
-					return (type == 'unknown') || (typeof variables[index] === type);
+					switch(typeof type) {
+						//Most of these types that the client sends up match the typeof values of the javascript
+						//types themselves so we can do a direct comparison
+						case 'number':
+						case 'string':
+						case 'boolean':
+						case 'array':
+							return typeof variables[index] === type;
+						//In the case of unknown, we have no choice but to trust the argument as
+						//the client hasn't specified what type it should be
+						case 'unknown':
+							return true;
+						case 'dispatch':
+							return typeof variables[index] === 'array' || typeof variables[index] === 'function';
+					}
+					//has the client provided a type that we weren't expecting?
+					assert(false);
 				});
 			});
 		},
