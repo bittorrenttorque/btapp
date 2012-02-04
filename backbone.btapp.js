@@ -19,7 +19,6 @@
 function assert(b) { if(!b) debugger; }
 
 (function() {
-	var console = { 'log' : function() {} };
 	// Torrent Client (base functionality for Falcon/Local Torrent Clients)
 	// -------------
 
@@ -203,16 +202,16 @@ function assert(b) { if(!b) debugger; }
 				];
 				var tags = create_tags(dependencies);
 				(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
-																		   if (this.remote_data) {
-																		       this.session = new falcon.session( { client_data: this.remote_data } );
-																		       this.falcon = this.session.api;
-																		       falcon_initialized = true;
-																		       this.trigger('connected');
-																		   } else {
-					console.log('falcon dependencies loaded...begin exchanging btapp webui information');
-					falcon_initialized = true;
-					this.reset();
-																		   }
+					if (this.remote_data) {
+						this.session = new falcon.session( { client_data: this.remote_data } );
+						this.falcon = this.session.api;
+						falcon_initialized = true;
+						this.trigger('connected');
+					} else {
+						console.log('falcon dependencies loaded...begin exchanging btapp webui information');
+						falcon_initialized = true;
+						this.reset();
+					}
 				}, this));
 			}, this));
 		},
@@ -275,24 +274,22 @@ function assert(b) { if(!b) debugger; }
 			this.url = 'http://localhost:10000/btapp/';
 			this.btapp = attributes.btapp;
 			this.reset();
-			$.getScript('https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', _.bind(function(data, textStatus) {
+			$.getScript(
+				'https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', 
+				_.bind(function(data, textStatus) {
 					// todo -- provide callback for plugin (this code works when plugin is installed already)
 					var plugin = document.getElementById('btapp_plugin');
-					if (attributes) {
-					    if (plugin && plugin.version) {
-						if ('torque' in attributes) {
-						    if (plugin.isRunning('Torque').length == 0) {
+					if (attributes && plugin && plugin.version && 'torque' in attributes) {
+						if (plugin.isRunning('Torque').length == 0) {
 							var version = '';
 							plugin.downloadProgram('Torque', version, function(a,success,c,d) {
-										   if (success) {
-										       if (attributes.torque.success) {
-											   return attributes.torque.success();
-										       }
-										   }
-									       });
-						    }
+								if (success) {
+									if (attributes.torque.success) {
+										return attributes.torque.success();
+									}
+								}
+							});
 						}
-					    }
 					    /* TODO: fix
 					    this.btapp.stop();
 					    if ('torque' in attributes && attributes.torque.error) {
@@ -300,7 +297,8 @@ function assert(b) { if(!b) debugger; }
 					    }
 					     */
 					}
-				    },this));
+				},this)
+			);
 		},
 		send_query: function(args, cb, err) {
 			$.ajax({
