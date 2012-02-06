@@ -54,7 +54,8 @@ function assert(b) { if(!b) debugger; }
 		},
 		// We expect function signatures that come from the client to have a specific syntax
 		isFunctionSignature: function(f) {
-			return f.match(/\[native function\](\([^\)]*\))+/);
+			return f.match(/\[native function\](\([^\)]*\))+/) ||
+					f.match(/\[nf\](\([^\)]*\))+/);
 		},
 		// Seeing as we're interfacing with a strongly typed language c/c++ we need to 
 		// ensure that our types are at least close enough to coherse into the desired types
