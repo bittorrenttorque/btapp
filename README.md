@@ -7,11 +7,11 @@ The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"),
 ## Downloads & Dependencies
 [Nightly Version (0.1)](https://raw.github.com/pwmckenna/btapp/master/backbone.btapp.js "backbone.btapp.js") 28kb, Full source, lots of comments
 
-Backbone.Btapp.js has hard dependencies of the following:
-[jquery.js](http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js "jquery")
-[jquery.json.js](http://jquery-json.googlecode.com/files/jquery.json-2.3.min.js "json")
-[underscore.js](http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.2.2/underscore-min.js "underscore")
-[backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone")
+Backbone.Btapp.js has hard dependencies of the following:  
+[jquery.js](http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js "jquery")  
+[jquery.json.js](http://jquery-json.googlecode.com/files/jquery.json-2.3.min.js "json")  
+[underscore.js](http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.2.2/underscore-min.js "underscore")  
+[backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone")  
 
 ## Introduction
 
