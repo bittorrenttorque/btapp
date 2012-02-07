@@ -651,6 +651,7 @@ function assert(b) { if(!b) debugger; }
 			this.poll_frequency = attributes.poll_frequency || 3000;
 			this.queries = attributes.queries || ['btapp/'];
 			this.url = 'btapp/';
+			this.id = 'btapp/';
 
 			//bind stuff
 			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
