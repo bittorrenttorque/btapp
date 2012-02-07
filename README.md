@@ -19,9 +19,17 @@ Backbone.Btapp.js builds off of Backbone.js to provide easy access to a torrent 
 
 ## Getting Started
 
+To connect to the plugin client on your local machine...
 ```javascript
 var btapp = new Btapp({'id':'btapp', 'url':'btapp/'});
 ```
+
+If you're connecting to a remote client, just supply a username and password
+```javascript
+var btapp = new Btapp({'username':'pwmckenna','password':'abrakadabraorsomething'});
+```
+
+
 
 ## Utilities
 
