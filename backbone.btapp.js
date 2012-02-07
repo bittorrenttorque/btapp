@@ -141,12 +141,13 @@ function assert(b) { if(!b) debugger; }
 			if(session) args['session'] = session;
 			
 			var success_callback = function(data) { 
-
-								if (data == 'invalid request') {
-								    alert('please close utorrent and bittorrent and share etc...');
-								}
-				if(!(typeof data === 'object') || 'error' in data)	err();
-				else cb(data);
+				if (data == 'invalid request') {
+					alert('please close utorrent and bittorrent and share etc...');
+				} else if(!(typeof data === 'object') || 'error' in data) {
+					err();
+				} else {
+					cb(data);
+				}
 			};
 			this.send_query(args, success_callback, err);
 		}
