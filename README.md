@@ -29,8 +29,8 @@ var local = new Btapp({});
 ```
 
 If you're connecting to a remote client, just supply a username and password
-<div class="run" title="Run"></div>
 ```javascript
+<div class="run" title="Run"></div>
 var remote = new Btapp({  
     'username':'pwmckenna',  
 	'password':'abracadabraorsomething'  
