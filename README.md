@@ -1,3 +1,7 @@
+<link rel="icon" href="docs/images/favicon.ico">
+
+<img src="http://www.pwmckenna.com/img/bittorrent_medium.png" />
+
 # Backbone.Btapp.js
 
 Backbone.Btapp.js provides access to a browser plugin version of uTorrent/BitTorrent via a tree of Backbone Models and Collections. The intent of this project is to allow access to the extensive functionality of a torrent client, from web apps that are simply Backbone Views. Backbone.Btapp.js takes responsibility for getting the plugin installed as well, so you're free to assume that its available. In addition to the local torrent client, you can also easily access a torrent client anywhere else in the world (assume you either configured it originally or have access to that client's username/password).
