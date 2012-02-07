@@ -2,7 +2,7 @@
 
 Backbone.Btapp.js provides access to a browser plugin version of uTorrent/BitTorrent via a tree of Backbone Models and Collections. The intent of this project is to allow access to the extensive functionality of a torrent client, from web apps that are simply Backbone Views. Backbone.Btapp.js takes responsibility for getting the plugin installed as well, so you're free to assume that its available. In addition to the local torrent client, you can also easily access a torrent client anywhere else in the world (assume you either configured it originally or have access to that client's username/password).
 
-The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/backbone.btapp.html "source") is available. An [example application](http://pwmckenna.github.com/nud.gs/ "see it run!") is also available through [GitHub](http://github.com/pwmckenna/nud.gs/ "source"). [Annotated source](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "annotation") is available for this as well.
+The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/backbone.btapp.html "source") is available. An [example application](http://pwmckenna.github.com/nud.gs/ "see it run!") with [Annotated source](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "annotation") is also available through [GitHub](http://github.com/pwmckenna/nud.gs/ "source").
 
 ## Downloads & Dependencies
 [Nightly Version (0.1)](https://raw.github.com/pwmckenna/btapp/master/backbone.btapp.js "backbone.btapp.js") 28kb, Full source, lots of comments
