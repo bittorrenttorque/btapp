@@ -106,7 +106,7 @@ function assert(b) { if(!b) debugger; }
 				// we should be able to use verifySignaturesArguments to determine if the client will
 				// consider the arguments that we're passing to be valid
 				if(!TorrentClient.prototype.validateArguments.call(this, signatures, native_args)) {
-					alert(signatures + ' cannot accept ' + $.toJSON(native_args));
+					alert(signatures + ' cannot accept ' + jQuery.toJSON(native_args));
 					return;
 				}
 				
@@ -120,7 +120,7 @@ function assert(b) { if(!b) debugger; }
 						args.push(arguments[i]);
 					}
 				}
-				path += encodeURIComponent($.toJSON(args));
+				path += encodeURIComponent(jQuery.toJSON(args));
 				path += ')/';
 				//console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
@@ -137,7 +137,7 @@ function assert(b) { if(!b) debugger; }
 			
 			var args = {};
 			args['type'] = type;
-			if(queries) args['queries'] = $.toJSON(queries);
+			if(queries) args['queries'] = jQuery.toJSON(queries);
 			if(session) args['session'] = session;
 			
 			var success_callback = function(data) {
@@ -193,7 +193,7 @@ function assert(b) { if(!b) debugger; }
 			};
 			
 			var jsload = 'https://remote-staging.utorrent.com/static/js/jsloadv2.js?v=0.57';
-			$.getScript(jsload, _.bind(function(data, textStatus) {
+			jQuery.getScript(jsload, _.bind(function(data, textStatus) {
 				console.log('loaded ' + jsload);
 				function create_tags(list) {
 					var tags = [];
@@ -291,7 +291,7 @@ function assert(b) { if(!b) debugger; }
 			this.url = 'http://localhost:10000/btapp/';
 			this.btapp = attributes.btapp;
 			this.reset();
-			$.getScript(
+			jQuery.getScript(
 				'https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', 
 				_.bind(function(data, textStatus) {
 					// todo -- provide callback for plugin (this code works when plugin is installed already)
@@ -318,7 +318,7 @@ function assert(b) { if(!b) debugger; }
 			);
 		},
 		send_query: function(args, cb, err) {
-			$.ajax({
+			jQuery.ajax({
 				url: this.url,
 				dataType: 'jsonp',
 				context: this,
@@ -565,16 +565,16 @@ function assert(b) { if(!b) debugger; }
 						// This is the only hard coding that we should do in this library...
 						// As a convenience, torrents and their file/peer lists are treated as backbone collections
 						// the same is true of rss_feeds and filters...its just a more intuitive way of using them
-						if(	childurl.match(/btapp\/torrent\/$/) ||
-							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
-							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
-							childurl.match(/btapp\/label\/$/) ||
-							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/$/) ||
-							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/$/) ||
-							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/$/) ||
-							childurl.match(/btapp\/rss_feed\/$/) ||
-							childurl.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/$/) ||
-							childurl.match(/btapp\/rss_filter\/$/) ) {
+						if(	childurl.match(/btapp\/torrent\/jQuery/) ||
+							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/jQuery/) ||
+							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/jQuery/) ||
+							childurl.match(/btapp\/label\/jQuery/) ||
+							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/jQuery/) ||
+							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/jQuery/) ||
+							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/jQuery/) ||
+							childurl.match(/btapp\/rss_feed\/jQuery/) ||
+							childurl.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/jQuery/) ||
+							childurl.match(/btapp\/rss_filter\/jQuery/) ) {
 							model = new BtappCollection;
 						} else {
 							model = new BtappModel({'id':childurl});
@@ -722,7 +722,7 @@ function assert(b) { if(!b) debugger; }
 		//it is generating a large diff tree. We should generally on get one element in data array. Anything more and
 		//the client has wasted energy creating seperate diff trees.
 		onEvents: function(time, session, data) {
-			console.log(((new Date()).getTime() - time) + ' ms - ' + $.toJSON(data).length + ' bytes');
+			console.log(((new Date()).getTime() - time) + ' ms - ' + jQuery.toJSON(data).length + ' bytes');
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(session, data[i]);
 			}
