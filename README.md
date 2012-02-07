@@ -4,9 +4,20 @@ Backbone.Btapp.js provides access to a browser plugin version of uTorrent/BitTor
 
 The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/backbone.btapp.html "source") is available. In addition, an [example application](http://pwmckenna.github.com/nud.gs/ "nud.gs") is also available, which is itself [annotated here.](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "nud.gs")
 
-## Backbone.Btapp.js (0.1)
+## Downloads & Dependencies
+[Nightly Version (0.1)](https://raw.github.com/pwmckenna/btapp/master/backbone.btapp.js "backbone.btapp.js") 28kb, Full source, lots of comments
+
+Backbone.Btapp.js has hard dependencies of the following:
+[jquery.js](http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js "jquery")
+[jquery.json.js](http://jquery-json.googlecode.com/files/jquery.json-2.3.min.js "json")
+[underscore.js](http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.2.2/underscore-min.js "underscore")
+[backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone")
 
 ## Introduction
+
+Backbone.Btapp.js builds off of Backbone.js to provide easy access to a torrent client, either on the local machine or a remote machine. The documentation, annotated source, and examples are designed to be as similar to the getting started experience of Backbone as possible. However, the functionality provided through these backbone models and collections is quite extensive and powerful, so its probably worth a look at the [Api Browser](http://pwmckenna.github.com/btapp_api_viewer/ "api") to get an idea of what is possible. Many of the attributes and functions that are made available through this library have examples to give you some idea of what they can be used for. 
+
+Many of the examples that follow are runnable. Click the *play* button to execute them.
 
 ## Utilities
 ### BtappListener
