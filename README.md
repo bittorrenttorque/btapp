@@ -21,12 +21,12 @@ Backbone.Btapp.js builds off of Backbone.js to provide easy access to a torrent 
 
 To connect to the plugin client on your local machine...
 ```javascript
-var btapp = new Btapp({});
+var local = new Btapp({});
 ```
 
 If you're connecting to a remote client, just supply a username and password
 ```javascript
-var btapp = new Btapp({'username':'pwmckenna','password':'abrakadabraorsomething'});
+var remote = new Btapp({'username':'pwmckenna','password':'abracadabraorsomething'});
 ```
 
 
@@ -35,10 +35,10 @@ var btapp = new Btapp({'username':'pwmckenna','password':'abrakadabraorsomething
 
 The following utilities are designed to get you started working with the library. Part of getting started includes installing the same plugin that your users will need to install in order to use your app. As all these utilities are themselves apps that use this library, clicking on any of these will take you through the process (You only need to install once, regardless of which browsers you use). If you're unfamiliar with all the functionality that the torrent client has to offer, ApiViewer is probably a good first stop. 
 
-### ApiViewer
-### BtappListener
-### BtappPlugin
-### RemoteSetup
+### Api Viewer
+### Btapp Listener
+### Btapp Plugin
+### Remote Setup
 
 ## Examples
 ### Nud.gs
