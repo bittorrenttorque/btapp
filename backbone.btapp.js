@@ -140,7 +140,11 @@ function assert(b) { if(!b) debugger; }
 			if(queries) args['queries'] = jQuery.toJSON(queries);
 			if(session) args['session'] = session;
 			
-			var success_callback = function(data) {
+			var success_callback = function(data) { 
+
+								if (data == 'invalid request') {
+								    alert('please close utorrent and bittorrent and share etc...');
+								}
 				if(!(typeof data === 'object') || 'error' in data)	err();
 				else cb(data);
 			};
