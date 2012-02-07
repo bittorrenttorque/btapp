@@ -298,28 +298,9 @@ function assert(b) { if(!b) debugger; }
 			this.reset();
 			jQuery.getScript(
 				'https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', 
-				_.bind(function(data, textStatus) {
-					// todo -- provide callback for plugin (this code works when plugin is installed already)
-					var plugin = document.getElementById('btapp_plugin');
-					if (attributes && plugin && plugin.version && 'torque' in attributes) {
-						if (plugin.isRunning('Torque').length == 0) {
-							var version = '';
-							plugin.downloadProgram('Torque', version, function(a,success,c,d) {
-								if (success) {
-									if (attributes.torque.success) {
-										return attributes.torque.success();
-									}
-								}
-							});
-						}
-					    /* TODO: fix
-					    this.btapp.stop();
-					    if ('torque' in attributes && attributes.torque.error) {
-						return attributes.torque.error();
-					    }
-					     */
-					}
-				},this)
+				function(data, textStatus) {
+					//now that the plugin code is loaded it can take it from here.
+				}
 			);
 		},
 		send_query: function(args, cb, err) {
