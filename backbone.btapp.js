@@ -520,6 +520,7 @@ function assert(b) { if(!b) debugger; }
 						changed = true;
 					} else if(typeof removed === 'string' && this.client.isFunctionSignature(removed)) {
 						assert(v in this.bt);
+						this.trigger('remove:bt.' + v, this.bt[v]);
 						delete this.bt[v];
 						changed = true;
 					} else if(v != 'id') {
@@ -575,6 +576,7 @@ function assert(b) { if(!b) debugger; }
 				} else if(typeof added === 'string' && this.client.isFunctionSignature(added)) {
 					assert(!(v in this.bt));
 					this.bt[v] = this.client.createFunction(session, url + v, added);
+					this.trigger('add:bt.' + v, this.bt[v]);
 					changed = true;
 				} else {
 					// Set non function/object variables as model attributes
