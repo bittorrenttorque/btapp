@@ -122,12 +122,9 @@ This snapshot was taken while also using the Nud.gs app, which uses labels to ca
 
 The Btapp Listener is designed to allow you to listen for the additions of models at any level of the data tree much the same way jQuery uses *delegate* to bind event handlers to DOM elements that don't yet exist.
 
-For instance, to list the name of all the files in all torrents you need to write code similar to the following:
-<div class="run" title="Run"></div>
+For instance, to list the name of all the files in all torrents you need to write code similar to the following...
+
 ```javascript
-console.log("--- Dumping File Names ---");
-var torrents = btapp.get("torrent");
-console.log("--- Done! ---");
 ```
 
 ### Btapp Plugin
