@@ -3,7 +3,7 @@
 <img id="logo" src="http://www.pwmckenna.com/img/bittorrent_medium.png" />
 
 # Backbone.Btapp.js
-Backbone.Btapp.js provides access to a browser plugin version of uTorrent/BitTorrent via a tree of Backbone Models and Collections. The intent of this project is to allow access to the extensive functionality of a torrent client, from web apps that are as simple as a single Backbone View. Backbone.Btapp.js takes responsibility for getting the plugin installed as well, so you're free to assume that its available. In addition to the local torrent client, you can also easily access a torrent client anywhere else in the world (assume you either configured it originally or have access to that client's username/password).
+Backbone.Btapp.js provides access to a browser plugin version of uTorrent/BitTorrent via a tree of [Backbone Models and Collections](http://documentcloud.github.com/backbone/ "backbone"). The intent of this project is to allow access to the extensive functionality of a torrent client, from web apps that are as simple as a single Backbone View. Backbone.Btapp.js takes responsibility for getting the plugin installed as well, so you're free to assume that its available. In addition to the local torrent client, you can also easily access a torrent client anywhere else in the world (assume you either configured it originally or have access to that client's username/password).
 
 The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/backbone.btapp.html "source") is available. An [example application](http://pwmckenna.github.com/nud.gs/ "see it run!") with [annotated source](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "annotation") is also available through [GitHub](http://github.com/pwmckenna/nud.gs/ "source").
 
@@ -14,7 +14,7 @@ Backbone.Btapp.js has hard dependencies of the following:
 [jquery.js](http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js "jquery")  
 [jquery.json.js](http://jquery-json.googlecode.com/files/jquery.json-2.3.min.js "json")  
 [underscore.js](http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.2.2/underscore-min.js "underscore")  
-[backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone")  
+[backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone") ([documentation](http://documentcloud.github.com/backbone/ "backbone"))  
 
 ## Introduction
 
