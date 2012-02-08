@@ -59,7 +59,8 @@ remote = new Btapp({
 
 #### Things to note:
 
-First off, it is important to note that all functions provided by the torrent client are in the bt member of each object. This is neglected in the api viewer, but keep it in mind when trying to make function calls. Take *connect_remote* for example. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll see this appearing as a function off of the base object (btapp in the viewer). However, inspecting our newly created Btapp objects (local or remote) in the debugger, you'll see a 'bt' attribute with numerous stored...
+First off, it is important to note that all functions provided by the torrent client are in the bt member of each object. This is neglected in the api viewer, but keep it in mind when trying to make function calls. Take *connect_remote* for example. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll see this appearing as a function off of the base object (btapp in the viewer). However, inspecting our newly created Btapp objects (local or remote) in the debugger, you'll see a 'bt' attribute where you'll find the function. (attributes are stored in the attributes member of objects, which should be accessed via standard backbone get/set functions)
+
 
 Secondly, you'll notice that this call doesn't quite match the signature that is displayed there. Which brings us to a pretty important aspect of this library...
   
