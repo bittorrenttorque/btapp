@@ -66,6 +66,14 @@ btapp.get('add').bt.torrent(url);
 ```
 And by easy-peasy I mean, wtf?!? So, the base object has an attribute called *add*, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because *add* is a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
 
+If you find yourself down a dark alley needing rss feeds, its almost the same to add one of those.
+<div class="run" title="Run"></div>
+```javascript
+var url = 'http://www.clearbits.net/feeds/cat/short-form-video.rss';
+btapp.get('add').bt.rss_feed(url);
+```
+
+
 Ok, adding existing content is pretty nice, but your users probably want to share their own content...
 
 ### Creating torrents
