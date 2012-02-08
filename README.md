@@ -98,28 +98,25 @@ __Warning__: this will launch a file browser on the machine that the client is r
 
 ## General Concepts
 
-### Btapp Listener
+### Btapp arguments
+Todo
+### Custom events
+Todo
+### Filters
+Todo
+### Underlying RESTless API
+Todo
 
-The torrent client has somewhat unpredicable availability. The plugin will do its best to download the client and run it for local instances, but when accessing a torrent client via falcon its never certain that the client is running on the other side, or if the person's upload bandwidth can support the connection. On top of this, if any of the jsonp calls that keep the library up to date time out, it'll scrap all the data it has (including your list of torrents/files/peer/rss_feeds/etc) and start over.  
-  
-This is all a long way of saying that in a deep tree of data, its no fun to create endless views who's job it is is simply to wait around for the next layer to bind add/remove event handlers to. With the BtappListener object, you can just bind the to urls of the types of models you're interested in, and provide a callback.  
-  
-So in cases where you're really just interested in the files in every torrent (end users generally don't know anything about torrents, so creating a ui around them can be quite challenging, and perhaps pointless), you can just do the following (Taken from the *Nud.gs* app).
-<div class="run" title="Run"></div>
-```javascript
-var listener = new BtappListener({'btapp': btapp});
-var filter = 'btapp/label/all/nudges/torrent/all/*/file/all/*/';
-var view_generator = function(file) {
-	var view = new NudgeView({model: file});
-	$("#nudge-list").append(view.render().el);
-};
-listener.bind(filter, view_generator);
-```
+## Utilities
 
-The Btapp Listener has its own [project on GitHub](https://github.com/pwmckenna/btapp_listener "btapp listener") as well as [annotated source code](http://pwmckenna.github.com/btapp_listener/docs/listener.btapp.html "annotated source").
+The following utilities are designed to get you started working with the library. Part of getting started includes installing the same plugin that your users will need to install in order to use your app (Provided you didn't go through this process when playing with the demo code above). As all these utilities are themselves apps that use this library, clicking on any of these will take you through the process (You only need to install once, regardless of which browsers you use). If you're unfamiliar with all the functionality that the torrent client has to offer, the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api") is probably a good first stop. 
 
-### Btapp Plugin
-The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](https://github.com/pwmckenna/btapp_plugin "plugin"). It is responsible for loading the necessary plugins and running the torrent client as necessary. It is dynamically loaded by backbone.btapp.js when you create a local Btapp object (unless you specifically pass in username/password arguments your Btapp object will be pointing at your local torrent client).
+### Api Viewer
+
+The api viewer is a one stop shop for examining the data coming from your torrent client in real time. It is itself a web app that uses backbone.btapp.js, so the [annotated source](http://pwmckenna.github.com/btapp_api_viewer/docs/index.html "annotated source") may be useful to skim through as well. It just creates a backbone view for each bit of info bubbled up from the torrent client.
+
+<a href="http://pwmckenna.github.com/btapp_api_viewer/"><img src="http://pwmckenna.com/img/api_viewer.png"></img></a>
+This snapshot was taken while also using the Nud.gs app, which uses labels to categorize its torrents...If you're curious about the dragon file, [check it out here](http://pwmckenna.com/img/dragon.jpg "dragon!")
 
 ## Examples
 ### Nud.gs
