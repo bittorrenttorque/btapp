@@ -190,10 +190,10 @@ function assert(b) { if(!b) debugger; }
 			
 			// If we choose to use falcon we need this specific global config variable defined
 			window.config = {
-				srp_root:'https://remote-staging.utorrent.com'
+				srp_root:'https://remote.utorrent.com'
 			};
 			
-			var jsload = 'https://remote-staging.utorrent.com/static/js/jsloadv2.js?v=0.57';
+			var jsload = 'https://remote.utorrent.com/static/js/jsloadv2.js?v=0.57';
 			jQuery.getScript(jsload, _.bind(function(data, textStatus) {
 				function create_tags(list) {
 					var tags = [];
@@ -218,7 +218,7 @@ function assert(b) { if(!b) debugger; }
 					'falcon/falcon.session.js'
 				];
 				var tags = create_tags(dependencies);
-				(new JSLoad(tags, "https://remote-staging.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
+				(new JSLoad(tags, "https://remote.utorrent.com/static/js/")).load(['falcon/falcon.session.js'], _.bind(function() {
 					if (this.remote_data) {
 						this.session = new falcon.session( { client_data: this.remote_data } );
 						this.falcon = this.session.api;
@@ -296,7 +296,7 @@ function assert(b) { if(!b) debugger; }
 				this.initialize_manager();
 			} else {
 				jQuery.getScript(
-					'https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', 
+					'http://apps.bittorrent.com/torque/btapp_plugin/plugin.btapp.js', 
 					_.bind(this.initialize_manager, this)
 				);
 			}
