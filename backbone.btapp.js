@@ -403,9 +403,9 @@ function assert(b) { if(!b) debugger; }
 				}
 				
 				if(typeof added === 'object') {
-					var model = this.get(childurl);
+					var model = this.get(v);
 					if(!model) {
-						model = new BtappModel({'id':childurl});
+						model = new BtappModel({'id':v});
 						model.url = childurl;
 						model.client = this.client;
 						model.updateState(this.session, added, removed, childurl);
@@ -563,7 +563,7 @@ function assert(b) { if(!b) debugger; }
 							childurl.match(/btapp\/rss_filter\/$/) ) {
 							model = new BtappCollection;
 						} else {
-							model = new BtappModel({'id':childurl});
+							model = new BtappModel({'id':v});
 						}
 						model.url = childurl;
 						model.client = this.client;
