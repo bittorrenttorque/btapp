@@ -7,7 +7,7 @@ Backbone.Btapp.js provides access to a browser plugin version of uTorrent/BitTor
 
 The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/backbone.btapp.html "source") is available. An [example application](http://pwmckenna.github.com/nud.gs/ "see it run!") with [annotated source](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "annotation") is also available through [GitHub](http://github.com/pwmckenna/nud.gs/ "source").
 
-## Downloads & Dependencies
+#### Downloads & Dependencies
 [Nightly Version (0.1)](https://raw.github.com/pwmckenna/btapp/master/backbone.btapp.js "backbone.btapp.js") 28kb, Full source, lots of comments
 
 Backbone.Btapp.js has hard dependencies of the following:  
@@ -59,16 +59,16 @@ remote = new Btapp({
 
 #### Things to note:
 
-First off, it is important to note that all functions provided by the torrent client are in the bt member of each object. This is neglected in the api viewer, but keep it in mind when trying to make function calls. Take *connect_remote* for example. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll see this appearing as a function off of the base object (btapp in the viewer). However, inspecting our newly created Btapp objects (*local* or *remote*) in the debugger, you'll see a 'bt' attribute with numerous stored...
+First off, it is important to note that all functions provided by the torrent client are in the bt member of each object. This is neglected in the api viewer, but keep it in mind when trying to make function calls. Take *connect_remote* for example. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll see this appearing as a function off of the base object (btapp in the viewer). However, inspecting our newly created Btapp objects (local or remote) in the debugger, you'll see a 'bt' attribute with numerous stored...
 
 Secondly, you'll notice that this call doesn't quite match the signature that is displayed there. Which brings us to a pretty important aspect of this library...
   
-__Everything__ is asynchronous! So you must provide a callback argument as the first argument for every bt (those in the bt member) function call, then continue with the documented arguments. The callback receives a data blob that varies depending on the function, but is generally the return value of the function.
+__Everything__ is asynchronous! So you must provide a callback argument as the first argument for every bt (those in the bt member) function call, then continue with the documented arguments. The callback receives the function's return value.
 
 
 ## Utilities
 
-The following utilities are designed to get you started working with the library. Part of getting started includes installing the same plugin that your users will need to install in order to use your app. As all these utilities are themselves apps that use this library, clicking on any of these will take you through the process (You only need to install once, regardless of which browsers you use). If you're unfamiliar with all the functionality that the torrent client has to offer, ApiViewer is probably a good first stop. 
+The following utilities are designed to get you started working with the library. Part of getting started includes installing the same plugin that your users will need to install in order to use your app (Provided you didn't go through this process when playing with the demo code above). As all these utilities are themselves apps that use this library, clicking on any of these will take you through the process (You only need to install once, regardless of which browsers you use). If you're unfamiliar with all the functionality that the torrent client has to offer, ApiViewer is probably a good first stop. 
 
 ### Api Viewer
 ### Btapp Listener
