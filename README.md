@@ -102,7 +102,7 @@ The following utilities are designed to get you started working with the library
 
 ### Api Viewer
 
-The api viewer is a one stop shop for examining the data coming from your torrent client in real time. It is itself a web app that uses backbone.btapp.js, so the annotated source may be useful to skim through. It just creates a backbone view for each bit of info bubbled up from the torrent client.
+The api viewer is a one stop shop for examining the data coming from your torrent client in real time. It is itself a web app that uses backbone.btapp.js, so the [annotated source](http://pwmckenna.github.com/btapp_api_viewer/docs/index.html "annotated source") may be useful to skim through as well. It just creates a backbone view for each bit of info bubbled up from the torrent client.
 
 <a href="http://pwmckenna.github.com/btapp_api_viewer/"><img style="border:1px solid #ddd" src="http://pwmckenna.com/img/api_viewer.png"></img></a>
 
