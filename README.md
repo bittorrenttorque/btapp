@@ -126,21 +126,21 @@ For instance, to list the name of all the files in all torrents you need to writ
 <div class="run" title="Run"></div>
 ```javascript
 console.log("--- Dumping File Names ---");
-var torrents = btapp.get('torrent');
+var torrents = btapp.get("torrent");
 if(torrents) {
 	torrents.each(function(torrent) {
-		var files = torrent.get('file');
+		var files = torrent.get("file");
 		if(files) {
 			files.each(function(file) {
-				var properties = torrent.get('properties');
+				var properties = torrent.get("properties");
 				if(properties) {
-					console.log(properties.get('name'));
+					console.log(properties.get("name"));
 				}
 			});
 		}
 	});
-	console.log("--- Done! ---");
 }
+console.log("--- Done! ---");
 ```
 
 ### Btapp Plugin
