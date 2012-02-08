@@ -64,7 +64,7 @@ Easy-peasy
 var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
 local.get('add').bt.torrent(url);
 ```
-
+And by easy-peasy I mean, wtf?!? So, the base object has an attribute called add, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because its a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
 
 ## Utilities
 
