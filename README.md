@@ -57,41 +57,6 @@ remote_btapp = new Btapp({
 });
 ```
 
-
-#### WARNING:
-When write an app using this library, do not ever assume that the data coming from the torrent client is available. This included collections downstream from the base *btapp* object such as the torrent collection (*btapp.get('torrent')*), as well as the functions themselves. Many backbone apps aren't written to handle a server that is somewhat unreliable, but that is how you should treat the torrent client...as a server that come online and offline as it pleases (In practice it will be much more stable than what is being described, as the plugin's sole goal is to get the torrent client downloaded and running). Lets try running the previous example without making assumptions about data/functions being available...
-
-#### Safe version of code from above.
-<div class="run" title="Run"></div>
-```javascript
-btapp = new Btapp({});
-
-username = prompt("Please enter a new name","Harry Potter");
-password = prompt("Please enter a new password","Abracadabra");
-
-var on_function_available = function() {
-	btapp.bt.connect_remote(
-		function() { }, 
-		username,
-		password
-	);
-	setTimeout(function() {
-		remote_btapp = new Btapp({  
-			'username':username,  
-			'password':password
-		});
-	}, 5000);
-};
-
-if('connect_remote' in btapp.bt) {
-	on_function_available();
-} else {
-	btapp.bind('add:bt.connect_remote', on_function_available);
-}
-```
-Ahhh...much better (safety first!)
-
-
 ### Adding torrents via urls/magnet links
 Easy-peasy
 <div class="run" title="Run"></div>
@@ -99,15 +64,28 @@ Easy-peasy
 var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
 btapp.get('add').bt.torrent(url);
 ```
-And by easy-peasy I mean, wtf?!? So, the base object has an attribute called *add*, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...and because *add* is a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
+And by easy-peasy I mean, wtf?!? So, the base object has an attribute called *add*, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because *add* is a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
 
-Now that you're an expert at adding torrents, lets add an rss feed, just to show the similarities.
+Ok, adding existing content is pretty nice, but your users probably want to share their own content...
+
+### Creating torrents
 <div class="run" title="Run"></div>
 ```javascript
-var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
-btapp.get('add').bt.rss_feed(url);
+btapp.bt.browseforfiles(function () {}, function(files) {
+	_.each(files, function(value, key) {
+			btapp.bt.create(
+				function(ret) {
+					alert('called create for ' + value);
+				}, 
+				'', 
+				[value], 
+				function(hash) {
+					alert('torrent created for ' + value);
+				}
+			);
+	});
+});
 ```
-
 
 
 ## Utilities
