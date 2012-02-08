@@ -59,9 +59,11 @@ remote = new Btapp({
 
 #### Things to note:
 
-Lets take a moment to look at that function call. First off, its important to note that all functions provided by the torrent client are in the bt member of each object. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll notice that this call doesn't quite match the signature that is displayed there. Which brings us to a pretty important aspect of this library...
+First off, it is important to note that all functions provided by the torrent client are in the bt member of each object. This is neglected in the api viewer, but keep it in mind when trying to make function calls. Take *connect_remote* for example. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll see this appearing as a function off of the base object (btapp in the viewer). However, inspecting our newly created Btapp objects (*local* or *remote*) in the debugger, you'll see a 'bt' attribute with numerous stored...
+
+Secondly, you'll notice that this call doesn't quite match the signature that is displayed there. Which brings us to a pretty important aspect of this library...
   
-Everything is asynchronous! So you must provide a callback argument as the first argument for every bt (those in the bt member) function call, then continue with the documented arguments. The callback receives a data blob that varies depending on the function.
+__Everything__ is asynchronous! So you must provide a callback argument as the first argument for every bt (those in the bt member) function call, then continue with the documented arguments. The callback receives a data blob that varies depending on the function, but is generally the return value of the function.
 
 
 ## Utilities
