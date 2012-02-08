@@ -296,12 +296,23 @@ function assert(b) { if(!b) debugger; }
 			this.url = 'http://localhost:10000/btapp/';
 			this.btapp = attributes.btapp;
 			this.reset();
-			jQuery.getScript(
-				'https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', 
-				function(data, textStatus) {
-					//now that the plugin code is loaded it can take it from here.
-				}
-			);
+			
+			//If you have the desire to manage the plugin yourself, simply define BtappPluginManger,
+			//either by preloading plugin.btapp.js and extending the class, or by completely defining
+			//it yourself. The only exported "symbol" is *check_for_plugin_and_product*.
+			if(window.BtappPluginManager) {
+				this.initialize_manager();
+			} else {
+				jQuery.getScript(
+					'https://raw.github.com/pwmckenna/btapp_plugin/master/plugin.btapp.js', 
+					_.bind(this.initialize_manager, this)
+				);
+			}
+		},
+		initialize_manager: function() {
+			assert(window.BtappPluginManager);
+			this.manager = new BtappPluginManager;
+			this.manager.check_for_plugin_and_product();
 		},
 		send_query: function(args, cb, err) {
 			jQuery.ajax({
