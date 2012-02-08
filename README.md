@@ -125,20 +125,22 @@ The Btapp Listener is designed to allow you to listen for the additions of model
 For instance, to list the name of all the files in all torrents you need to write code similar to the following:
 <div class="run" title="Run"></div>
 ```javascript
-btapp.bt.browseforfiles(function () {}, function(files) {
-	_.each(files, function(value, key) {
-			btapp.bt.create(
-				function(ret) {
-					alert('called create for ' + value);
-				}, 
-				'', 
-				[value], 
-				function(hash) {
-					alert('torrent created for ' + value);
+console.log("--- Dumping File Names ---");
+var torrents = btapp.get('torrent');
+if(torrents) {
+	torrents.each(function(torrent) {
+		var files = torrent.get('file');
+		if(files) {
+			files.each(function(file) {
+				var properties = torrent.get('properties');
+				if(properties) {
+					console.log(properties.get('name'));
 				}
-			);
+			});
+		}
 	});
-});
+	console.log("--- Done! ---");
+}
 ```
 
 ### Btapp Plugin
