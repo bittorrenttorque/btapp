@@ -108,25 +108,6 @@ var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
 btapp.get('add').bt.rss_feed(url);
 ```
 
-Ok, adding existing content is pretty nice, but your users probably want to share their own content...
-### Creating torrents
-<div class="run" title="Run"></div>
-```javascript
-btapp.bt.browseforfiles(function () {}, function(files) {
-	_.each(files, function(value, key) {
-			btapp.bt.create(
-				function(ret) {
-					alert('called create for ' + value);
-				}, 
-				'', 
-				[value], 
-				function(hash) {
-					alert('torrent created for ' + value);
-				}
-			);
-	});
-});
-```
 
 
 ## Utilities
