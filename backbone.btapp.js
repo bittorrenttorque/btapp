@@ -122,7 +122,6 @@ function assert(b) { if(!b) debugger; }
 				}
 				path += encodeURIComponent(jQuery.toJSON(args));
 				path += ')/';
-				console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
 			func.valueOf = function() { return signatures; };
@@ -189,9 +188,6 @@ function assert(b) { if(!b) debugger; }
 				return;
 			}
 			
-			console.log('initializing falcon client');
-			console.log('loading falcon external dependencies');
-			
 			// If we choose to use falcon we need this specific global config variable defined
 			window.config = {
 				srp_root:'https://remote-staging.utorrent.com'
@@ -199,7 +195,6 @@ function assert(b) { if(!b) debugger; }
 			
 			var jsload = 'https://remote-staging.utorrent.com/static/js/jsloadv2.js?v=0.57';
 			jQuery.getScript(jsload, _.bind(function(data, textStatus) {
-				console.log('loaded ' + jsload);
 				function create_tags(list) {
 					var tags = [];
 					var deps = [];
@@ -230,7 +225,6 @@ function assert(b) { if(!b) debugger; }
 						falcon_initialized = true;
 						this.trigger('connected');
 					} else {
-						console.log('falcon dependencies loaded...begin exchanging btapp webui information');
 						falcon_initialized = true;
 						this.reset();
 					}
@@ -243,7 +237,6 @@ function assert(b) { if(!b) debugger; }
 			var opts = {
 				success: _.bind(function(session) {
 						    if (this.login_success) { this.login_success(session); }
-					console.log('raptor connected successfully');
 					this.falcon = this.session.api;
 					this.trigger('connected');
 				}, this),
@@ -270,7 +263,6 @@ function assert(b) { if(!b) debugger; }
 					cb(data.result);
 				},
 				_.bind(function() { 
-					console.log('falcon request failed');
 					err();
 					this.reset();
 				}, this),
@@ -313,6 +305,7 @@ function assert(b) { if(!b) debugger; }
 			assert(window.BtappPluginManager);
 			this.manager = new BtappPluginManager;
 			this.manager.check_for_plugin_and_product();
+			//alternatively just call this.manager.check_for_plugin() to see if the plugin is running
 		},
 		send_query: function(args, cb, err) {
 			jQuery.ajax({
@@ -427,7 +420,6 @@ function assert(b) { if(!b) debugger; }
 				}
 			}
 			var delta = ((new Date()).getTime() - time);
-			console.log('updateState(' + this.url + ') - ' + delta);
 		}
 	});
 	
@@ -605,7 +597,6 @@ function assert(b) { if(!b) debugger; }
 				this.trigger('change');
 			}
 			var delta = ((new Date()).getTime() - time);
-			console.log('updateState(' + this.url + ') - ' + delta);
 		}
 	});
 
@@ -657,9 +648,6 @@ function assert(b) { if(!b) debugger; }
 			//Special case the events because we like to offer the convenience of having bindable
 			//backbone events triggered when the client triggers a btapp event
 			
-			//this.bind('add:events', this.setEvents);
-			//this.bind('filter', function(filter) { console.log('FILTER: ' + filter); });
-			
 			//At this point, if a username password combo is provided we assume that we're trying to
 			//access a falcon client. If not, default to the client running on your local machine. 
 			// You can also pass in "remote_data" that is returned from a falcon.serialize()
@@ -691,7 +679,6 @@ function assert(b) { if(!b) debugger; }
 			this.client = null;
 		},
 		onConnectionError: function() {
-			console.log('connection lost...retrying...');
 			this.clearState();
 			this.client.reset();
 		},
@@ -721,7 +708,6 @@ function assert(b) { if(!b) debugger; }
 		//it is generating a large diff tree. We should generally on get one element in data array. Anything more and
 		//the client has wasted energy creating seperate diff trees.
 		onEvents: function(time, session, data) {
-			console.log(((new Date()).getTime() - time) + ' ms - ' + jQuery.toJSON(data).length + ' bytes');
 			for(var i = 0; i < data.length; i++) {
 				this.onEvent(session, data[i]);
 			}
