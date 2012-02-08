@@ -22,34 +22,39 @@ Backbone.Btapp.js builds off of Backbone.js to provide easy access to a torrent 
 
 ## Getting Started
 
+#### Local Connection
 To connect to the plugin client on your local machine...
 <div class="run" title="Run"></div>
 ```javascript
 local = new Btapp({});
 ```
 
-Crack open your console window (sorry IE) and take a peak at what's happening.
+#### Remote Connection 
+(referred to occasionally as the falcon proxy)  
+Lets setup the local machine with some proxy credentials and see if we can't connect to it via the falcon proxy (as well as the original local connection)...
 
-If you're connecting to a remote client, just supply a username and password
 <div class="run" title="Run"></div>
 ```javascript
+username = prompt("Please enter your name","Harry Potter");
+password = prompt("Please enter your password","Abracadabra");
+
+local.bt.connect_remote(
+    function() { }, 
+	username,
+	password
+);
+```
+
+Now that we're connected to the falcon proxy we can connect to your current local machine by executing the following code from any computer in the world!
+
+```javascript
 remote = new Btapp({  
-    'username':'pwmckenna',  
-	'password':'abracadabraorsomething'  
+    'username':username,  
+	'password':password
 });
 ```
 
-This certainly won't work...unless there's someone else going through this tutorial that you're connecting to. But you'll be able to see the dependencies for the remote connections being loaded and falcon being contacted to see if there is a torrent client with these credentials running.
-
-Lets setup the local machine with those credentials and see if we can't connect to it via the falcon proxy (as well as the original local connection)
-<div class="run" title="Run"></div>
-```javascript
-local.bt.connect_remote(
-    function() { }, 
-	'pwmckenna', 
-	'abracadabraorsomething'
-);
-```
+#### Things to note:
 
 Lets take a moment to look at that function call. First off, its important to note that all functions provided by the torrent client are in the bt member of each object. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll notice that this call doesn't quite match the signature that is displayed there. Which brings us to a pretty important aspect of this library...
   
