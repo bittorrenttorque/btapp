@@ -94,7 +94,7 @@ btapp.bt.browseforfiles(function () {}, function(files) {
 	});
 });
 ```
-
+Keep in mind that this will launch a file browser on the machine that the client is running on...so if you're connected via falcon you won't be able to see the dialog pop up (but someone might get an unexpected surprise!)
 
 ## Utilities
 
