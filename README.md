@@ -136,7 +136,7 @@ var view_generator = function(file) {
 listener.bind(filter, view_generator);
 ```
 
-The Btapp Listener has its own [project on GitHub](https://github.com/pwmckenna/btapp_listener "btapp listener") as well as [annotated source code]("http://pwmckenna.github.com/btapp_listener/docs/listener.btapp.html" "annotated source").
+The Btapp Listener has its own [project on GitHub](https://github.com/pwmckenna/btapp_listener "btapp listener") as well as [annotated source code](http://pwmckenna.github.com/btapp_listener/docs/listener.btapp.html "annotated source").
 
 ### Btapp Plugin
 The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](https://github.com/pwmckenna/btapp_plugin "plugin"). It is responsible for loading the necessary plugins and running the torrent client as necessary. It is dynamically loaded by backbone.btapp.js when you create a local Btapp object (unless you specifically pass in username/password arguments your Btapp object will be pointing at your local torrent client).
