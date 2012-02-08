@@ -33,7 +33,7 @@ local = new Btapp({});
 
 #### Remote Connection 
 (referred to occasionally as the falcon proxy)  
-Lets setup the local machine with some proxy credentials and see if we can't connect to it via the falcon proxy (as well as the original local connection)...
+Lets setup the local machine with some proxy credentials and see if we can't connect to it via the falcon proxy. This proxy Btapp object will point to the same torrent client as your original Btapp object. You can have unlimited objects all representing the same torrent client (be careful to not step on each others toes though).
 
 <div class="run" title="Run"></div>
 ```javascript
