@@ -124,7 +124,9 @@ The Btapp Listener is designed to allow you to listen for the additions of model
 
 For instance, to list the name of all the files in all torrents you need to write code similar to the following...
 
+<div class="run" title="Run"></div>
 ```javascript
+var torrents = btapp.get('torrent');
 ```
 
 ### Btapp Plugin
