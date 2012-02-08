@@ -121,7 +121,7 @@ The torrent client has somewhat unpredicable availability. The plugin will do it
   
 This is all a long way of saying that in a deep tree of data, its no fun to create endless views who's job it is is simply to wait around for the next layer to bind add/remove event handlers to. With the BtappListener object, you can just bind the to urls of the types of models you're interested in, and provide a callback.  
   
-So in cases where you're really just interested in the files in every torrent (no one really knows anything about torrents, so creating a ui around them can be quite challenging, and perhaps pointless), you can just do the following (Taken from the *Nud.gs* app).
+So in cases where you're really just interested in the files in every torrent (end users generally don't know anything about torrents, so creating a ui around them can be quite challenging, and perhaps pointless), you can just do the following (Taken from the *Nud.gs* app).
 <div class="run" title="Run"></div>
 ```javascript
 var listener = new BtappListener({'btapp': btapp});
