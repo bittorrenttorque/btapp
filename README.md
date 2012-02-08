@@ -72,8 +72,8 @@ Ok, adding existing content is pretty nice, but your users probably want to shar
 ```javascript
 btapp.bt.browseforfiles(function () {}, function(files) {
 	_.each(files, function(value, key) {
-			btapp.bt.create(function() {}, '', [value], function(hash) {
-					alert('torrent created');
+			btapp.bt.create(function(ret) { alert(jQuery.toJSON(ret)); }, '', [value], function(hash) {
+					alert('torrent created for ' + value);
 			});
 	});
 });
