@@ -61,14 +61,14 @@ remote = new Btapp({
 Easy-peasy
 <div class="run" title="Run"></div>
 ```javascript
-var url = 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent';
+var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
 local.get('add').bt.torrent(url);
 ```
 
 
 ## Utilities
 
-The following utilities are designed to get you started working with the library. Part of getting started includes installing the same plugin that your users will need to install in order to use your app (Provided you didn't go through this process when playing with the demo code above). As all these utilities are themselves apps that use this library, clicking on any of these will take you through the process (You only need to install once, regardless of which browsers you use). If you're unfamiliar with all the functionality that the torrent client has to offer, ApiViewer is probably a good first stop. 
+The following utilities are designed to get you started working with the library. Part of getting started includes installing the same plugin that your users will need to install in order to use your app (Provided you didn't go through this process when playing with the demo code above). As all these utilities are themselves apps that use this library, clicking on any of these will take you through the process (You only need to install once, regardless of which browsers you use). If you're unfamiliar with all the functionality that the torrent client has to offer, the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api") is probably a good first stop. 
 
 ### Api Viewer
 ### Btapp Listener
