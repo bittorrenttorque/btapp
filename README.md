@@ -124,10 +124,12 @@ So in cases where you're really just interested in the files in every torrent (n
 <div class="run" title="Run"></div>
 ```javascript
 var listener = new BtappListener({'btapp': btapp});
-listener.bind('btapp/label/all/nudges/torrent/all/*/file/all/*/', function(file) {
+var filter = 'btapp/label/all/nudges/torrent/all/*/file/all/*/';
+var view_generator = function(file) {
 	var view = new NudgeView({model: file});
 	$("#nudge-list").append(view.render().el);
-});
+};
+listener.bind(filter, view_generator);
 ```
 
 ### Btapp Plugin
