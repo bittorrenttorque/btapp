@@ -132,6 +132,8 @@ var view_generator = function(file) {
 listener.bind(filter, view_generator);
 ```
 
+The Btapp Listener has its own [project on GitHub](https://github.com/pwmckenna/btapp_listener "btapp listener") as well as [annotated source code]("http://pwmckenna.github.com/btapp_listener/docs/listener.btapp.html" "annotated source").
+
 ### Btapp Plugin
 
 ## Examples
