@@ -122,7 +122,7 @@ function assert(b) { if(!b) debugger; }
 				}
 				path += encodeURIComponent(jQuery.toJSON(args));
 				path += ')/';
-				//console.log('CUSTOM FUNCTION: ' + path);
+				console.log('CUSTOM FUNCTION: ' + path);
 				this.query('function', [path], session, cb, function() {});
 			}, this);
 			func.valueOf = function() { return signatures; };
@@ -551,16 +551,16 @@ function assert(b) { if(!b) debugger; }
 						// This is the only hard coding that we should do in this library...
 						// As a convenience, torrents and their file/peer lists are treated as backbone collections
 						// the same is true of rss_feeds and filters...its just a more intuitive way of using them
-						if(	childurl.match(/btapp\/torrent\/jQuery/) ||
-							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/jQuery/) ||
-							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/jQuery/) ||
-							childurl.match(/btapp\/label\/jQuery/) ||
-							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/jQuery/) ||
+						if(	childurl.match(/btapp\/torrent\/$/) ||
+							childurl.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
+							childurl.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
+							childurl.match(/btapp\/label\/$/) ||
+							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/$/) ||
 							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/jQuery/) ||
 							childurl.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/jQuery/) ||
-							childurl.match(/btapp\/rss_feed\/jQuery/) ||
-							childurl.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/jQuery/) ||
-							childurl.match(/btapp\/rss_filter\/jQuery/) ) {
+							childurl.match(/btapp\/rss_feed\/$/) ||
+							childurl.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/$/) ||
+							childurl.match(/btapp\/rss_filter\/$/) ) {
 							model = new BtappCollection;
 						} else {
 							model = new BtappModel({'id':childurl});
