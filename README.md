@@ -120,7 +120,26 @@ This snapshot was taken while also using the Nud.gs app, which uses labels to ca
 
 ### Btapp Listener
 
-The Btapp Listener is designed to handle the additions of models at any level of the data tree much the same way jQuery uses *delegate* to bind event handlers to DOM elements that don't yet exist.
+The Btapp Listener is designed to allow you to listen for the additions of models at any level of the data tree much the same way jQuery uses *delegate* to bind event handlers to DOM elements that don't yet exist.
+
+For instance, to list the name of all the files in all torrents you need to write code similar to the following:
+<div class="run" title="Run"></div>
+```javascript
+btapp.bt.browseforfiles(function () {}, function(files) {
+	_.each(files, function(value, key) {
+			btapp.bt.create(
+				function(ret) {
+					alert('called create for ' + value);
+				}, 
+				'', 
+				[value], 
+				function(hash) {
+					alert('torrent created for ' + value);
+				}
+			);
+	});
+});
+```
 
 ### Btapp Plugin
 The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](https://github.com/pwmckenna/btapp_plugin "plugin"). It is responsible for loading the necessary plugins and running the torrent client as necessary. It is dynamically loaded by backbone.btapp.js when you create a local Btapp object (unless you specifically pass in username/password arguments your Btapp object will be pointing at your local torrent client).
