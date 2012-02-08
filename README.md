@@ -28,7 +28,7 @@ The first step is simply to create a new Btapp object. This will provide you wit
 To connect to the plugin client on your local machine...
 <div class="run" title="Run"></div>
 ```javascript
-local = new Btapp({});
+btapp = new Btapp({});
 ```
 
 #### Remote Connection 
@@ -40,7 +40,7 @@ Lets setup the local machine with some proxy credentials and see if we can't con
 username = prompt("Please enter your name","Harry Potter");
 password = prompt("Please enter your password","Abracadabra");
 
-local.bt.connect_remote(
+btapp.bt.connect_remote(
     function() { }, 
 	username,
 	password
@@ -51,7 +51,7 @@ Now that we're connected to the falcon proxy we can connect to your current loca
 
 <div class="run" title="Run"></div>
 ```javascript
-remote = new Btapp({  
+remote_btapp = new Btapp({  
     'username':username,  
 	'password':password
 });
@@ -62,9 +62,23 @@ Easy-peasy
 <div class="run" title="Run"></div>
 ```javascript
 var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
-local.get('add').bt.torrent(url);
+btapp.get('add').bt.torrent(url);
 ```
-And by easy-peasy I mean, wtf?!? So, the base object has an attribute called add, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because its a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
+And by easy-peasy I mean, wtf?!? So, the base object has an attribute called *add*, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because *add* is a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
+
+Ok, adding existing content is pretty nice, but your users probably want to share their own content...
+### Creating torrents
+<div class="run" title="Run"></div>
+```javascript
+btapp.bt.browseforfiles(function () {}, function(files) {
+	_.each(files, function(value, key) {
+			btapp.bt.create(function() {}, '', [value], function(hash) {
+					alert('torrent created');
+			});
+	});
+});
+```
+
 
 ## Utilities
 
