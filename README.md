@@ -28,6 +28,8 @@ To connect to the plugin client on your local machine...
 var local = new Btapp({});
 ```
 
+Crack open your console window (sorry IE) and take a peak at what's happening.
+
 If you're connecting to a remote client, just supply a username and password
 <div class="run" title="Run"></div>
 ```javascript
@@ -37,6 +39,16 @@ var remote = new Btapp({
 });
 ```
 
+This certainly won't work...unless there's someone else going through this tutorial that you're connecting to. But you'll be able to see the dependencies for the remote connections being loaded and falcon being contacted to see if there is a torrent client with these credentials running.
+
+Lets setup the local machine with those credentials and see if we can't connect to it via the falcon proxy (as well as the original local connection)
+```javascript
+local.bt.connect_remote(function() { }, 'pwmckenna', 'abracadabraorsomething');
+```
+
+Lets take a moment to look at that function call. First off, its important to note that all functions provided by the torrent client are in the bt member of each object. If you look at the [api viewer](http://pwmckenna.github.com/btapp_api_viewer/ "api"), you'll notice that this call doesn't quite match the signature that is displayed there. Which brings us to a pretty important aspect of this library...
+  
+Everything is asynchronous! So you must provide a callback argument as the first argument for every bt (those in the bt member) function call, then continue with the documented arguments. The callback receives a data blob that varies depending on the function.
 
 
 ## Utilities
