@@ -47,6 +47,7 @@ local.bt.connect_remote(
 
 Now that we're connected to the falcon proxy we can connect to your current local machine by executing the following code from any computer in the world!
 
+<div class="run" title="Run"></div>
 ```javascript
 remote = new Btapp({  
     'username':username,  
