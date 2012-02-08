@@ -117,18 +117,8 @@ The api viewer is a one stop shop for examining the data coming from your torren
 
 <a href="http://pwmckenna.github.com/btapp_api_viewer/"><img src="http://pwmckenna.com/img/api_viewer.png"></img></a>
 This snapshot was taken while also using the Nud.gs app, which uses labels to categorize its torrents...If you're curious about the dragon file, [check it out here](http://pwmckenna.com/img/dragon.jpg "dragon!")
-### Btapp Listener
 
-<div class="run" title="Run"></div>
-```javascript
-var listener = new BtappListener({'btapp': btapp});
-var filter = 'btapp/label/all/nudges/torrent/all/*/file/all/*/';
-var view_generator = function(file) {
-	var view = new NudgeView({model: file});
-	$("#nudge-list").append(view.render().el);
-};
-listener.bind(filter, view_generator);
-```
+### Btapp Listener
 
 ### Btapp Plugin
 The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](https://github.com/pwmckenna/btapp_plugin "plugin"). It is responsible for loading the necessary plugins and running the torrent client as necessary. It is dynamically loaded by backbone.btapp.js when you create a local Btapp object (unless you specifically pass in username/password arguments your Btapp object will be pointing at your local torrent client).
