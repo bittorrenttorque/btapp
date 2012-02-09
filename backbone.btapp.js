@@ -652,6 +652,7 @@ function assert(b) { if(!b) debugger; }
 		connect: function(attributes) {
 			assert(!this.client);
 			//initialize variables
+			attributes = attributes || {};
 			this.poll_frequency = attributes.poll_frequency || 3000;
 			this.queries = attributes.queries || ['btapp/'];
 			
