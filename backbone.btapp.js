@@ -634,19 +634,26 @@ function assert(b) { if(!b) debugger; }
 	window.Btapp = BtappModel.extend({
 		initialize: function(attributes) {
 			BtappModel.prototype.initialize.apply(this, arguments);
-			attributes = attributes || {};
-			assert(typeof attributes === 'object');
 
-			//initialize variables
-			this.poll_frequency = attributes.poll_frequency || 3000;
-			this.queries = attributes.queries || ['btapp/'];
 			this.url = 'btapp/';
 			this.id = 'btapp/';
+			this.connected_state = false;
+			this.client = null;
 
 			//bind stuff
 			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
-			//Special case the events because we like to offer the convenience of having bindable
-			//backbone events triggered when the client triggers a btapp event
+		},
+		destructor: function() {
+			//We don't want to destruct the base object even when we can't connect...
+			//Its event bindings are the only way we'll known when we've re-connected
+			//WARNING: this might leak a wee bit if you have numerous connections in your app
+			this.disconnect();
+		},
+		connect: function(attributes) {
+			assert(!this.client);
+			//initialize variables
+			this.poll_frequency = attributes.poll_frequency || 3000;
+			this.queries = attributes.queries || ['btapp/'];
 			
 			//At this point, if a username password combo is provided we assume that we're trying to
 			//access a falcon client. If not, default to the client running on your local machine. 
@@ -664,30 +671,34 @@ function assert(b) { if(!b) debugger; }
 				this.trigger('client:' + eventName);
 			}, this));
 			
-			this.client.bind('connected', this.fetch);
+			this.client.bind('connected', this.fetch);		
 		},
-		destructor: function() {
-			//We don't want to destruct the base object even when we can't connect...
-			//Its event bindings are the only way we'll known when we've re-connected
-			//WARNING: this might leak a wee bit if you have numerous connections in your app
-		},
-		stop: function() {
+		disconnect: function() {
+			assert(this.client);
+			this.connected_state = false;
 			if (this.next_timeout) {
 				clearTimeout( this.next_timeout );
 			}
 			this.client.btapp = null;
 			this.client = null;
 		},
+		connected: function() {
+			return this.connected_state;
+		},
 		onConnectionError: function() {
 			this.clearState();
-			this.client.reset();
+			if(this.client) {
+				this.client.reset();
+			}
 		},
 		onFetch: function(data) {
 			assert('session' in data);
 			this.waitForEvents(data.session);
 		},
 		fetch: function() {
-			this.client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
+			if(this.client) {
+				this.client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
+			}
 		},
 		onEvent: function(session, data) {
 			this.trigger('event', data);
@@ -708,13 +719,17 @@ function assert(b) { if(!b) debugger; }
 		//it is generating a large diff tree. We should generally on get one element in data array. Anything more and
 		//the client has wasted energy creating seperate diff trees.
 		onEvents: function(time, session, data) {
-			for(var i = 0; i < data.length; i++) {
-				this.onEvent(session, data[i]);
+			if(this.connected_state) {
+				for(var i = 0; i < data.length; i++) {
+					this.onEvent(session, data[i]);
+				}
+				this.next_timeout = setTimeout(_.bind(this.waitForEvents, this, session), this.poll_frequency);
 			}
-			this.next_timeout = setTimeout(_.bind(this.waitForEvents, this, session), this.poll_frequency);
 		},
 		waitForEvents: function(session) {
-			this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
+			if(this.client) {
+				this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
+			}
 		}
 	});
 }).call(this);
