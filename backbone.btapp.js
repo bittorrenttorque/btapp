@@ -641,7 +641,7 @@ function assert(b) { if(!b) debugger; }
 			this.client = null;
 
 			//bind stuff
-			_.bindAll(this, 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
+			_.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
 		},
 		destructor: function() {
 			//We don't want to destruct the base object even when we can't connect...
