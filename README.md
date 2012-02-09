@@ -28,7 +28,8 @@ The first step is simply to create a new Btapp object. This will provide you wit
 To connect to the plugin client on your local machine...
 <div class="run" title="Run"></div>
 ```javascript
-btapp = new Btapp({});
+btapp = new Btapp;
+btapp.connect();
 ```
 
 #### Remote Connection 
@@ -51,7 +52,8 @@ Now that we're connected to the falcon proxy we can connect to your current loca
 
 <div class="run" title="Run"></div>
 ```javascript
-remote_btapp = new Btapp({  
+remote_btapp = new Btapp;
+remote_btapp.connect({  
     'username':username,  
 	'password':password
 });
