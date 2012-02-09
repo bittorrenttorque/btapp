@@ -644,11 +644,13 @@ function assert(b) { if(!b) debugger; }
 			_.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
 		},
 		destructor: function() {
+			this.trigger('log:destructor');
 			//We don't want to destruct the base object even when we can't connect...
 			//Its event bindings are the only way we'll known when we've re-connected
 			//WARNING: this might leak a wee bit if you have numerous connections in your app
 		},
 		connect: function(attributes) {
+			this.trigger('log:connect(' + JSON.stringify(attributes) + ')');
 			assert(!this.client);
 			//initialize variables
 			attributes = attributes || {};
@@ -674,6 +676,7 @@ function assert(b) { if(!b) debugger; }
 			this.client.bind('connected', this.fetch);		
 		},
 		disconnect: function() {
+			this.trigger('log:disconnect');
 			assert(this.client);
 			this.connected_state = false;
 			if (this.next_timeout) {
@@ -683,24 +686,29 @@ function assert(b) { if(!b) debugger; }
 			this.client = null;
 		},
 		connected: function() {
+			this.trigger('log:connected');
 			return this.connected_state;
 		},
 		onConnectionError: function() {
+			this.trigger('log:onConnectionError');
 			this.clearState();
 			if(this.client) {
 				this.client.reset();
 			}
 		},
 		onFetch: function(data) {
+			this.trigger('log:onFetch(' + JSON.stringify(data) + ')');
 			assert('session' in data);
 			this.waitForEvents(data.session);
 		},
 		fetch: function() {
+			this.trigger('log:fetch');
 			if(this.client) {
 				this.client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
 			}
 		},
 		onEvent: function(session, data) {
+			this.trigger('log:onEvent(' + session + ',' + JSON.stringify(data) + ')');
 			this.trigger('event', data);
 			//There are two types of events...state updates and callbacks
 			//Handle state updates the same way we handle the initial tree building
@@ -719,6 +727,7 @@ function assert(b) { if(!b) debugger; }
 		//it is generating a large diff tree. We should generally on get one element in data array. Anything more and
 		//the client has wasted energy creating seperate diff trees.
 		onEvents: function(time, session, data) {
+			this.trigger('log:onEvents(' + time + ',' + session + ',' + JSON.stringify(data) + ')');
 			if(this.connected_state) {
 				for(var i = 0; i < data.length; i++) {
 					this.onEvent(session, data[i]);
@@ -727,6 +736,7 @@ function assert(b) { if(!b) debugger; }
 			}
 		},
 		waitForEvents: function(session) {
+			this.trigger('log:waitForEvents');
 			if(this.client) {
 				this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
 			}
