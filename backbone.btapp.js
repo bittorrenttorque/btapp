@@ -686,6 +686,7 @@ function assert(b) { if(!b) debugger; }
 			}
 			this.client.btapp = null;
 			this.client = null;
+			this.clearState();
 		},
 		connected: function() {
 			this.trigger('log:connected');
