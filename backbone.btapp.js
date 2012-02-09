@@ -651,7 +651,9 @@ function assert(b) { if(!b) debugger; }
 		},
 		connect: function(attributes) {
 			this.trigger('log:connect(' + JSON.stringify(attributes) + ')');
-			assert(!this.client);
+			assert(!this.client && !this.connected_state);
+			this.connected_state = true;
+			
 			//initialize variables
 			attributes = attributes || {};
 			this.poll_frequency = attributes.poll_frequency || 3000;
@@ -677,7 +679,7 @@ function assert(b) { if(!b) debugger; }
 		},
 		disconnect: function() {
 			this.trigger('log:disconnect');
-			assert(this.client);
+			assert(this.client && this.connected_state);
 			this.connected_state = false;
 			if (this.next_timeout) {
 				clearTimeout( this.next_timeout );
