@@ -647,7 +647,6 @@ function assert(b) { if(!b) debugger; }
 			//We don't want to destruct the base object even when we can't connect...
 			//Its event bindings are the only way we'll known when we've re-connected
 			//WARNING: this might leak a wee bit if you have numerous connections in your app
-			this.disconnect();
 		},
 		connect: function(attributes) {
 			assert(!this.client);
