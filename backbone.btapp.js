@@ -386,7 +386,7 @@ function assert(b) { if(!b) debugger; }
 
 					// We only expect objects and functions to be added to collections
 					if(typeof removed === 'object') {
-						var model = this.get(childurl);
+						var model = this.get(v);
 						assert(model);
 						model.updateState(session, added, removed, childurl);
 						this.remove(model);
