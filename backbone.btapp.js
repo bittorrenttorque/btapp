@@ -632,11 +632,10 @@ function assert(b) { if(!b) debugger; }
 	// events that are generally used...these trigger events when they are received by the base object, so to listen in
 	// on torrentStatus events, simply provide a callback to btapp.bind('torrentStatus', callback_func)
 	window.Btapp = BtappModel.extend({
-		initialize: function(attributes) {
+		initialize: function() {
 			BtappModel.prototype.initialize.apply(this, arguments);
 
 			this.url = 'btapp/';
-			this.id = 'btapp/';
 			this.connected_state = false;
 			this.client = null;
 
