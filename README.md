@@ -58,7 +58,10 @@ remote_btapp.connect({
 
 ### Listening for state changes
 Here is where the dependency on Backbone makes the most sense. State diffs are sent as JSON from the torrent client to the Btapp library, and so to listen for objects being added to your torrent client, you can bind add listeners to the corresponding Backbone Models and Collections.  
-For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...<b>But wait!</b>
+For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...<b>But wait!</b> We're not guaranteed the list of torrents will be there either...so lets listen for that as well.
+
+
+If this seems a bit messy for you, we've written an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
 
 ### Adding torrents via urls/magnet links
 Easy-peasy
