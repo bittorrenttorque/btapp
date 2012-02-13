@@ -59,10 +59,18 @@ remote_btapp.connect({
 ### Listening for state changes
 I'm about to show you how to add and remove data, and here is where the dependency on Backbone makes the most sense. The data in the Btapp object is updates as the state of the torrent client changes, so to listen for objects being added to your torrent client, you can bind add listeners to the corresponding Backbone Models and Collections.  
   
-For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...__WARNING!__ We're not guaranteed the list of torrents will be there either...so lets listen for that as well.
+For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...__Note:__ We're not guaranteed the list of torrents will be there either...so lets listen for that as well.
 <div class="run" title="Run"></div>
 ```javascript
+function torrent_list_handler(torrent_list) {
+
+}
 var torrent_list = btapp.get('torrent');
+if(torrent_list) {
+
+} else {
+	
+}
 ```
 If this seems a bit messy for you, we've written an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
 
