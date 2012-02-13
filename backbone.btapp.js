@@ -106,7 +106,7 @@ function assert(b) { if(!b) debugger; }
 				// we should be able to use verifySignaturesArguments to determine if the client will
 				// consider the arguments that we're passing to be valid
 				if(!TorrentClient.prototype.validateArguments.call(this, signatures, native_args)) {
-					alert(signatures + ' cannot accept ' + JSON.stringify(native_args));
+					alert(signatures + ' cannot accept ' + jQuery.toJSON(native_args));
 					return;
 				}
 				
@@ -120,7 +120,7 @@ function assert(b) { if(!b) debugger; }
 						args.push(arguments[i]);
 					}
 				}
-				path += encodeURIComponent(JSON.stringify(args));
+				path += encodeURIComponent(jQuery.toJSON(args));
 				path += ')/';
 				this.query('function', [path], session, cb, function() {});
 			}, this);
@@ -136,7 +136,7 @@ function assert(b) { if(!b) debugger; }
 			
 			var args = {};
 			args['type'] = type;
-			if(queries) args['queries'] = JSON.stringify(queries);
+			if(queries) args['queries'] = jQuery.toJSON(queries);
 			if(session) args['session'] = session;
 			
 			var success_callback = function(data) { 
