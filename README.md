@@ -10,10 +10,7 @@ The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"),
 #### Downloads & Dependencies
 [Nightly Version (0.1)](https://raw.github.com/pwmckenna/btapp/master/backbone.btapp.js "backbone.btapp.js") 28kb, Full source, lots of comments
 
-Backbone.Btapp.js has hard dependencies of the following:  
-[jquery.js](http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js "jquery")  
-[jquery.json.js](http://jquery-json.googlecode.com/files/jquery.json-2.3.min.js "json")  
-[underscore.js](http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.2.2/underscore-min.js "underscore")  
+Backbone.Btapp.js's dependencies are a subset of Backbone.js, which is itself a dependency:
 [backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone") ([documentation](http://documentcloud.github.com/backbone/ "backbone"))  
 
 ## Introduction
@@ -26,11 +23,12 @@ The first step is simply to create a new Btapp object. This will provide you wit
 
 #### Local Connection
 To connect to the plugin client on your local machine...
-<div class="run" title="Run"></div>
+<script>btapp = new Btapp;</script>
 ```javascript
 btapp = new Btapp;
 btapp.connect();
 ```
+this code was executed when the page was loaded to ensure that the examples below work even if you forget about this one...
 
 #### Remote Connection 
 (referred to occasionally as the falcon proxy)  
