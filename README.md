@@ -63,16 +63,17 @@ For instance, to show an alert each time a torrent is added to the client, just 
 <div class="run" title="Run"></div>
 ```javascript
 function torrent_list_handler(torrent_list) {
-
+	torrent_list.bind('add', function() { alert('torrent added'); });
+	torrent_list.bind('remove', function() { alert('torrent removed'); });
 }
 var torrent_list = btapp.get('torrent');
 if(torrent_list) {
-
+	torrent_list_handler(torrent_list);
 } else {
-	
+	btapp.bind('add:torrent', torrent_list_handler);
 }
 ```
-If this seems a bit messy for you, we've written an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
+If this seems a bit messy for you, there is an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
 
 ### Adding torrents via urls/magnet links
 Easy-peasy
