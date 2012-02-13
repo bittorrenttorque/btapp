@@ -10,7 +10,7 @@ The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"),
 #### Downloads & Dependencies
 [Nightly Version (0.1)](https://raw.github.com/pwmckenna/btapp/master/backbone.btapp.js "backbone.btapp.js") 28kb, Full source, lots of comments
 
-Backbone.Btapp.js's dependencies are a subset of Backbone.js, which is itself a dependency:
+Backbone.Btapp.js's dependencies are a subset of Backbone.js, so just get that working and you'll be good to go.
 [backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone") ([documentation](http://documentcloud.github.com/backbone/ "backbone"))  
 
 ## Introduction
@@ -62,6 +62,7 @@ I'm about to show you how to add and remove data, and here is where the dependen
 For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...__WARNING!__ We're not guaranteed the list of torrents will be there either...so lets listen for that as well.
 <div class="run" title="Run"></div>
 ```javascript
+var torrent_list = btapp.get('torrent');
 ```
 If this seems a bit messy for you, we've written an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
 
