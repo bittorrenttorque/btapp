@@ -23,12 +23,12 @@ The first step is simply to create a new Btapp object. This will provide you wit
 
 #### Local Connection
 To connect to the plugin client on your local machine...
-<script>btapp = new Btapp;</script>
+<script>alert('hi'); window.btapp = new Btapp;</script>
 ```javascript
 btapp = new Btapp;
 btapp.connect();
 ```
-this code was executed when the page was loaded to ensure that the examples below work even if you forget about this one...
+this code was executed when the page was loaded to ensure that the examples below work even if you forget about this 
 
 #### Remote Connection 
 (referred to occasionally as the falcon proxy)  
