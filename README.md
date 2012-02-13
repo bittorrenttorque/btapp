@@ -27,7 +27,7 @@ To connect to the plugin client on your local machine...
 btapp = new Btapp;
 btapp.connect();
 ```
-*this code was executed when the page was loaded to ensure that the examples below work even if you forget about this*
+*this code was executed when the page was loaded to ensure that the examples below work even if you forget about this...*
 
 #### Remote Connection 
 (referred to occasionally as the falcon proxy)  
@@ -55,6 +55,10 @@ remote_btapp.connect({
 	'password':password
 });
 ```
+
+### Listening for state changes
+Here is where the dependency on Backbone makes the most sense. State diffs are sent as JSON from the torrent client to the Btapp library, and so to listen for objects being added to your torrent client, you can bind add listeners to the corresponding Backbone Models and Collections.  
+For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...<b>But wait!</b>
 
 ### Adding torrents via urls/magnet links
 Easy-peasy
