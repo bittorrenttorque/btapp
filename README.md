@@ -27,7 +27,7 @@ To connect to the plugin client on your local machine...
 btapp = new Btapp;
 btapp.connect();
 ```
-this code was executed when the page was loaded to ensure that the examples below work even if you forget about this 
+*this code was executed when the page was loaded to ensure that the examples below work even if you forget about this*
 
 #### Remote Connection 
 (referred to occasionally as the falcon proxy)  
@@ -94,6 +94,14 @@ btapp.bt.browseforfiles(function () {}, function(files) {
 });
 ```
 __Warning__: this will launch a file browser on the machine that the client is running on...so if you're connected via falcon you won't be able to see the dialog pop up (but someone might get an unexpected surprise!)
+
+### Deleting torrents
+<div class="run" title="Run"></div>
+```javascript
+	btapp.get('torrent').each(function(torrent) {
+		torrent.bt.remove();
+	});
+```
 
 ## General Concepts
 
