@@ -96,6 +96,7 @@ btapp.bt.browseforfiles(function () {}, function(files) {
 __Warning__: this will launch a file browser on the machine that the client is running on...so if you're connected via falcon you won't be able to see the dialog pop up (but someone might get an unexpected surprise!)
 
 ### Deleting torrents
+The types that bubble up from the client are either backbone collections or models depending on if they are collections of other torrent client types or not...In the case of the list of torrents, its created as a Collection, which has all those convenient underscore functions available.
 <div class="run" title="Run"></div>
 ```javascript
 	btapp.get('torrent').each(function(torrent) {
