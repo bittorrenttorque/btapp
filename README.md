@@ -62,19 +62,6 @@ I'm about to show you how to add and remove data, and here is where the dependen
 For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...__WARNING!__ We're not guaranteed the list of torrents will be there either...so lets listen for that as well.
 <div class="run" title="Run"></div>
 ```javascript
-
-function torrent_list_listener(torrent_list) {
-	torrent_list.bind('add', function() {
-		alert('torrent added!');
-	});
-}
-
-var torrent_list = btapp.get('torrent');
-if(torrent_list) {
-	torrent_list_listener(torrent_list);
-} else {
-	btapp.bind('add:torrent', torrent_list_listener);
-}
 ```
 If this seems a bit messy for you, we've written an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
 
