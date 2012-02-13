@@ -23,7 +23,6 @@ The first step is simply to create a new Btapp object. This will provide you wit
 
 #### Local Connection
 To connect to the plugin client on your local machine...
-<script>alert('hi'); window.btapp = new Btapp;</script>
 ```javascript
 btapp = new Btapp;
 btapp.connect();
