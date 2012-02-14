@@ -301,6 +301,9 @@ function assert(b) { if(!b) debugger; }
 		initialize_manager: function(attributes) {
 			assert(window.BtappPluginManager);
 			this.manager = new BtappPluginManager(attributes);
+			this.manager.bind('all', _.bind(function(eventName) {
+				this.trigger('plugin:' + eventName);
+			}, this));
 		},
 		send_query: function(args, cb, err) {
 			jQuery.ajax({
