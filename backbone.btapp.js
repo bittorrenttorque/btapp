@@ -454,7 +454,7 @@ function assert(b) { if(!b) debugger; }
                     //Instead of adding a query for each attribute, lets just filter to the model level...
                     //this is probably the sweet spot in terms of client side efficiency. Using too many queries 
                     //is probably almost as damaging as casting too wide of a net.
-                    this.trigger('queries', this.url); 
+                    this.trigger('queries', this.url + escape(key) + '/');
                 }
             }
             return ret;
