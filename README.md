@@ -63,8 +63,7 @@ For instance, to show an alert each time a torrent is added to the client, just 
 <div class="run" title="Run"></div>
 ```javascript
 function torrent_list_handler(torrent_list) {
-	torrent_list.bind('add', function(torrent) {
-	});
+	
 }
 var torrent_list = btapp.get('torrent');
 if(torrent_list) {
