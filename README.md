@@ -39,9 +39,6 @@ Lets setup the local machine with some proxy credentials and see if we can't con
 username = prompt("Please enter your name","Harry Potter");
 password = prompt("Please enter your password","Abracadabra");
 
-btapp.get('settings').bt.set('webui.raptor_host', 'raptor.utorrent.com');
-btapp.get('settings').bt.set('webui.talon_host', 'remote.utorrent.com');
-
 btapp.bt.connect_remote(
     function() { }, 
 	username,
