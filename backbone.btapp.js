@@ -72,14 +72,15 @@ function assert(b) { if(!b) debugger; }
 						case 'number':
 						case 'string':
 						case 'boolean':
-						case 'array':
 							return typeof variables[index] === type;
 						//In the case of unknown, we have no choice but to trust the argument as
 						//the client hasn't specified what type it should be
 						case 'unknown':
 							return true;
+						case 'array':
+                            return typeof variables[index] === 'object';
 						case 'dispatch':
-							return typeof variables[index] === 'array' || typeof variables[index] === 'function';
+							return typeof variables[index] === 'object' || typeof variables[index] === 'function';
 					}
 					//has the client provided a type that we weren't expecting?
 					assert(false);
