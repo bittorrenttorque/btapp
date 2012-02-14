@@ -127,7 +127,8 @@ The types that bubble up from the client are either Backbone Collections or Mode
 Todo
 ### Custom events
 Todo
-### Filters
+### Filters (*alias* Queries)
+
 Todo
 ### Underlying RESTless API
 Todo

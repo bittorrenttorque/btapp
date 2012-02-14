@@ -61,7 +61,6 @@ function assert(b) { if(!b) debugger; }
 		// ensure that our types are at least close enough to coherse into the desired types
 		// takes something along the lines of "[native function](string,unknown)(string)".
 		validateArguments: function(functionValue, variables) {
-			return true;
 			assert(typeof functionValue === 'string' && typeof variables === 'object');
 			var signatures = functionValue.match(/\(.*?\)/g);
 			return _.any(signatures, function(signature) {
@@ -123,6 +122,7 @@ function assert(b) { if(!b) debugger; }
 				path += encodeURIComponent(jQuery.toJSON(args));
 				path += ')/';
 				this.query('function', [path], session, cb, function() {});
+                this.trigger('queries', url);
 			}, this);
 			func.valueOf = function() { return signatures; };
 			return func;
@@ -382,7 +382,7 @@ function assert(b) { if(!b) debugger; }
 
 					// We only expect objects and functions to be added to collections
 					if(typeof removed === 'object') {
-						var model = this.get(v);
+						var model = this.get(v, {'silent': true});
 						assert(model);
 						model.updateState(session, added, removed, childurl);
 						this.remove(model);
@@ -403,9 +403,10 @@ function assert(b) { if(!b) debugger; }
 				}
 				
 				if(typeof added === 'object') {
-					var model = this.get(v);
+					var model = this.get(v, {'silent': true});
 					if(!model) {
 						model = new BtappModel({'id':v});
+                        model.bind('queries', _.bind(this.trigger, this, 'queries'));
 						model.url = childurl;
 						model.client = this.client;
 						model.updateState(this.session, added, removed, childurl);
@@ -442,6 +443,23 @@ function assert(b) { if(!b) debugger; }
 			this.unbind('change', this.triggerCustomEvents);
 			this.trigger('destroy');
 		},
+        // Override Backbone.Model's get function
+        get: function(key, options) {
+            var ret = Backbone.Model.prototype.get.apply(this, arguments);
+            //We don't want to trigger a query event if this is an internal get used for maintaining the btapp object.
+            if(!options || !options.silent) {
+                //We also don't care about anything other than the leaves of objects, as intermediate objects are just
+                //containers for actual torrent client state information.
+                if(!(typeof ret === 'object' && 'clearState' in ret)) {
+                    //Instead of adding a query for each attribute, lets just filter to the model level...
+                    //this is probably the sweet spot in terms of client side efficiency. Using too many queries 
+                    //is probably almost as damaging as casting too wide of a net.
+                    this.trigger('queries', this.url); 
+                }
+            }
+            return ret;
+        },
+        
 		// Because there is so much turbulance in the properties of models (they can come and go
 		// as clients are disconnected, torrents/peers added/removed, it made sense to be able to
 		// bind to add/remove events on a model for when its attributes change
@@ -511,7 +529,7 @@ function assert(b) { if(!b) debugger; }
 					
 					if(typeof removed === 'object') {
 						//Update state downstream from here. Then remove from the collection.
-						var model = this.get(v);
+						var model = this.get(v, {'silent': true});
 						assert(model);
 						assert('updateState' in model);
 						model.updateState(session, added, removed, childurl);
@@ -523,7 +541,7 @@ function assert(b) { if(!b) debugger; }
 						delete this.bt[v];
 						changed = true;
 					} else if(v != 'id') {
-						assert(this.get(v) == unescape(removed));
+						assert(this.get(v, {'silent': true}) == unescape(removed));
 						this.unset(v, {silent: true});
 						changed = true;
 					}
@@ -546,7 +564,7 @@ function assert(b) { if(!b) debugger; }
 
 				if(typeof added === 'object') {
 					// Don't recreate a variable we already have. Just update it.
-					var model = this.get(v);
+					var model = this.get(v, {'silent': true});
 					if(!model) {
 						// This is the only hard coding that we should do in this library...
 						// As a convenience, torrents and their file/peer lists are treated as backbone collections
@@ -565,6 +583,7 @@ function assert(b) { if(!b) debugger; }
 						} else {
 							model = new BtappModel({'id':v});
 						}
+                        model.bind('queries', _.bind(this.trigger, this, 'queries'));
 						model.url = childurl;
 						model.client = this.client;
 						param[v] = model;
@@ -634,10 +653,23 @@ function assert(b) { if(!b) debugger; }
 			this.url = 'btapp/';
 			this.connected_state = false;
 			this.client = null;
-
+            
 			//bind stuff
-			_.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
+			_.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError', 'trackQuery');
+            
+            this.tracked_queries = {};
+            this.bind('queries', this.trackQuery);
 		},
+        trackQuery: function(query) {
+            if(query in this.tracked_queries) {
+                this.tracked_queries[query]++;
+            } else {
+                this.tracked_queries[query] = 1;
+            }
+        },
+        getAccessedQueries: function() {
+            return _.keys(this.tracked_queries);
+        },
 		destructor: function() {
 			//We don't want to destruct the base object even when we can't connect...
 			//Its event bindings are the only way we'll known when we've re-connected
