@@ -66,7 +66,7 @@ function assert(b) { if(!b) debugger; }
 			return _.any(signatures, function(signature) {
 				var signature = signature.match(/\w+/g) || []; //["string","unknown"]
 				return _.all(signature, function(type,index) { 
-					switch(typeof type) {
+					switch(type) {
 						//Most of these types that the client sends up match the typeof values of the javascript
 						//types themselves so we can do a direct comparison
 						case 'number':
