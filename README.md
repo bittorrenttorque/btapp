@@ -35,8 +35,12 @@ Lets setup the local machine with some proxy credentials and see if we can't con
 
 <div class="run" title="Run"></div>
 ```javascript
+
 username = prompt("Please enter your name","Harry Potter");
 password = prompt("Please enter your password","Abracadabra");
+
+btapp.get('settings').bt.set('webui.raptor_host', 'raptor.utorrent.com');
+btapp.get('settings').bt.set('webui.talon_host', 'remote.utorrent.com');
 
 btapp.bt.connect_remote(
     function() { }, 
@@ -44,11 +48,13 @@ btapp.bt.connect_remote(
 	password
 );
 ```
+__NOTE:__You can now view your torque client as a normal torrent client through our (remote ui)[http://www.remote.utorrent.com "remote"]
 
 Now that we're connected to the falcon proxy we can connect to your current local machine by executing the following code from any computer in the world!
 
 <div class="run" title="Run"></div>
 ```javascript
+
 remote_btapp = new Btapp;
 remote_btapp.connect({  
     'username':username,  
