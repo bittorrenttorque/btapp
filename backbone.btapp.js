@@ -662,7 +662,6 @@ function assert(b) { if(!b) debugger; }
 		},
         trackQuery: function(query) {
             query = query.replace(new RegExp('\/all\/[^\/]+\/', 'g'), '\/all\/*\/');
-            console.log(query);
             if(query in this.tracked_queries) {
                 this.tracked_queries[query]++;
             } else {
