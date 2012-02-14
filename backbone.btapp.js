@@ -223,7 +223,7 @@ function assert(b) { if(!b) debugger; }
 						this.session = new falcon.session( { client_data: this.remote_data } );
 						this.falcon = this.session.api;
 						falcon_initialized = true;
-						this.trigger('connected');
+						this.trigger('client:connected');
 					} else {
 						falcon_initialized = true;
 						this.reset();
@@ -238,7 +238,7 @@ function assert(b) { if(!b) debugger; }
 				success: _.bind(function(session) {
 					if (this.login_success) { this.login_success(session); }
 					this.falcon = this.session.api;
-					this.trigger('connected');
+					this.trigger('client:connected');
 				}, this),
 				error: _.bind(function(xhr, status, data) {
 					if (this.login_error) { this.login_error(xhr, status, data); }
@@ -301,9 +301,7 @@ function assert(b) { if(!b) debugger; }
 		initialize_manager: function(attributes) {
 			assert(window.BtappPluginManager);
 			this.manager = new BtappPluginManager(attributes);
-			this.manager.bind('all', _.bind(function(eventName) {
-				this.trigger('plugin:' + eventName);
-			}, this));
+			this.manager.bind('all', this.trigger, this);
 		},
 		send_query: function(args, cb, err) {
 			jQuery.ajax({
@@ -317,7 +315,7 @@ function assert(b) { if(!b) debugger; }
 			});
 		},
 		reset: function() {
-			_.defer(_.bind(this.trigger, this, 'connected'));
+			_.defer(_.bind(this.trigger, this, 'client:connected'));
 		}		
 	});	
 	
@@ -666,11 +664,8 @@ function assert(b) { if(!b) debugger; }
 			//While we don't want app writers having to interact with the client directly,
 			//it would be nice to be able to listen in on what's going on...so lets just bubble
 			//them up as client:XXX messages
-			this.client.bind('all', _.bind(function(eventName) {
-				this.trigger('client:' + eventName);
-			}, this));
-			
-			this.client.bind('connected', this.fetch);		
+			this.client.bind('all', this.trigger, this);
+			this.client.bind('client:connected', this.fetch);		
 		},
 		disconnect: function() {
 			assert(this.client && this.connected_state);
