@@ -289,23 +289,18 @@ function assert(b) { if(!b) debugger; }
 			this.btapp = attributes.btapp;
 			this.reset();
 			
-			//If you have the desire to manage the plugin yourself, simply define BtappPluginManger,
-			//either by preloading plugin.btapp.js and extending the class, or by completely defining
-			//it yourself. The only exported "symbol" is *check_for_plugin_and_product*.
 			if(window.BtappPluginManager) {
-				this.initialize_manager();
+				this.initialize_manager(attributes);
 			} else {
 				jQuery.getScript(
 					'http://apps.bittorrent.com/torque/btapp_plugin/plugin.btapp.js', 
-					_.bind(this.initialize_manager, this)
+					_.bind(this.initialize_manager, this, attributes)
 				);
 			}
 		},
-		initialize_manager: function() {
+		initialize_manager: function(attributes) {
 			assert(window.BtappPluginManager);
-			this.manager = new BtappPluginManager;
-			this.manager.check_for_plugin_and_product();
-			//alternatively just call this.manager.check_for_plugin() to see if the plugin is running
+			this.manager = new BtappPluginManager(attributes);
 		},
 		send_query: function(args, cb, err) {
 			jQuery.ajax({
