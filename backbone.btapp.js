@@ -18,6 +18,87 @@
 // some of us are lost in the world without __asm int 3;
 function assert(b) { if(!b) debugger; }
 
+if (window.console) {
+    var console = window.console;
+} else {
+    var console = { log: function() {}, error: function() {} };
+}
+
+function Pairing(options) {
+    this.i = 0;
+    this.options = options;
+    this.curport = -1;
+    this.local_url = null;
+    this.resultImg = null;
+    this.scan_start_time = new Date();
+    this.highest_port_possbile = 50000;
+    this.realistic_give_up_after_port = 11000;
+    this.scan();
+}
+
+Pairing.prototype = {
+    scan: function() {
+        this.resultImg = new Image();
+        var _this = this;
+
+        this.resultImg.onerror = function() {
+            if (_this.options.timeout && (new Date() - _this.scan_start_time > _this.options.timeout)) {
+                _this.options.error( { error: 'timeout' } );
+            } else if (_this.curport > _this.realistic_give_up_after_port) { // highest_port_possible takes too long...
+                _this.options.error( { port_scan_failed: true } );
+            } else {
+                _this.i++;
+                _this.pingimg();
+            }
+        };
+
+        this.resultImg.onload = function() { _this.port_found(_this.curport); };
+
+        _this.i = 0;
+        _this.pingimg();
+    },
+    pingimg: function() {
+        var i = this.i;
+        this.curport = 7*Math.pow(i,3) + 3*Math.pow(i,2) + 5*i + 10000;
+        var url = 'http://127.0.0.1:' + this.curport + '/gui/pingimg';
+        this.resultImg.src = url;
+    },
+    port_found: function(port) {
+        // found a listening port. now check its version...
+        this.local_url = "http://127.0.0.1:" + port;
+
+        var _this = this;
+        this.test_port( { success: function(data, status, xhr) {
+                              if (data == 'invalid request') {
+                                  // utorrent/bittorrent old version without api v2
+                                  console.log('found non-compatible client on', _this.local_url);
+                                  _this.i++;
+                                  _this.pingimg();
+                              } else if (data.error == 'invalid request type') {
+                                  _this.options.success(_this.local_url);
+                              } else {
+                                  _this.options.error('portscan tested port response',data,status,xhr);
+                              }
+                          },
+                          error: function(xhr, status, text) {
+                              _this.options.error('error jsonp testing port',xhr,status,text);
+                          }
+                        });
+
+    },
+    test_port: function(opts) {
+        console.log('test port', this.local_url);
+        var _this = this;
+        var test_pair_url = this.local_url + '/btapp/';
+        jQuery.ajax( { url: test_pair_url,
+                       dataType: 'jsonp',
+                       success: opts.success,
+                       error: opts.error
+                     });
+    }
+};
+
+
 (function() {
 	// Torrent Client (base functionality for Falcon/Local Torrent Clients)
 	// -------------
@@ -139,10 +220,13 @@ function assert(b) { if(!b) debugger; }
 			args['type'] = type;
 			if(queries) args['queries'] = jQuery.toJSON(queries);
 			if(session) args['session'] = session;
-			
+			var _this = this;
 			var success_callback = function(data) { 
 				if (data == 'invalid request') {
-					alert('please close utorrent and bittorrent and share etc...');
+                                    var err = 'please close utorrent and bittorrent and share etc...';
+				    console.error(err);
+                                    alert(err);
+                                    _this.reset();
 				} else if(!(typeof data === 'object') || 'error' in data) {
 					err();
 				} else {
@@ -285,9 +369,11 @@ function assert(b) { if(!b) debugger; }
 	// (for falcon clients we may not ever reach the client even if it is logged into falcon)
 	window.LocalTorrentClient = TorrentClient.extend({
 		initialize: function(attributes) {
+                    // TODO -- fix to do port detection.
 			TorrentClient.prototype.initialize.call(this, attributes);
-			this.url = 'http://localhost:10000/btapp/';
 			this.btapp = attributes.btapp;
+
+                    
 			this.reset();
 			
 			if(window.BtappPluginManager) {
@@ -316,7 +402,18 @@ function assert(b) { if(!b) debugger; }
 			});
 		},
 		reset: function() {
-			_.defer(_.bind(this.trigger, this, 'client:connected'));
+                    var _this = this;
+                    new Pairing( { success: function(url) {
+                                       console.log('got compatible port',url);
+                                       _this.url = url + '/btapp/';
+			               _.defer(_.bind(_this.trigger, _this, 'client:connected'));
+                                   },
+                                   error: function(a,b,c) {
+                                       console.error('error port scanning. default to port 10000',a,b,c);
+			               _this.url = 'http://localhost:10000/btapp/';
+                                       _.defer(_.bind(_this.trigger, _this, 'client:connected'));
+                                   }
+                                 });
 		}		
 	});	
 	
