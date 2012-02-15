@@ -1,4 +1,5 @@
 (function() {
+    if(window.TorrentClient) alert('already loaded torque.btapp.js');
     // Torrent Client (base functionality for Falcon/Local Torrent Clients)
     // -------------
 

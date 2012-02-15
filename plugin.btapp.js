@@ -1,4 +1,7 @@
 jQuery(function() {
+    if(window.BtappPluginManager) alert('already loaded plugin.btapp.js');
+
+
 	BTAPP_PLUGIN_ID = 'btapp_plugin_1982391823981239812389'; //avoid dom collisions
 	BT_WINDOW_HASH = '4823';
 	PRODUCT = 'Torque';
