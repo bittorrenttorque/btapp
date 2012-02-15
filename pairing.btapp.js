@@ -1,6 +1,4 @@
 (function() {
-    if(window.Pairing) alert('already loaded pairing.btapp.js');
-
     window.Pairing = Backbone.Model.extend({
         initialize: function() {
             this.i = 0;
