@@ -308,7 +308,6 @@ jQuery(function() {
             this.pairing.bind('all', this.trigger, this);
             
             var success = _.bind(function(url) {
-                console.log('got compatible port',url);
                 this.url = url + '/btapp/';
                 _.defer(_.bind(this.trigger, this, 'client:connected'));
             }, this);

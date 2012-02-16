@@ -49,11 +49,13 @@ jQuery(function() {
 			window[onload] = _.once(function() {
 				cb();
 			});
-			var div = document.createElement('div');
+			var div = document.createElement('div');			
+			div.css({'position':'absolute','left':'-999em'});
 			div.innerHTML = 
 				'<object id="' + BTAPP_PLUGIN_ID + '" type="' + MIME_TYPE + '" width="0" height="0">' + 
 					'<param name="onload" value="' + onload + '" />' + 
 				'</object>';
+                
 			document.body.appendChild(div);
 			setTimeout(window[onload], 1000);
 		},
