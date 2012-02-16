@@ -46,7 +46,6 @@
                 success: function(data, status, xhr) {
                     if (data == 'invalid request') {
                         // utorrent/bittorrent old version without api v2
-                        console.log('found non-compatible client on', _this.local_url);
                         _this.i++;
                         _this.pingimg();
                         _this.trigger('pairing:client', _this.local_url);
@@ -62,7 +61,6 @@
             });
         },
         test_port: function(opts) {
-            console.log('test port', this.local_url);
             var test_pair_url = this.local_url + '/btapp/';
             jQuery.ajax({ 
                 url: test_pair_url,
