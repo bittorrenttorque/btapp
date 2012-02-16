@@ -318,7 +318,6 @@ jQuery(function() {
                 }
             }, this);
             var error = _.bind(function(a,b,c) {
-                debugger;
                 this.url = 'http://localhost:10000/btapp/';
                 _.defer(_.bind(this.trigger, this, 'client:connected'));
             }, this);
