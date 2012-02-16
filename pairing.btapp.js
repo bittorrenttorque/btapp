@@ -1,4 +1,4 @@
-(function() {
+jQuery(function() {
     // some of us are lost in the world without __asm int 3;
     function assert(b) { if(!b) debugger; }
 
@@ -70,4 +70,4 @@
             });
         }
     });
-}).call(this);
+});

@@ -16,7 +16,7 @@
 // rely on this as the	torrentStatus event function is set and the used to keep our models up to date
 
 
-(function() {
+jQuery(function() {
     // some of us are lost in the world without __asm int 3;
     function assert(b) { if(!b) debugger; }
 
@@ -473,4 +473,4 @@
             }
         }
     });
-}).call(this);
+});
