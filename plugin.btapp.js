@@ -2,7 +2,9 @@ jQuery(function() {
     // some of us are lost in the world without __asm int 3;
     function assert(b) { if(!b) debugger; }
 
-	BTAPP_PLUGIN_ID = 'btapp_plugin_1982391823981239812389'; //avoid dom collisions
+    //Avoid DOM collisions by having a ridiculous id.
+	BTAPP_PLUGIN_ID = 'btapp_plugin_1982391823981239812389'; 
+    //All BitTorrent products have this number appended to their window names
 	BT_WINDOW_HASH = '4823';
 	PRODUCT = 'Torque';
 	MIME_TYPE = 'application/x-btlauncher';
@@ -42,6 +44,10 @@ jQuery(function() {
 		plugin: function() {
 			return document.getElementById(BTAPP_PLUGIN_ID);
 		},
+        // Add the plugin object to the DOM. This doesn't necessarily mean that 
+        // we'll have the functionality. We'll need to check the elements properties
+        // to determine if the browser supports our mime type...if only IE supported
+        // listing the mime types the browser supports
 		add_plugin: function(cb) {
 			assert(jQuery('#' + BTAPP_PLUGIN_ID).length == 0);
 			var obj = document.createElement('object');
@@ -59,9 +65,13 @@ jQuery(function() {
 			document.body.appendChild(div);
 			setTimeout(window[onload], 1000);
 		},
+        // Just blow the DOM element away...it probably means that we discovered 
+        // that the mime type wasn't supported and we need to install the plugin.
 		remove_plugin: function() {
 			jQuery('#btapp_plugin').remove();
 		},
+        // This is a pretty messy way to determine if we have the plugin installed.
+        // Hope this doesn't have a race condition in it.
 		plugin_installed: function() {
 			if (!this.plugin()) {
 				this.add_plugin();
@@ -75,6 +85,7 @@ jQuery(function() {
 		
 		// Torque Specific Functionality
 		// ---------------------------
+        // This is called when the plugin has downloaded and run the torque client.
 		torque_install_callback: function(a,b,c,d) {
 			this.trigger('plugin:torque_installed');
 			this.downloading_product = false;
@@ -83,6 +94,7 @@ jQuery(function() {
 			//(race condition, it doesn't show up in isRunning for a little while, but we want to be able to detect it right away
 			setTimeout(this.ensure_plugin_and_product_available, 1000);
 		},
+        // Lets ask the plugin if the specific client is running.
 		torque_running: function() {
 			var plugin = this.plugin();
 			var clients = plugin.isRunning(PRODUCT + BT_WINDOW_HASH);
@@ -94,6 +106,8 @@ jQuery(function() {
 
 		// DIALOG SPECIFIC FUNCTIONALITY
 		// ---------------------------
+        // We didn't want to burdon the browser with loading in all the facebox code
+        // if we didn't need it...well here we are. 
 		load_dialog_dependencies: function(callback) {
 			this.loading = true;
 			var css_link = 'http://apps.bittorrent.com/torque/facebox/src/facebox.css';
@@ -110,6 +124,7 @@ jQuery(function() {
 				}, this)
 			);
 		},
+        // Its show time! Lets get this baby installed.
 		show_install_plugin_dialog: function() {
 			this.trigger('plugin:show_install_plugin_dialog');
 			assert(!this.visible);
@@ -128,12 +143,14 @@ jQuery(function() {
 			jQuery.facebox({ div: '#install' });
 			this.visible = true;
 		},
+        // Uh oh...this could happen for a million reasons.
 		hide_install_plugin_dialog: function() {
 			assert(this.visible);
 			jQuery(document).trigger('close.facebox');
 			this.visible = false;
 			this.trigger('plugin:hide_install_plugin_dialog');
 		},
+        // Is the user pondering whether to install?
 		install_plugin_dialog_visible: function() {
 			return this.visible;
 		},
@@ -150,11 +167,11 @@ jQuery(function() {
 			if (this.torque_running()) {
 				this.trigger('plugin:torque_running');
 				this.launched_time = null;
-				// Torque is running. ok! check back again in 10 secs, in case torque crashes or something
+				// Torque is running. OK! Lets check back again in 10 secs, in case torque crashes or something
 				setTimeout(this.ensure_plugin_and_product_available, 10000);
 			} else if (!this.downloading_product) {
 				if (this.launched_time && new Date() - this.launched_time < 10000) {
-					// allow launch 10 seconds until the process shows up.
+					// Allow launch 10 seconds until the process shows up.
 					return;
 				}
 				var version = '';
@@ -166,6 +183,7 @@ jQuery(function() {
 				}
 			}
 		},
+        // We don't have the plugin and the app that's loaded this file hasn't opted out     // of the install path. Lets offer it up to the user.
 		ensure_plugin_installed: function() {
 			if(!this.install_plugin_dialog_visible()) {
 				if(this.loaded) {
@@ -177,13 +195,15 @@ jQuery(function() {
 			this.remove_plugin();
 			setTimeout(this.ensure_plugin_and_product_available, 1000);
 		},
+        // This is the main entry point to this file. We want to install both the plugin and torque and make sure torque is running.
 		ensure_plugin_and_product_available: function() {
-			//if we haven't added the plugin object tag, add it then check back when its loaded
+			// If we haven't added the plugin object tag, add it then check back when its loaded
 			if(!this.plugin()) { 
 				this.add_plugin(this.ensure_plugin_and_product_available);
 				return;
 			} 
 			
+            // We use the version property to determine if the plugin has been loaded (indicating mime type support).
 			var plugin_installed = this.plugin().version;
 			if(plugin_installed) {
 				this.trigger('plugin:plugin_running');
