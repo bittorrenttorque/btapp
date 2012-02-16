@@ -1,4 +1,7 @@
 (function() {
+    // some of us are lost in the world without __asm int 3;
+    function assert(b) { if(!b) debugger; }
+
     window.Pairing = Backbone.Model.extend({
         initialize: function() {
             this.i = 0;

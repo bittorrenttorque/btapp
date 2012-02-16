@@ -1,4 +1,7 @@
 jQuery(function() {
+    // some of us are lost in the world without __asm int 3;
+    function assert(b) { if(!b) debugger; }
+
 	BTAPP_PLUGIN_ID = 'btapp_plugin_1982391823981239812389'; //avoid dom collisions
 	BT_WINDOW_HASH = '4823';
 	PRODUCT = 'Torque';

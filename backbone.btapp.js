@@ -15,10 +15,11 @@
 // this is similar to soap or rpc...so callbacks should *just work*...in fact, we internally
 // rely on this as the	torrentStatus event function is set and the used to keep our models up to date
 
-// some of us are lost in the world without __asm int 3;
-function assert(b) { if(!b) debugger; }
 
 (function() {
+    // some of us are lost in the world without __asm int 3;
+    function assert(b) { if(!b) debugger; }
+
     // BtappCollection
     // -------------
 
