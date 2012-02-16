@@ -123,7 +123,6 @@ jQuery(function() {
             var success_callback = _.bind(function(data) {
                 if (data == 'invalid request') {
                     var err = 'please close utorrent and bittorrent and share etc...';
-                    console.error(err);
                     alert(err);
                     this.reset();
                 } else if(!(typeof data === 'object') || 'error' in data) {
@@ -312,7 +311,6 @@ jQuery(function() {
                 _.defer(_.bind(this.trigger, this, 'client:connected'));
             }, this);
             var error = _.bind(function(a,b,c) {
-                console.error('error port scanning. default to port 10000',a,b,c);
                 this.url = 'http://localhost:10000/btapp/';
                 _.defer(_.bind(this.trigger, this, 'client:connected'));
             }, this);
