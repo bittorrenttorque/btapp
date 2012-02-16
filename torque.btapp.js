@@ -75,8 +75,6 @@ jQuery(function() {
         createFunction: function(session, url, signatures) {
             assert(session);
             var func = _.bind(function(cb) {
-                assert(arguments.length >= 1); //they at least need to provide the callback
-                assert(typeof cb === 'function');
                 var path = url + '(';
                 var args = [];
 
