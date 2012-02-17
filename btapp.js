@@ -439,7 +439,7 @@ window.Btapp = BtappModel.extend({
         } else if('callback' in data && 'arguments' in data) {
             this.client.btappCallbacks[data.callback](data.arguments);
         } else {
-            debugger;
+            assert(false);
         }
     },
     // When we get a poll response from the client, we sort through them here, as well as track round trip time.

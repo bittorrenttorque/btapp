@@ -43,23 +43,23 @@ window.BtappPluginManager = Backbone.Model.extend({
     // Plugin Specific Functionality
     // ---------------------------
     plugin: function() {
-        return document.getElementById(BTAPP_PLUGIN_ID);
+        return document.getElementById(this.BTAPP_PLUGIN_ID);
     },
     // Add the plugin object to the DOM. This doesn't necessarily mean that 
     // we'll have the functionality. We'll need to check the elements properties
     // to determine if the browser supports our mime type...if only IE supported
     // listing the mime types the browser supports
     add_plugin: function(cb) {
-        assert(jQuery('#' + BTAPP_PLUGIN_ID).length == 0);
+        assert(jQuery('#' + this.BTAPP_PLUGIN_ID).length == 0);
         var obj = document.createElement('object');
-        var onload = BTAPP_PLUGIN_ID + 'onload';
+        var onload = this.BTAPP_PLUGIN_ID + 'onload';
         window[onload] = _.once(function() {
             cb();
         });
         var div = document.createElement('div');			
         jQuery(div).css({'position':'absolute','left':'-999em'});
         div.innerHTML = 
-            '<object id="' + BTAPP_PLUGIN_ID + '" type="' + MIME_TYPE + '" width="0" height="0">' + 
+            '<object id="' + this.BTAPP_PLUGIN_ID + '" type="' + this.MIME_TYPE + '" width="0" height="0">' + 
                 '<param name="onload" value="' + onload + '" />' + 
             '</object>';
             
@@ -98,7 +98,7 @@ window.BtappPluginManager = Backbone.Model.extend({
     // Lets ask the plugin if the specific client is running.
     torque_running: function() {
         var plugin = this.plugin();
-        var clients = plugin.isRunning(PRODUCT + BT_WINDOW_HASH);
+        var clients = plugin.isRunning(this.PRODUCT + this.BT_WINDOW_HASH);
         var running = clients && clients.length > 0;
         return running;
     },
@@ -180,7 +180,7 @@ window.BtappPluginManager = Backbone.Model.extend({
             this.trigger('plugin:install_torque', switches);
             if(switches.install) {
                 this.downloading_product = true;
-                this.plugin().downloadProgram(PRODUCT, version, this.torque_install_callback);
+                this.plugin().downloadProgram(this.PRODUCT, version, this.torque_install_callback);
             }
         }
     },
