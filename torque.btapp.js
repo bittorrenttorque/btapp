@@ -1,3 +1,8 @@
+// (c) 2012 Patrick Williams, BitTorrent Inc.
+// Btapp may be freely distributed under the MIT license.
+// For all details and documentation:
+// http://pwmckenna.github.com/btapp
+
 jQuery(function() {
     // some of us are lost in the world without __asm int 3;
     function assert(b) { if(!b) debugger; }

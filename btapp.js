@@ -1,8 +1,11 @@
-// Backbone.btapp.js 0.1
-// (c) 2012 Patrick Williams, BitTorrent Inc.
-// Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+// Btapp.js 0.0.1
 
-// Welcome to backbone.btapp.js
+// (c) 2012 Patrick Williams, BitTorrent Inc.
+// Btapp may be freely distributed under the MIT license.
+// For all details and documentation:
+// http://pwmckenna.github.com/btapp
+
+// Welcome to Btapp!
 
 // This should provide a clean javascript layer above the utorrent/bittorrent
 // webui layer (the web interface to a client). It is intended to abstract away
@@ -332,21 +335,6 @@ jQuery(function() {
     // The primary difference is that in the original you got the state at that exact moment, where
     // we now simply keep the backbone objects up to date (by quick polling and updating as diffs are returned)
     // so you can query at your leisure.
-
-    //EVENTS: there are the following events
-        //appDownloadProgress
-        //filesDragDrop
-        //appStopping
-        //appUninstall
-        //clientMessage
-        //commentNotice
-        //filesAction
-        //rssStatus
-        //torrentStatus
-
-    // torrentStatus is used internally to keep our objects up to date, but that and clientMessage are really the only
-    // events that are generally used...these trigger events when they are received by the base object, so to listen in
-    // on torrentStatus events, simply provide a callback to btapp.bind('torrentStatus', callback_func)
     window.Btapp = BtappModel.extend({
         initialize: function() {
             BtappModel.prototype.initialize.apply(this, arguments);
