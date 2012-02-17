@@ -3,17 +3,14 @@
 // For all details and documentation:
 // http://pwmckenna.github.com/btapp
 
-// some of us are lost in the world without __asm int 3;
-function assert(b) { if(!b) debugger; }
-
-//Avoid DOM collisions by having a ridiculous id.
-BTAPP_PLUGIN_ID = 'btapp_plugin_1982391823981239812389'; 
-//All BitTorrent products have this number appended to their window names
-BT_WINDOW_HASH = '4823';
-PRODUCT = 'Torque';
-MIME_TYPE = 'application/x-btlauncher';
-
 window.BtappPluginManager = Backbone.Model.extend({
+    //Avoid DOM collisions by having a ridiculous id.
+    BTAPP_PLUGIN_ID: 'btapp_plugin_1982391823981239812389',
+    //All BitTorrent products have this number appended to their window names
+    BT_WINDOW_HASH: '4823',
+    PRODUCT:'Torque',
+    MIME_TYPE: 'application/x-btlauncher',
+
     loading: false,
     loaded: false,
     visible: false,
