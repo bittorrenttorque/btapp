@@ -11,21 +11,33 @@ jQuery(function() {
         initialize: function() {
             this.i = 0;
             this.curport = -1;
+            this.numfound = 0; // track # found so can trigger "none found" event
             this.local_url = null;
+            this._cancel = false;
             this.resultImg = null;
-            this.timeout = 1000;
-            this.realistic_give_up_after_port = 11000;
+            this.highest_port_possbile = 50000;
+            this.realistic_give_up_after_port = 15000; // don't bother scanning all the ports.
+            assert( this.realistic_give_up_after_port < this.highest_port_possbile );
         },
-        scan: function() {
+        stop: function() {
+            this._cancel = true;
+        },
+        scan: function(options) {
+            this.options = options || {};
+            this.initialize();
             this.scan_start_time = new Date();
             this.resultImg = new Image();
             var _this = this;
-
+            
             this.resultImg.onerror = function() {
-                if (_this.timeout && (new Date() - _this.scan_start_time > _this.timeout)) {
-                    _this.trigger('pairing:timeout');
+                if (_this.options.timeout && (new Date() - _this.scan_start_time > _this.options.timeout)) {
+                    if (_this.numfound == 0) {
+                        _this.trigger('pairing:nonefound', { reason: 'timeout' } );
+                    }
                 } else if (_this.curport > _this.realistic_give_up_after_port) { // highest_port_possible takes too long...
-                    _this.trigger('pairing:port_scan_failed');
+                    if (_this.numfound == 0) {
+                        _this.trigger('pairing:nonefound', { reason: 'ended scan' } );
+                    }
                 } else {
                     _this.i++;
                     _this.pingimg();
@@ -38,35 +50,46 @@ jQuery(function() {
             _this.pingimg();
         },
         pingimg: function() {
+            if (this._cancel) { return; }
             this.curport = 7 * Math.pow(this.i, 3) + 3 * Math.pow(this.i, 2) + 5 * this.i + 10000;
             var url = 'http://127.0.0.1:' + this.curport + '/gui/pingimg';
             this.resultImg.src = url;
         },
         port_found: function(port) {
+            if (this._cancel) { return; }
             // found a listening port. now check its version...
             this.local_url = "http://127.0.0.1:" + port;
 
             var _this = this;
             this.test_port({ 
                 success: function(data, status, xhr) {
-                    if (data == 'invalid request') {
+                    _this.numfound += 1;
+                    if (data && data.version) {
+                        data.port = port;
+                        _this.trigger('pairing:found', data);
+                    } else if (data == 'invalid request') {
                         // utorrent/bittorrent old version without api v2
-                        _this.i++;
-                        _this.pingimg();
-                        _this.trigger('pairing:client', _this.local_url);
-                    } else if (data.error == 'invalid request type') {
-                        _this.trigger('pairing:torque', _this.local_url);
+                        _this.trigger('pairing:found', { 'version':'unknown', 'name':'unknown', 'port':port } );
                     } else {
-                        _this.trigger('pairing:other', _this.local_url);
+                        // not sure what other things could be
+                        // returned, but other processes or versions
+                        // could return weird stuff.
+                        _this.trigger('pairing:found', { 'version':'unknown', 'name':'unknown', 'port':port, 'data': data } );
                     }
+                    // keep scanning for other clients!
+                    _this.i++;
+                    _this.pingimg();
+
                 },
                 error: function(xhr, status, text) {
-                    _this.trigger('pairing:error', xhr);
+                    // a client responded to /gui/pingimg but had some other error on fetching "/version"
+                    // should not happen, but report an event anyway.
+                    _this.trigger('pairing:error', { xhr: xhr, status: status, text: text } );
                 }
             });
         },
         test_port: function(opts) {
-            var test_pair_url = this.local_url + '/btapp/';
+            var test_pair_url = this.local_url + '/version/';
             jQuery.ajax({ 
                 url: test_pair_url,
                 dataType: 'jsonp',

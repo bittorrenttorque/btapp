@@ -127,9 +127,12 @@ jQuery(function() {
             if(session) args['session'] = session;
             var success_callback = _.bind(function(data) {
                 if (data == 'invalid request') {
+                    assert(false);
                     var err = 'please close utorrent and bittorrent and share etc...';
                     alert(err);
-                    this.reset();
+                    setTimeout( _.bind(function() {
+                        this.reset();
+                    }, this), 1000 );
                 } else if(!(typeof data === 'object') || 'error' in data) {
                     err();
                 } else {
@@ -311,17 +314,21 @@ jQuery(function() {
             this.pairing = new Pairing;
             this.pairing.bind('all', this.trigger, this);
             
-            var success = _.bind(function(url) {
-                this.url = url + '/btapp/';
-                _.defer(_.bind(this.trigger, this, 'client:connected'));
+            var success = _.bind(function(data) {
+                if (data && data.version && data.version != 'unknown' && data.version == "4.2") { 
+                    // Torque reports its version as 4.2
+                    this.url = 'http://127.0.0.1:' + data.port + '/btapp/';
+                    this.pairing.stop();
+                    _.defer(_.bind(this.trigger, this, 'client:connected'));
+                }
             }, this);
             var error = _.bind(function(a,b,c) {
                 this.url = 'http://localhost:10000/btapp/';
                 _.defer(_.bind(this.trigger, this, 'client:connected'));
             }, this);
             
-            this.pairing.bind('pairing:torque', success);
-            this.pairing.bind('pairing:error', error);
+            this.pairing.bind('pairing:found', success);
+            this.pairing.bind('pairing:nonefound', error);
             this.reset();
         },
         reset: function() {
