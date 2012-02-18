@@ -19,10 +19,10 @@
 			
 			waitsFor(function() {
 				return this.paired;
-			}, "client connection", 15000);
+			}, "client pairing", 15000);
 			
 			runs(function() {
-				expect(this.paired);
+				expect(this.paired).toBeTruthy();
 			});
 		});
 		it('connects', function() {
@@ -39,7 +39,7 @@
 			}, "client connection", 15000);
 			
 			runs(function() {
-				expect(this.connected);
+				expect(this.connected).toBeTruthy();
 			});
 		});
 	});
