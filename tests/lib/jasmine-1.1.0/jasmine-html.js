@@ -77,6 +77,8 @@ jasmine.TrivialReporter.prototype.reportRunnerStarting = function(runner) {
       self.outerDiv.className = self.outerDiv.className.replace(/ show-passed/, '');
     }
   };
+  showPassed.checked = true;
+  showPassed.onclick();
 
   showSkipped.onclick = function(evt) {
     if (showSkipped.checked) {
@@ -85,6 +87,8 @@ jasmine.TrivialReporter.prototype.reportRunnerStarting = function(runner) {
       self.outerDiv.className = self.outerDiv.className.replace(/ show-skipped/, '');
     }
   };
+  showSkipped.checked = true;
+  showSkipped.onclick();
 };
 
 jasmine.TrivialReporter.prototype.reportRunnerResults = function(runner) {
