@@ -230,7 +230,7 @@ window.FalconTorrentClient = TorrentClient.extend({
             }, this)
         };
         this.session = new falcon.session;
-        this.session.negotiate(this.username,this.password, { success: opts.success, error: opts.error, progress: this.login_progress } );
+        this.session.negotiate(this.username, this.password, { success: opts.success, error: opts.error, progress: this.login_progress } );
     },
     // This is the Btapp object's gateway to the actual client requests. These requests look slightly
     // different than those headed to a local client because they are encrypted.
@@ -316,13 +316,9 @@ window.LocalTorrentClient = TorrentClient.extend({
                 _.defer(_.bind(this.trigger, this, 'client:connected'));
             }
         }, this);
-        var error = _.bind(function(a,b,c) {
-            this.url = 'http://localhost:10000/btapp/';
-            _.defer(_.bind(this.trigger, this, 'client:connected'));
-        }, this);
         
         this.pairing.bind('pairing:found', success);
-        this.pairing.bind('pairing:nonefound', error);
+        this.pairing.bind('pairing:nonefound', _.bind(this.reset, this));
         this.reset();
     },
     reset: function() {
