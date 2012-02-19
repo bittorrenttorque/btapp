@@ -91,6 +91,7 @@
 			runs(function() {
 				this.btapp = new Btapp;
 				this.btapp.connect();
+				this.remove_callback = jasmine.createSpy();
 			});
 
 			waitsFor(function() {
@@ -98,12 +99,18 @@
 			}, "torrent added", 5000);
 			
 			runs(function() {
+				expect(this.btapp.get('torrent'));
+				this.btapp.get('torrent').bind('remove:C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A', this.remove_callback);
 				this.btapp.get('torrent').get("C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A").bt.remove();
 			});
 			
 			waitsFor(function() {
 				return !this.btapp.get('torrent') || !this.btapp.get('torrent').get("C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A");
 			}); 
+			
+			runs(function() {
+				expect(this.remove_callback).toHaveBeenCalled();
+			});
 		});
 	});
 }).call(this);
