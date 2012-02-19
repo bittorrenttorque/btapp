@@ -34,17 +34,29 @@ function assert(b) { if(!b) debugger; }
 window.BtappCollection = Backbone.Collection.extend({
     initialize: function(models, options) {
         Backbone.Collection.prototype.initialize.apply(this, arguments);
-        _.bindAll(this, 'destructor', 'clearState', 'updateState');
+        _.bindAll(this, 'destructor', 'clearState', 'updateState', 'triggerCustomAddEvent', 'triggerCustomRemoveEvent');
         this.initializeValues();
-    },
+
+        this.bind('add', this.triggerCustomAddEvent);
+        this.bind('remove', this.triggerCustomRemoveEvent);
+	},
     initializeValues: function() {
         this.url = '';
         this.session = null;
         this.bt = {};
     },
     destructor: function() {
+		this.unbind('add', this.triggerCustomAddEvent);
+		this.unbind('remove', this.triggerCustomRemoveEvent);
+		
         this.trigger('destroy');
     },
+	triggerCustomAddEvent: function(model) {
+		this.trigger('add:' + model.id, model);
+	},
+	triggerCustomRemoveEvent: function(model) {
+		this.trigger('remove:' + model.id, model);
+	},
     clearState: function() {
         this.each(function(model) {
             model.clearState();
