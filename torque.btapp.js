@@ -45,11 +45,12 @@ window.TorrentClient = Backbone.Model.extend({
     // ensure that our types are at least close enough to coherse into the desired types
     // takes something along the lines of "[native function](string,unknown)(string)".
     validateArguments: function(functionValue, variables) {
-        assert(typeof functionValue === 'string' && typeof variables === 'object');
+        assert(typeof functionValue === 'string', 'expected functionValue to be a string');
+		assert(typeof variables === 'object', 'expected variables to be an object');
         var signatures = functionValue.match(/\(.*?\)/g);
         return _.any(signatures, function(signature) {
             var signature = signature.match(/\w+/g) || []; //["string","unknown"]
-            return _.all(signature, function(type,index) {
+            return signature.length == variables.length && _.all(signature, function(type,index) {
                 switch(type) {
                     //Most of these types that the client sends up match the typeof values of the javascript
                     //types themselves so we can do a direct comparison
@@ -67,15 +68,17 @@ window.TorrentClient = Backbone.Model.extend({
                         return typeof variables[index] === 'object' || typeof variables[index] === 'function';
                 }
                 //has the client provided a type that we weren't expecting?
-                assert(false);
+                throw 'there is an invalid type in the function signature exposed by the client';
             });
         });
     },
     // Functions are simply urls that we make ajax request to. The cb is called with the
     // result of that ajax request.
     createFunction: function(session, url, signatures) {
-        assert(session);
+        assert(session, 'cannot create a function without a session id');
         var func = _.bind(function(cb) {
+			assert(cb, 'return value callback is not optional');
+			assert(typeof cb === 'function', 'the first argument must be a function that receives the return value for the call to the client');
             var path = url + '(';
             var args = [];
 
@@ -88,7 +91,7 @@ window.TorrentClient = Backbone.Model.extend({
             // we should be able to use verifySignaturesArguments to determine if the client will
             // consider the arguments that we're passing to be valid
             if(!TorrentClient.prototype.validateArguments.call(this, signatures, native_args)) {
-                alert(signatures + ' cannot accept ' + jQuery.toJSON(native_args));
+                throw 'arguments do not match any of the function signatures exposed by the client';
                 return;
             }
 
@@ -111,7 +114,7 @@ window.TorrentClient = Backbone.Model.extend({
         return func;
     },
     query: function(type, queries, session, cb, err) {
-        assert(type == "update" || type == "state" || type == "function");
+        assert(type == "update" || type == "state" || type == "function", 'the query type must be either "update", "state", or "function"');
         cb = cb || function() {};
         err = err || function() {};
         // Handle either an array of strings or just a single query.
@@ -123,12 +126,8 @@ window.TorrentClient = Backbone.Model.extend({
         if(session) args['session'] = session;
         var success_callback = _.bind(function(data) {
             if (data == 'invalid request') {
-                assert(false);
-                var err = 'please close utorrent and bittorrent and share etc...';
-                alert(err);
-                setTimeout( _.bind(function() {
-                    this.reset();
-                }, this), 1000 );
+                setTimeout(_.bind(this.reset, this), 1000);
+                throw 'pairing occured with a torrent client that does not support the btapp api';
             } else if(!(typeof data === 'object') || 'error' in data) {
                 err();
             } else {
@@ -149,9 +148,11 @@ window.TorrentClient = Backbone.Model.extend({
 window.FalconTorrentClient = TorrentClient.extend({
     initialize: function(attributes) {
         TorrentClient.prototype.initialize.call(this, attributes);
+		
+		assert(('username' in attributes && 'password' in attributes) || 'remote_data' in attributes, 
+			'attempting to connect to client through falcon without providing the necessary credentials');
 
-        assert(typeof attributes === 'object' && (('username' in attributes && 'password' in attributes) || 'remote_data' in attributes));
-        this.username = attributes.username;
+		this.username = attributes.username;
         this.password = attributes.password;
         if ('remote_data' in attributes) {
             this.remote_data = attributes.remote_data;
@@ -217,7 +218,7 @@ window.FalconTorrentClient = TorrentClient.extend({
         }, this));
     },
     connect: function() {
-        assert(!this.falcon);
+        assert(!this.falcon, 'trying to connect with falcon already set');
         // set up some connection variables
         var opts = {
             success: _.bind(function(session) {
@@ -235,7 +236,7 @@ window.FalconTorrentClient = TorrentClient.extend({
     // This is the Btapp object's gateway to the actual client requests. These requests look slightly
     // different than those headed to a local client because they are encrypted.
     send_query: function(args, cb, err) {
-        assert(this.falcon);
+        assert(this.falcon, 'cannot send a query to the client without falcon properly connected');
 
         this.falcon.request(
             'POST',
@@ -243,8 +244,8 @@ window.FalconTorrentClient = TorrentClient.extend({
             {'btapp':'backbone.btapp.js'},
             args,
             function(data) {
-                assert('build' in data);
-                assert('result' in data);
+                assert('build' in data, 'expected build information in the falcon response');
+                assert('result' in data, 'expected result information in the falcon response');
                 cb(data.result);
             },
             _.bind(function() {
@@ -298,7 +299,7 @@ window.LocalTorrentClient = TorrentClient.extend({
     // plugin and using that plugin to ensure that Torque is downloaded and
     // running on the local machine.
     initialize_manager: function(attributes) {
-        assert(window.BtappPluginManager);
+        assert(window.BtappPluginManager, 'expected plugin.btapp.js to be loaded by now');
         this.manager = new BtappPluginManager(attributes);
         this.manager.bind('all', this.trigger, this);
     },
