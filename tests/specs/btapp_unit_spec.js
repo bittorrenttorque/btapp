@@ -203,8 +203,8 @@
 			it('triggers remove event', function() {
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
-				model.bind('remove', remove_callback);
 				var remove_callback = jasmine.createSpy();
+				model.bind('remove', remove_callback);
 				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
 				expect(remove_callback).toHaveBeenCalledWith('testkey', 'testvalue');
 				model.unbind('remove', remove_callback);
@@ -212,8 +212,8 @@
 			it('triggers remove:key event', function() {
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
-				model.bind('remove:' + 'testkey', remove_callback);
 				var remove_callback = jasmine.createSpy();
+				model.bind('remove:' + 'testkey', remove_callback);
 				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
 				expect(remove_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('remove:' + 'testkey', remove_callback);
