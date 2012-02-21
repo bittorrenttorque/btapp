@@ -105,7 +105,7 @@ window.BtappPluginManager = Backbone.Model.extend({
 
 
 
-	// DIALOG SPECIFIC FUNCTIONALITY
+	// Dialog specific functionality
 	// ---------------------------
 	// We didn't want to burdon the browser with loading in all the facebox code
 	// if we didn't need it...well here we are.
