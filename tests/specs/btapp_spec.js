@@ -16,7 +16,7 @@
 					this.btapp.bind('pairing:found', _.bind(function(info) {
 						this.paired = true;
 						expect(info.name).toEqual('Torque');
-						expect(info.version).toEqual('4.2');
+						expect(info.version).toEqual('4.2.1');
 					}, this));
 					this.btapp.connect();
 				});
