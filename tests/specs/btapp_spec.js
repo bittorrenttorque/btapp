@@ -56,11 +56,6 @@
 				this.btapp.disconnect();
 			});
 			it('returns btapp.bt functions from torque', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();
-				});
-
 				waitsFor(function() {
 					return 'create' in this.btapp.bt;
 				}, "functions", 5000);
