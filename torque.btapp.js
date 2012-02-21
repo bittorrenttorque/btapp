@@ -310,8 +310,8 @@ window.LocalTorrentClient = TorrentClient.extend({
         this.pairing.bind('all', this.trigger, this);
         
         var success = _.bind(function(data) {
-            if (data && data.version && data.version != 'unknown' && data.version == '4.2.1') { 
-                // Torque reports its version as 4.2.1
+            if (data && data.version && data.version != 'unknown' && data.version == Btapp.VERSION) { 
+                // We require that the version of torque you use must match the version of this library
                 this.url = 'http://127.0.0.1:' + data.port + '/btapp/';
                 this.pairing.stop();
                 _.defer(_.bind(this.trigger, this, 'client:connected'));

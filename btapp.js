@@ -1,4 +1,4 @@
-// Btapp.js 0.0.1
+// Btapp.js 4.2.1
 
 // (c) 2012 Patrick Williams, BitTorrent Inc.
 // Btapp may be freely distributed under the MIT license.
@@ -479,3 +479,5 @@ window.Btapp = BtappModel.extend({
         }
     }
 });
+
+Btapp.VERSION = '4.2.1'
