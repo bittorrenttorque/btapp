@@ -9,7 +9,7 @@ window.BtappPluginManager = Backbone.Model.extend({
 	//All BitTorrent products have this number appended to their window names
 	BT_WINDOW_HASH: '4823',
 	PRODUCT:'Torque',
-	MIME_TYPE: 'application/x-btlauncher',
+	MIME_TYPE: 'application/x-bittorrent-torque',
 
 	loading: false,
 	loaded: false,
