@@ -105,7 +105,7 @@ window.TorrentClient = Backbone.Model.extend({
 					args.push(arguments[i]);
 				}
 			}
-			path += encodeURIComponent(jQuery.toJSON(args));
+			path += encodeURIComponent(JSON.stringify(args));
 			path += ')/';
 			this.query('function', [path], session, cb, function() {});
 			this.trigger('queries', url);
@@ -122,7 +122,7 @@ window.TorrentClient = Backbone.Model.extend({
 
 		var args = {};
 		args['type'] = type;
-		if(queries) args['queries'] = jQuery.toJSON(queries);
+		if(queries) args['queries'] = JSON.stringify(queries);
 		if(session) args['session'] = session;
 		var success_callback = _.bind(function(data) {
 			if (data == 'invalid request') {
