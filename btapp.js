@@ -242,7 +242,6 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 				this.trigger('add', key, value);
 				this.trigger('add:' + key, value);
 			}
-			this.trigger('change:' + key, value);
 		}, this));
 	},
 	verifyUrl: function(url) {
