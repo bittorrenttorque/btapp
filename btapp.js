@@ -480,4 +480,5 @@ window.Btapp = BtappModel.extend({
 	}
 });
 
+//The version of this library should always match the version of torque that it requires.
 Btapp.VERSION = '4.2.1'

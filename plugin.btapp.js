@@ -5,11 +5,11 @@
 
 window.BtappPluginManager = Backbone.Model.extend({
 	//Avoid DOM collisions by having a ridiculous id.
-	BTAPP_PLUGIN_ID: 'btapp_plugin_1982391823981239812389',
+	pid: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
 	//All BitTorrent products have this number appended to their window names
-	BT_WINDOW_HASH: '4823',
-	PRODUCT:'Torque',
-	MIME_TYPE: 'application/x-bittorrent-torque',
+	window_hash: '4823',
+	product:'Torque',
+	mime_type: 'application/x-bittorrent-torque',
 
 	loading: false,
 	loaded: false,
@@ -43,23 +43,23 @@ window.BtappPluginManager = Backbone.Model.extend({
 	// Plugin Specific Functionality
 	// ---------------------------
 	plugin: function() {
-		return document.getElementById(this.BTAPP_PLUGIN_ID);
+		return document.getElementById(this.pid);
 	},
 	// Add the plugin object to the DOM. This doesn't necessarily mean that
 	// we'll have the functionality. We'll need to check the elements properties
 	// to determine if the browser supports our mime type...if only IE supported
 	// listing the mime types the browser supports
 	add_plugin: function(cb) {
-		assert(jQuery('#' + this.BTAPP_PLUGIN_ID).length == 0);
+		assert(jQuery('#' + this.pid).length == 0);
 		var obj = document.createElement('object');
-		var onload = this.BTAPP_PLUGIN_ID + 'onload';
+		var onload = this.pid + 'onload';
 		window[onload] = _.once(function() {
 			cb();
 		});
 		var div = document.createElement('div');			
 		jQuery(div).css({'position':'absolute','left':'-999em'});
 		div.innerHTML =
-			'<object id="' + this.BTAPP_PLUGIN_ID + '" type="' + this.MIME_TYPE + '" width="0" height="0">' +
+			'<object id="' + this.pid + '" type="' + this.mime_type + '" width="0" height="0">' +
 				'<param name="onload" value="' + onload + '" />' +
 			'</object>';
 
@@ -98,7 +98,7 @@ window.BtappPluginManager = Backbone.Model.extend({
 	// Lets ask the plugin if the specific client is running.
 	torque_running: function() {
 		var plugin = this.plugin();
-		var clients = plugin.isRunning(this.PRODUCT + this.BT_WINDOW_HASH);
+		var clients = plugin.isRunning(this.product + this.window_hash);
 		var running = clients && clients.length > 0;
 		return running;
 	},
@@ -136,7 +136,7 @@ window.BtappPluginManager = Backbone.Model.extend({
 		paragraph.text('This site requires the BitTorrent Torque plugin.');
 		dialog.append(paragraph);
 
-		var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/btlauncher.msi">Download</a>');
+		var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/Torque.msi">Download</a>');
 		button.click(_.bind(this.trigger, this, 'downloading_plugin'));
 		dialog.append(button);
 		dialog.hide();
@@ -175,12 +175,11 @@ window.BtappPluginManager = Backbone.Model.extend({
 				// Allow launch 10 seconds until the process shows up.
 				return;
 			}
-			var version = '';
 			var switches = {'install':true};
 			this.trigger('plugin:install_torque', switches);
 			if(switches.install) {
 				this.downloading_product = true;
-				this.plugin().downloadProgram(this.PRODUCT, version, this.torque_install_callback);
+				this.plugin().downloadProgram(this.product, Btapp.VERSION, this.torque_install_callback);
 			}
 		}
 	},
