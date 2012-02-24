@@ -9,14 +9,10 @@ window.Pairing = Backbone.Model.extend({
 		this.curport = -1;
 		this.numfound = 0; // track # found so can trigger "none found" event
 		this.local_url = null;
-		this._cancel = false;
 		this.resultImg = null;
 		this.highest_port_possbile = 50000;
 		this.realistic_give_up_after_port = 15000; // don't bother scanning all the ports.
 		assert( this.realistic_give_up_after_port < this.highest_port_possbile );
-	},
-	stop: function() {
-		this._cancel = true;
 	},
 	scan: function(options) {
 		this.options = options || {};
@@ -45,43 +41,68 @@ window.Pairing = Backbone.Model.extend({
 		_this.i = 0;
 		_this.pingimg();
 	},
+	get_domain: function() {
+		return 'http://127.0.0.1';
+	},
+	get_ping_img_url: function(port) {
+		return this.get_domain() + ':' + port + '/gui/pingimg';
+	},
+	get_pair_url: function(port) {
+		return this.get_domain() + ':' + port + '/gui/pair?name=' + encodeURIComponent(window.location.origin);
+	},
 	pingimg: function() {
-		if (this._cancel) { return; }
 		this.curport = 7 * Math.pow(this.i, 3) + 3 * Math.pow(this.i, 2) + 5 * this.i + 10000;
-		var url = 'http://127.0.0.1:' + this.curport + '/gui/pingimg';
+		var url = this.get_ping_img_url(this.curport);
 		this.resultImg.src = url;
 	},
 	port_found: function(port) {
-		if (this._cancel) { return; }
 		// found a listening port. now check its version...
 		this.local_url = "http://127.0.0.1:" + port;
 
-		var _this = this;
 		this.test_port({
-			success: function(data, status, xhr) {
-				_this.numfound += 1;
-				if (data && data.version) {
-					data.port = port;
-					_this.trigger('pairing:found', data);
-				} else if (data == 'invalid request') {
-					// utorrent/bittorrent old version without api v2
-					_this.trigger('pairing:found', { 'version':'unknown', 'name':'unknown', 'port':port } );
-				} else {
-					// not sure what other things could be
-					// returned, but other processes or versions
-					// could return weird stuff.
-					_this.trigger('pairing:found', { 'version':'unknown', 'name':'unknown', 'port':port, 'data': data } );
+			success: _.bind(function(data, status, xhr) {
+				this.numfound += 1;
+				
+				var options = { 
+					'version':(typeof data === 'object' ? data.version : 'unknown'),
+					'name':(typeof data === 'object' ? data.name : 'unknown'), 
+					'port':port, 
+					'continue_scan':true, 
+					'attempt_authorization':true 
+				};
+				
+				if (data == 'invalid request' || (data && data.version)) {
+					this.trigger('pairing:found', options);
 				}
-				// keep scanning for other clients!
-				_this.i++;
-				_this.pingimg();
 
-			},
-			error: function(xhr, status, text) {
+				if(options.attempt_authorization) {
+					this.authorize_port(port);
+				}
+				if(options.continue_scan) {
+					// keep scanning for other clients!
+					this.i++;
+					this.pingimg();
+				}	
+			}, this),
+			error: _.bind(function(xhr, status, text) {
 				// a client responded to /gui/pingimg but had some other error on fetching "/version"
 				// should not happen, but report an event anyway.
-				_this.trigger('pairing:error', { xhr: xhr, status: status, text: text } );
-			}
+				this.trigger('pairing:error', { xhr: xhr, status: status, text: text } );
+			}, this)
+		});
+	},
+	authorize_port_success: function(port, data, status, xhr) {
+		this.trigger('pairing:authorized', {'port':port, 'key':data});
+	},
+	authorize_port_error: function(port) {
+		this.trigger('pairing:authorization_failed', port);
+	},
+	authorize_port: function(port) {
+		jQuery.ajax({
+			url: this.get_pair_url(port),
+			dataType: 'jsonp',
+			success: _.bind(this.authorize_port_success, this, port),
+			error: _.bind(this.authorize_port_error, this, port)
 		});
 	},
 	test_port: function(opts) {

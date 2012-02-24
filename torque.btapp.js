@@ -272,33 +272,22 @@ window.LocalTorrentClient = TorrentClient.extend({
 	initialize: function(attributes) {
 		TorrentClient.prototype.initialize.call(this, attributes);
 		this.btapp = attributes.btapp;
-
-		// We want to allow developers to only include backbone.btapp.js if they want to...
-		// However if they've already included plugin.btapp.js, don't deprive them of the
-		// load time...
-		if(window.BtappPluginManager) {
-			this.initialize_manager(attributes);
-		} else {
-			jQuery.getScript(
-				'http://apps.bittorrent.com/torque/btapp/plugin.btapp.js',
-				_.bind(this.initialize_manager, this, attributes)
-			);
-		}
-
-		// Same goes for pairing.btapp.js
-		if(window.Pairing) {
-			this.initialize_pairing();
-		} else {
-			jQuery.getScript(
-				'http://apps.bittorrent.com/torque/btapp/pairing.btapp.js',
-				_.bind(this.initialize_pairing, this)
-			);
-		}
+		this.initialize_manager(attributes);
+		this.initialize_pairing();
 	},
 	// We have a seperate object that is responsible for managing the browser
 	// plugin and using that plugin to ensure that Torque is downloaded and
 	// running on the local machine.
 	initialize_manager: function(attributes) {
+		//if we don't have what we need, fetch it and try again
+		if(!window.BtappPluginManager) {
+			jQuery.getScript(
+				'http://apps.bittorrent.com/torque/btapp/plugin.btapp.js',
+				_.bind(this.initialize_manager, this, attributes)
+			);
+			return;
+		}
+	
 		assert(window.BtappPluginManager, 'expected plugin.btapp.js to be loaded by now');
 		this.manager = new BtappPluginManager(attributes);
 		this.manager.bind('all', this.trigger, this);
@@ -306,21 +295,53 @@ window.LocalTorrentClient = TorrentClient.extend({
 	// We have a seperate object responsible for determining exactly which
 	// port the torrent client is bound to.
 	initialize_pairing: function() {
+		//if we don't have what we need, fetch it and try again
+		if(!window.Pairing) {
+			jQuery.getScript(
+				'http://apps.bittorrent.com/torque/btapp/pairing.btapp.js',
+				_.bind(this.initialize_pairing, this)
+			);
+			return;
+		}
+		
+		//if we don't have what we need, fetch it and try again
+		if(!jQuery.jStorage) {
+			jQuery.getScript(
+				'http://apps.bittorrent.com/torque/jStorage/jstorage.min.js',
+				_.bind(this.initialize_pairing, this)
+			);
+			return;
+		}
+		
+		//all right...ready to roll.
 		this.pairing = new Pairing;
 		this.pairing.bind('all', this.trigger, this);
 
-		var success = _.bind(function(data) {
-			if (data && data.version && data.version != 'unknown' && data.version == Btapp.VERSION) {
+		this.pairing.bind('pairing:found', _.bind(function(options) {
+			if(options && options.version && options.version != 'unknown' && options.version == Btapp.VERSION) {
 				// We require that the version of torque you use must match the version of this library
-				this.url = 'http://127.0.0.1:' + data.port + '/btapp/';
-				this.pairing.stop();
-				_.defer(_.bind(this.trigger, this, 'client:connected'));
+				var key = jQuery.jStorage.get('pairing_key');
+				if(key) {
+					options.continue_scan = false;
+					options.attempt_authorization = false;
+					this.connect_to_authenticated_port(options.port, key);
+				} else {
+					options.continue_scan = false;
+					options.attempt_authorization = true;
+				}
 			}
-		}, this);
+		}, this));
+		this.pairing.bind('pairing:authorized', _.bind(function(options) {
+			jQuery.jStorage.set('pairing_key', options.key);
+			this.connect_to_authenticated_port(options.port, options.key);
+		}, this));
 
-		this.pairing.bind('pairing:found', success);
 		this.pairing.bind('pairing:nonefound', _.bind(this.reset, this));
 		this.reset();
+	},
+	connect_to_authenticated_port: function(port, key) {
+		this.url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
+		this.trigger('client:connected');
 	},
 	reset: function() {
 		// Reset is called upon initialization (or when we load pairing.btapp.js)
