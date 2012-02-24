@@ -41,6 +41,7 @@ window.BtappBase = {
 		this.session = null;
 	},
 	updateState: function(session, add, remove, url) {
+		assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + url + '")...these should have been trimmed off');
 		this.session = session;
 		if(!this.url) {
 			this.url = url;
@@ -279,7 +280,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 				}
 
 				if(typeof removed === 'object') {
-					this.updateRemoveObjectState(session, added, removed, url, v, attributes);
+					this.updateRemoveObjectState(session, added, removed, childurl, v, attributes);
 				} else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
 					this.updateRemoveFunctionState(v);
 				} else if(v != 'id') {

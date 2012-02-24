@@ -57,12 +57,12 @@
 			});
 			it('adds a BtappCollection', function() {
 				var model = new BtappModel({'id':'btapp'});
-				model.updateState('testsession', {'torrent':{}}, null, 'btapp/');
+				model.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, 'btapp/');
 				expect(model.get('torrent') instanceof BtappCollection).toBeTruthy();
 			});
 			it('adds a BtappCollection and ignores "all" when populating', function() {
 				var model = new BtappModel({'id':'btapp'});
-				model.updateState('testsession', {'torrent':{'all':{'01234':{}}}}, null, 'testurl');
+				model.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, 'testurl');
 				var torrent = model.get('torrent').get('01234');
 				expect(torrent instanceof BtappModel).toBeTruthy();
 			});
@@ -72,12 +72,12 @@
 				var collection = new BtappCollection;
 				var exception = 'cannot updateState with an invalid collection url';
 				expect(function() { 
-					collection.updateState('testsession', null, null, 'testurl'); 
+					collection.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, 'testurl'); 
 				}).toThrow(exception);
 			});
 			it('adds models', function() {
 				var collection = new BtappCollection;
-				collection.updateState('testsession', {'key1':{},'key2':{}}, null, 'btapp/torrent/');
+				collection.updateState('testsession', {'key1':{'torrentname':'name1'},'key2':{'torrentname':'name1'}}, null, 'btapp/torrent/');
 				expect(collection.length).toEqual(2);
 				expect(collection.get('key1') instanceof BtappModel).toBeTruthy();
 				expect(collection.get('key2') instanceof BtappModel).toBeTruthy();
@@ -140,30 +140,30 @@
 				var collection = new BtappCollection;
 				var add_callback = jasmine.createSpy();
 				collection.bind('add', add_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{} } }, null, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
 				expect(add_callback).toHaveBeenCalled();
 			});
 			it('triggers add:key event', function() {
 				var collection = new BtappCollection;
 				var add_callback = jasmine.createSpy();
 				collection.bind('add:' + 'ABCD', add_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{} } }, null, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
 				expect(add_callback).toHaveBeenCalled();
 			});
 			it('triggers remove event', function() {
 				var collection = new BtappCollection;
 				var remove_callback = jasmine.createSpy();
 				collection.bind('remove', remove_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{} } }, null, 'btapp/torrent/');
-				collection.updateState('testsession', null, {'all':{'ABCD':{} } }, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
+				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, 'btapp/torrent/');
 				expect(remove_callback).toHaveBeenCalled();
 			});
 			it('triggers remove:key event', function() {
 				var collection = new BtappCollection;
 				var remove_callback = jasmine.createSpy();
 				collection.bind('remove:' + 'ABCD', remove_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{} } }, null, 'btapp/torrent/');
-				collection.updateState('testsession', null, {'all':{'ABCD':{} } }, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
+				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, 'btapp/torrent/');
 				expect(remove_callback).toHaveBeenCalled();
 			});
 			it('triggers change event when a model changes in the collection', function() {
