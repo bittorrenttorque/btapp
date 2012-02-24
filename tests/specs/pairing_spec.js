@@ -5,10 +5,12 @@
 				runs(function() {
 					this.pairing = new Pairing;
 					this.paired = false;
-					this.pairing.bind('pairing:found', _.bind(function(info) {
+					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
-						expect(info.name).toEqual('Torque');
-						expect(info.version).toEqual(Btapp.VERSION);
+						expect(options.name).toEqual('Torque');
+						expect(options.version).toEqual(Btapp.VERSION);
+						options.attempt_authorization = false;
+						options.continue_scan = false;
 					}, this));
 					this.pairing.scan();
 				});
@@ -34,6 +36,8 @@
 							expect(options.port).toEqual(this.port);
 						}
 						this.port = options.port;
+						options.attempt_authorization = false;
+						options.continue_scan = false;
 					}, this));
 					this.pairing.scan();
 				});
@@ -45,7 +49,6 @@
 				runs(function() {
 					expect(this.paired).toBeTruthy();
 					this.paired = false;
-					this.pairing.stop();
 					this.pairing.scan();
 				});
 				
