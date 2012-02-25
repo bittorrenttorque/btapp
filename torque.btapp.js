@@ -340,8 +340,25 @@ window.LocalTorrentClient = TorrentClient.extend({
 		this.reset();
 	},
 	connect_to_authenticated_port: function(port, key) {
-		this.url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
-		this.trigger('client:connected');
+		var cb = function() {
+			this.url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
+			this.trigger('client:connected');
+		};
+		var err = function() {
+			jQuery.jStorage.flush();
+			this.reset();
+		};
+	
+		jQuery.ajax({
+			url: 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key,
+			dataType: 'jsonp',
+			context: this,
+			success: function(data) {
+				if(data === 'invalid request') err.call(this);
+				else cb.call(this);
+			},
+			error: err
+		});
 	},
 	reset: function() {
 		// Reset is called upon initialization (or when we load pairing.btapp.js)
