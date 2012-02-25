@@ -35,7 +35,7 @@ window.BtappPluginManager = Backbone.Model.extend({
 			'ensure_plugin_installed',
 			'ensure_plugin_and_product_available'
 		);
-		_.defer(this.ensure_plugin_and_product_available);
+		jQuery(this.ensure_plugin_and_product_available);
 	},
 
 
