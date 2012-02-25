@@ -77,6 +77,7 @@ function listen_for_torrents() {
 		btapp.bind('add:torrent', listen_for_torrents);
 	}
 }
+listen_for_torrents.call(this);
 ```
 
 If this seems a bit messy for you, there is an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
