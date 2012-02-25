@@ -7,7 +7,7 @@ Btapp.js provides access to a browser plugin version of uTorrent/BitTorrent via 
 
 The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/backbone.btapp.html "source") is available. An [example application](http://pwmckenna.github.com/nud.gs/ "see it run!") with [annotated source](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "annotation") is also available through [GitHub](http://github.com/pwmckenna/nud.gs/ "source").
 
-#### Downloads & Dependencies
+#### Downloads and Dependencies
 [Nightly Version (4.2.1)](https://raw.github.com/pwmckenna/btapp/master/btapp.js "btapp.js") 28kb, Full source, lots of comments
 [Production Version (4.2.1)](http://apps.bittorrent.com/torque/btapp/btapp.js "btapp.js") 
 
