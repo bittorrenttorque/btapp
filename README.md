@@ -10,7 +10,8 @@ The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"),
 #### Downloads and Dependencies
 [Github Bleeding Edge Version (4.2.1)](https://raw.github.com/pwmckenna/btapp/master/btapp.js "btapp.js") 20kb, Full source, lots of comments  
 [Development Version (4.2.1)](http://apps.bittorrent.com/torque/btapp/btapp.js "btapp.js") 20kb, Full source, lots of comments  
-Production version is on the way. It will be minified and include the the *.btapp.js dependencies.
+  
+A Production version is on the way. It will be minified and include the the *.btapp.js dependencies.
 
 Btapp.js's has all of Backbone.js' dependencies, but also requires json2...in addition, there are helpful functions that you're welcome to include (though they're be pulled in dynamically as needed if you don't)
 [backbone.js](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.3/backbone-min.js "backbone") ([documentation](http://documentcloud.github.com/backbone/ "backbone"))  
