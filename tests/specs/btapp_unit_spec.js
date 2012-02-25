@@ -29,9 +29,9 @@
 			});
 			it('throws an error if changing an attribute to the same value', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
-				var exception = 'trying to set a variable to the existing value';
-				expect(function() { model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, 'testurl') }).toThrow(exception);
+				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl/');
+				var exception = 'trying to set a variable to the existing value [testurl/testkey/ -> "testvalue"]';
+				expect(function() { model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, 'testurl/') }).toThrow(exception);
 			});
 			it('adds a function', function() {
 				var model = new BtappModel({'id':'test'});
