@@ -449,6 +449,7 @@ window.Btapp = BtappModel.extend({
 		}
 	},
 	onEvent: function(session, data) {
+		this.trigger('sync', data);
 		// There are two types of events...state updates and callbacks
 		// Handle state updates the same way we handle the initial tree building
 		if('add' in data || 'remove' in data) {
