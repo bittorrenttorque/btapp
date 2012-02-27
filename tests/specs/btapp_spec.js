@@ -104,5 +104,26 @@
 				}, "torrent removed", 5000); 
 			});
 		});
+		describe('Btapp Interactive Client Function Calls', function() {
+			it('shows a file selection dialog and returns the files selected', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect();	
+					this.files = null;
+				});
+				
+				waitsFor(function() {
+					return this.btapp.bt.browseforfiles;
+				});
+				
+				runs(function() {
+					this.btapp.bt.browseforfiles(function() {}, _.bind(function(files) { debugger; this.files = files }, this));
+				});
+				
+				waitsFor(function() {
+					return this.files;
+				}, 10000, 'waiting for a file to be selected');
+			});
+		});
 	});
 }).call(this);
