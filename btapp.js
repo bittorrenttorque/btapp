@@ -261,7 +261,8 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		delete this.bt[v];
 	},
 	updateRemoveAttributeState: function(v, removed, attributes) {
-		assert(this.get(v) === unescape(removed), 'trying to remove an attribute, but did not provide the correct previous value');
+		removed = typeof removed === 'string' ? unescape(removed) : removed;
+		assert(this.get(v) === removed, 'trying to remove an attribute, but did not provide the correct previous value');
 		attributes[v] = this.get(v);
 	},
 	updateRemoveState: function(session, add, remove, url) {
@@ -314,9 +315,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v, attributes) {
 		// Set non function/object variables as model attributes
-		if(typeof added === 'string') {
-			added = unescape(added);
-		}
+		added = (typeof added === 'string') ? unescape(added) : added;
 		assert(!(this.get(escape(v)) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
 		if(!(removed === undefined)) {
 			assert(this.get(escape(v)) === removed, 'trying to update an attribute, but did not provide the correct previous value');

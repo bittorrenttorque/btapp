@@ -53,7 +53,7 @@
 				expect(model.get('testkey')).not.toEqual(0);
 				expect(model.get('testkey')).not.toEqual('');
 				expect(model.get('testkey')).not.toEqual(null);
-				model.updateState('testsession', null, {'testkey':0}, 'testurl/');
+				model.updateState('testsession', null, {'testkey':false}, 'testurl/');
 				expect(model.get('testkey')).toEqual(null);
 				expect(model.get('testkey')).not.toEqual(false);
 				expect(model.get('testkey')).not.toEqual(0);
@@ -228,7 +228,7 @@
 				var add_callback = jasmine.createSpy();
 				model.bind('add', add_callback);
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
-				expect(add_callback).toHaveBeenCalledWith('testkey', 'testvalue');
+				expect(add_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('add', add_callback);
 			});
 			it('triggers add:key event', function() {
@@ -245,7 +245,7 @@
 				var remove_callback = jasmine.createSpy();
 				model.bind('remove', remove_callback);
 				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
-				expect(remove_callback).toHaveBeenCalledWith('testkey', 'testvalue');
+				expect(remove_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('remove', remove_callback);
 			});
 			it('triggers remove:key event', function() {
