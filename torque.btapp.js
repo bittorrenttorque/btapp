@@ -336,7 +336,7 @@ window.LocalTorrentClient = TorrentClient.extend({
 			this.connect_to_authenticated_port(options.port, options.key);
 		}, this));
 
-		this.pairing.bind('pairing:nonefound', _.bind(this.reset, this));
+		this.pairing.bind('pairing:nonefound', _.bind(this.delayed_reset, this) );
 		this.reset();
 	},
 	connect_to_authenticated_port: function(port, key) {
@@ -359,6 +359,9 @@ window.LocalTorrentClient = TorrentClient.extend({
 			},
 			error: err
 		});
+	},
+	delayed_reset: function() {
+		setTimeout( _.bind(function() { this.reset() }, this), 1000 );
 	},
 	reset: function() {
 		// Reset is called upon initialization (or when we load pairing.btapp.js)
