@@ -14,9 +14,14 @@ jQuery(function() {
 	window.btapp = new Btapp;
 	btapp.bind('sync', function(data) {
 		console.log('---- BEGIN SYNC ----');
+		console.log('existing state: ');
+		console.log(btapp);
+		console.log('sync data: ');
 		console.log(data);
 		print(data);
 		console.log('---- FINISH SYNC ----');
+		console.log('');
+		console.log('');
 		console.log('');
 		console.log('');
 	});
