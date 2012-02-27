@@ -148,7 +148,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 
 			// Elements that are in remove aren't necessarily being removed,
 			// they might alternatively be the old value of a variable that has changed
-			if(!added) {
+			if(added === undefined) {
 				// Most native objects coming from the client have an "all" layer before their variables,
 				// There is no need for the additional layer in javascript so we just flatten the tree a bit.
 				if(v == 'all') {
@@ -272,7 +272,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			var v = escape(uv);
 			var childurl = url + v + '/';
 
-			if(!added) {
+			if(added === undefined) {
 				//special case all
 				if(v == 'all') {
 					this.updateState(this.session, added, removed, childurl);
@@ -317,7 +317,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		if(typeof added === 'string') {
 			added = unescape(added);
 		}
-		assert(this.get(escape(v)) != added, 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
+		assert(!(this.get(escape(v)) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
 		if(removed) {
 			assert(this.get(escape(v)) === removed, 'trying to update an attribute, but did not provide the correct previous value');
 		}

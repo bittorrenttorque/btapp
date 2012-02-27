@@ -33,6 +33,45 @@
 				var exception = 'trying to set a variable to the existing value [testurl/testkey/ -> "testvalue"]';
 				expect(function() { model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, 'testurl/') }).toThrow(exception);
 			});
+			it('handles adding and removing attributes with value 0', function() {
+				var model = new BtappModel({'id':'test'});
+				model.updateState('testsession', {'testkey':0}, undefined, 'testurl/');
+				expect(model.get('testkey')).toEqual(0);
+				expect(model.get('testkey')).not.toEqual(false);
+				expect(model.get('testkey')).not.toEqual('');
+				expect(model.get('testkey')).not.toEqual(null);
+				model.updateState('testsession', null, {'testkey':0}, 'testurl/');
+				expect(model.get('testkey')).toEqual(null);
+				expect(model.get('testkey')).not.toEqual(false);
+				expect(model.get('testkey')).not.toEqual(0);
+				expect(model.get('testkey')).not.toEqual('');
+			});
+			it('handles adding and removing attributes with value false', function() {
+				var model = new BtappModel({'id':'test'});
+				model.updateState('testsession', {'testkey':false}, undefined, 'testurl/');
+				expect(model.get('testkey')).toEqual(false);
+				expect(model.get('testkey')).not.toEqual(0);
+				expect(model.get('testkey')).not.toEqual('');
+				expect(model.get('testkey')).not.toEqual(null);
+				model.updateState('testsession', null, {'testkey':0}, 'testurl/');
+				expect(model.get('testkey')).toEqual(null);
+				expect(model.get('testkey')).not.toEqual(false);
+				expect(model.get('testkey')).not.toEqual(0);
+				expect(model.get('testkey')).not.toEqual('');
+			});
+			it('handles adding and removing attributes with value \'\'', function() {
+				var model = new BtappModel({'id':'test'});
+				model.updateState('testsession', {'testkey':''}, undefined, 'testurl/');
+				expect(model.get('testkey')).toEqual('');
+				expect(model.get('testkey')).not.toEqual(0);
+				expect(model.get('testkey')).not.toEqual(false);
+				expect(model.get('testkey')).not.toEqual(null);
+				model.updateState('testsession', null, {'testkey':''}, 'testurl/');
+				expect(model.get('testkey')).toEqual(null);
+				expect(model.get('testkey')).not.toEqual(false);
+				expect(model.get('testkey')).not.toEqual(0);
+				expect(model.get('testkey')).not.toEqual('');
+			});
 			it('adds a function', function() {
 				var model = new BtappModel({'id':'test'});
 				model.client = new LocalTorrentClient({'btapp':model});
