@@ -151,7 +151,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 			if(added === undefined) {
 				// Most native objects coming from the client have an "all" layer before their variables,
 				// There is no need for the additional layer in javascript so we just flatten the tree a bit.
-				if(v == 'all') {
+				if(v === 'all') {
 					this.updateState(this.session, added, removed, childurl);
 					continue;
 				}
@@ -169,7 +169,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	},
 	updateAddObjectState: function(session, added, removed, childurl, v) {
 		var model = this.get(v);
-		if(!model) {
+		if(model === undefined) {
 			model = new BtappModel({'id':v});
 			model.url = childurl;
 			model.client = this.client;
@@ -195,7 +195,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 
 			// Most native objects coming from the client have an "all" layer before their variables,
 			// There is no need for the additional layer in javascript so we just flatten the tree a bit.
-			if(v == 'all') {
+			if(v === 'all') {
 				this.updateState(this.session, added, removed, childurl);
 				continue;
 			}
@@ -261,7 +261,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		delete this.bt[v];
 	},
 	updateRemoveAttributeState: function(v, removed, attributes) {
-		assert(this.get(v) == unescape(removed), 'trying to remove an attribute, but did not provide the correct previous value');
+		assert(this.get(v) === unescape(removed), 'trying to remove an attribute, but did not provide the correct previous value');
 		attributes[v] = this.get(v);
 	},
 	updateRemoveState: function(session, add, remove, url) {
@@ -274,7 +274,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 
 			if(added === undefined) {
 				//special case all
-				if(v == 'all') {
+				if(v === 'all') {
 					this.updateState(this.session, added, removed, childurl);
 					continue;
 				}
@@ -293,7 +293,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	updateAddObjectState: function(session, added, removed, childurl, v, attributes) {
 		// Don't recreate a variable we already have. Just update it.
 		var model = this.get(v);
-		if(!model) {
+		if(model === undefined) {
 			// This is the only hard coding that we should do in this library...
 			// As a convenience, torrents and their file/peer lists are treated as backbone collections
 			// the same is true of rss_feeds and filters...its just a more intuitive way of using them
@@ -318,7 +318,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			added = unescape(added);
 		}
 		assert(!(this.get(escape(v)) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
-		if(removed) {
+		if(!(removed === undefined)) {
 			assert(this.get(escape(v)) === removed, 'trying to update an attribute, but did not provide the correct previous value');
 		}
 		attributes[escape(v)] = added;
@@ -332,7 +332,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			var childurl = url + v + '/';
 
 			// Special case all. It is a redundant layer that exist for the benefit of the torrent client
-			if(v == 'all') {
+			if(v === 'all') {
 				this.updateState(this.session, added, removed, childurl);
 				continue;
 			}
