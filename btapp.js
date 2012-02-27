@@ -237,10 +237,10 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			//check if this is a value that has been unset
 			if(value === undefined) {
 				var prev = this.previous(key);
-				this.trigger('remove', key, prev);
+				this.trigger('remove', prev);
 				this.trigger('remove:' + key, prev);
 			} else if(this.previous(key) === undefined) {
-				this.trigger('add', key, value);
+				this.trigger('add', value);
 				this.trigger('add:' + key, value);
 			}
 		}, this));
