@@ -13,7 +13,7 @@ The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"),
   
 A Production version is on the way. It will be minified and include the the *.btapp.js dependencies.
 
-Btapp.js's has all of Backbone's dependencies, but also requires json2...the *.btapp.js files contain functionality that is situation specific, and will be pulled in dynamically when needed by btapp.js, or you can include them yourself for the speed boost. All minified production version of btapp.js will come bundled with all of these.
+Btapp.js's has all of Backbone's dependencies, but also requires json2...the *.btapp.js files contain functionality that is situation specific, and will be pulled in dynamically when needed by btapp.js, or you can include them yourself for the speed boost (they will be included by default in production versions of btapp.js).
   
 [backbone.js v0.9.1](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.1/backbone-min.js "backbone") ([documentation](http://documentcloud.github.com/backbone/ "backbone"))  
 [json2.js](http://cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js "json2") ([documentation](http://www.json.org/js.html "json2"))  
