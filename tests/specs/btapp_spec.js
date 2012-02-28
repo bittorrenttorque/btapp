@@ -105,11 +105,11 @@
 			});
 		});
 		describe('Btapp Interactive Client Function Calls', function() {
-			it('shows a file selection dialog and returns the files selected', function() {
+			it('shows a file selection dialog and creates a torrent', function() {
 				runs(function() {
 					this.btapp = new Btapp;
 					this.btapp.connect();	
-					this.files = null;
+					this.created = false;
 				});
 				
 				waitsFor(function() {
@@ -117,12 +117,27 @@
 				});
 				
 				runs(function() {
-					this.btapp.bt.browseforfiles(function() {}, _.bind(function(files) { debugger; this.files = files }, this));
+					this.btapp.bt.browseforfiles(
+						function() {}, 
+						_.bind(function(files) { 
+							this.files = files;
+							this.btapp.bt.create(
+								function() {}, 
+								'', 
+								_.values(this.files), 
+								_.bind(function() { this.created = true; }, this)
+							); 
+						}, this)
+					);
 				});
 				
 				waitsFor(function() {
 					return this.files;
-				}, 10000, 'waiting for a file to be selected');
+				}, 20000, 'file selection');
+
+				waitsFor(function() {
+					return this.created;
+				}, 20000, 'torrent creation');
 			});
 		});
 	});
