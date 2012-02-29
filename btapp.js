@@ -32,7 +32,7 @@ function assert(b, err) { if(!b) throw err; }
 // the client become unreachable.
 window.BtappBase = {
 	initialize: function() {
-		_.bindAll(this, 'initializeValues', 'updateState', 'clearState');
+		_.bindAll(this, 'initializeValues', 'updateState', 'clearState', 'isEmpty', 'destructor');
 		this.initializeValues();
 	},
 	initializeValues: function() {
@@ -87,7 +87,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	initialize: function(models, options) {
 		Backbone.Collection.prototype.initialize.apply(this, arguments);
 		BtappBase.initialize.apply(this, arguments);
-		_.bindAll(this, 'destructor', 'customAddEvent', 'customRemoveEvent', 'customChangeEvent');
+		_.bindAll(this, 'customAddEvent', 'customRemoveEvent', 'customChangeEvent');
 		
 		this.bind('add', this.customAddEvent);
 		this.bind('remove', this.customRemoveEvent)
@@ -126,8 +126,11 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	updateRemoveObjectState: function(session, added, removed, childurl, v, attributes) {
 		var model = this.get(v);
 		assert(model, 'trying to remove a model that does not exist');
+		assert(model instanceof BtappModel, 'trying to remove an object, but the existing value is not a model');
 		model.updateState(session, added, removed, childurl);
-		this.remove(model);
+		if(model.isEmpty()) {
+			this.remove(model);
+		}
 	},
 	updateRemoveFunctionState: function(v) {
 		assert(v in this.bt, 'trying to remove a function that does not exist');
@@ -208,6 +211,9 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 				this.updateAddAttributeState(session, added, removed, childurl, v);
 			}
 		}
+	},
+	isEmpty: function() {
+		return jQuery.isEmptyObject(this.bt) && this.length === 0;
 	}
 });
 
@@ -223,7 +229,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	initialize: function(attributes) {
 		Backbone.Model.prototype.initialize.apply(this, arguments);
 		BtappBase.initialize.apply(this, arguments);
-		_.bindAll(this, 'destructor', 'customEvents');
+		_.bindAll(this, 'customEvents');
 		
 		this.bind('change', this.customEvents);
 	},
@@ -254,7 +260,9 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		assert(model, 'trying to remove a model that does not exist');
 		assert(model instanceof BtappModel || model instanceof BtappCollection, 'expected removed attribute to be an instance of BtappModel or BtappCollection');
 		model.updateState(session, added, removed, childurl);
-		attributes[v] = this.get(v);
+		if(model.isEmpty()) {
+			attributes[v] = this.get(v);
+		}
 	},
 	updateRemoveFunctionState: function(v) {
 		assert(v in this.bt, 'trying to remove a function that does not exist');
@@ -345,6 +353,10 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			}	
 		}
 		this.set(attributes);
+	},
+	isEmpty: function() {
+		var keys = _.keys(this.toJSON());
+		return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
 	}
 });
 
