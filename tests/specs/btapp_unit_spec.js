@@ -72,6 +72,40 @@
 				expect(model.get('testkey')).not.toEqual(0);
 				expect(model.get('testkey')).not.toEqual('');
 			});
+			it('adds multiple attributes and removes them one at a time', function() {
+				var model = new BtappModel({'id':'test'});
+				model.client = new LocalTorrentClient({'btapp':model});
+				model.updateState('testsession', {'a':{'a':3,'b':{'b':3,'c':3,'fn':'[nf]()'}}}, undefined, 'testurl/');
+				expect(model.get('a')).toBeDefined();
+				expect(model.get('a').get('a')).toEqual(3);
+				expect(model.get('a').get('b')).toBeDefined();
+				expect(model.get('a').get('b').bt.fn).toBeDefined();
+				expect(typeof model.get('a').get('b').bt.fn).toEqual('function');
+				expect(model.get('a').get('b').get('b')).toEqual(3);
+				expect(model.get('a').get('b').get('c')).toEqual(3);
+				
+				model.updateState('testsession', undefined, {'a':{'b':{'c':3}}}, 'testurl/');
+				expect(model.get('a')).toBeDefined();
+				expect(model.get('a').get('a')).toEqual(3);
+				expect(model.get('a').get('b')).toBeDefined();
+				expect(model.get('a').get('b').bt.fn).toBeDefined();
+				expect(model.get('a').get('b').get('b')).toEqual(3);
+				expect(model.get('a').get('b').get('c')).not.toBeDefined();
+				expect(model.get('a').get('b').bt.fn).toBeDefined();
+
+				model.updateState('testsession', undefined, {'a':{'b':{'b':3}}}, 'testurl/');
+				expect(model.get('a')).toBeDefined();
+				expect(model.get('a').get('a')).toEqual(3);
+				expect(model.get('a').get('b')).toBeDefined();
+				expect(model.get('a').get('b').bt.fn).toBeDefined();
+				expect(model.get('a').get('b').get('b')).not.toBeDefined();
+				expect(model.get('a').get('b').get('c')).not.toBeDefined();
+				
+				model.updateState('testsession', undefined, {'a':{'b':{'fn':'[nf]()'}}}, 'testurl/');
+				expect(model.get('a')).toBeDefined();
+				expect(model.get('a').get('a')).toEqual(3);
+				expect(model.get('a').get('b')).not.toBeDefined();
+			});
 			it('adds a function', function() {
 				var model = new BtappModel({'id':'test'});
 				model.client = new LocalTorrentClient({'btapp':model});

@@ -81,27 +81,65 @@
 				});
 				
 				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get("C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A");
-					this.btapp.disconnect();
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get('C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A');
 				}, "torrent added", 5000);
 			});
-			it('removes a torrent from torque', function() {
-				runs(function() {
-					this.hash = 'C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A';
-				});
-
+			it('removes all torrents from torque', function() {
 				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, "torrent added", 5000);
+					return this.btapp.get('torrent');
+				}, "torrent to be added", 5000);
 				
 				runs(function() {
 					expect(this.btapp.get('torrent'));
-					this.btapp.get('torrent').get(this.hash).bt.remove(function() {});
+					this.btapp.get('torrent').each(function(torrent) { torrent.bt.remove(function() {}); });
 				});
 				
 				waitsFor(function() {
-					return !this.btapp.get('torrent') || !this.btapp.get('torrent').get(this.hash);
-				}, "torrent removed", 5000); 
+					return this.btapp.get('torrent').length === 0;
+				}, "all torrents to be removed", 5000); 
+			});
+			it('connects and disconnects to the client over and over', function() {
+				runs(function() {
+					this.btapp.bind('client:connected', _.bind(function() {
+						this.connected = true;
+					}, this));
+				});
+				for(var i = 0; i < 5; i++) {
+					waitsFor(function() { return this.connected; });
+					runs(function() { this.btapp.disconnect(); this.connected = false; });
+					waits(1000);
+					runs(function() { this.btapp.connect(); });
+				}				
+			});
+			it('adds several popular torrents', function() {
+				waitsFor(function() {
+					return this.btapp.get('add') && 'torrent' in this.btapp.get('add').bt;
+				}, 'add', 5000);
+				runs(function() {
+					this.btapp.get('add').bt.torrent(function() { }, 'http://www.clearbits.net/get/59-trusted-computing.torrent');
+				});
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
+				}, 'torrent to appear after being added', 5000);
+			});
+			it('downloads those popular torrents', function() {
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4').get('properties');
+				});
+				waitsFor(function() {
+					return this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4').get('properties').get('downloaded') > 0;
+				}, 'some of the file to be downloaded');
+			});
+			it('deletes those popular torrents', function() {
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
+				}, 'torrent to be detected', 5000);
+				runs(function() {
+					this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4').bt.remove(function() {});
+				});
+				waitsFor(function() {
+					return !this.btapp.get('torrent') || !this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
+				}, 'torrent to be deleted', 5000);
 			});
 		});
 		describe('Btapp Interactive Client Function Calls', function() {
