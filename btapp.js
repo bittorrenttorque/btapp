@@ -117,8 +117,8 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 			url.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
 			url.match(/btapp\/label\/$/) ||
 			url.match(/btapp\/label\/all\/[^\/]+\/torrent\/$/) ||
-			url.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/jQuery/) ||
-			url.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/jQuery/) ||
+			url.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/$/) ||
+			url.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/$/) ||
 			url.match(/btapp\/rss_feed\/$/) ||
 			url.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/$/) ||
 			url.match(/btapp\/rss_filter\/$/);
@@ -400,7 +400,7 @@ window.Btapp = BtappModel.extend({
 		// Initialize variables
 		attributes = attributes || {};
 		this.poll_frequency = attributes.poll_frequency || 3000;
-		this.queries = attributes.queries || ['btapp/'];
+		this.queries = attributes.queries || Btapp.QUERIES.ALL;
 
 		// At this point, if a username password combo is provided we assume that we're trying to
 		// access a falcon client. If not, default to the client running on your local machine.
@@ -494,3 +494,10 @@ window.Btapp = BtappModel.extend({
 
 //The version of this library should always match the version of torque that it requires.
 Btapp.VERSION = '4.2.1'
+Btapp.QUERIES = {
+	ALL: 'btapp/',
+	TORRENTS: 'btapp/torrent/all/*/',
+	FILES: 'btapp/torrent/all/*/file/all/*/',
+	PEERS: 'btapp/torrent/all/*/peer/all/*/',
+	SETTINGS: 'btapp/settings/all/*/'
+};
