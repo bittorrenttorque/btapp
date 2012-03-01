@@ -134,6 +134,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	},
 	updateRemoveFunctionState: function(v) {
 		assert(v in this.bt, 'trying to remove a function that does not exist');
+		this.trigger('remove:bt:' + v);
 		delete this.bt[v];
 	},
 	updateRemoveAttributeState: function(v, removed) {
@@ -184,6 +185,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	},
 	updateAddFunctionState: function(session, added, url, v) {
 		assert(!(v in this.bt), 'trying to add a function that already exists');
+		this.trigger('add:bt:' + v);
 		this.bt[v] = this.client.createFunction(session, url + v, added);
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v) {
@@ -266,6 +268,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	},
 	updateRemoveFunctionState: function(v) {
 		assert(v in this.bt, 'trying to remove a function that does not exist');
+		this.trigger('remove:bt:' + v);
 		delete this.bt[v];
 	},
 	updateRemoveAttributeState: function(v, removed, attributes) {
@@ -319,6 +322,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	},
 	updateAddFunctionState: function(session, added, url, v) {
 		assert(!(v in this.bt), 'trying to add a function that already exists');
+		this.trigger('add:bt:' + v);
 		this.bt[v] = this.client.createFunction(session, url + v, added);
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v, attributes) {
