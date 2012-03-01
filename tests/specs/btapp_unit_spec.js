@@ -273,6 +273,15 @@
 				expect(add_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('add:' + 'testkey', add_callback);
 			});
+			it('triggers add:bt:func event', function() {
+				var model = new BtappModel({'id':'test'});
+				model.client = new LocalTorrentClient({'btapp':model});
+				var add_callback = jasmine.createSpy();
+				model.bind('add:bt:fn', add_callback);
+				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				expect(add_callback).toHaveBeenCalled();
+				model.unbind('add:bt:fn', add_callback);
+			});
 			it('triggers remove event', function() {
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
@@ -290,6 +299,16 @@
 				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
 				expect(remove_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('remove:' + 'testkey', remove_callback);
+			});
+			it('triggers remove:bt:func event', function() {
+				var model = new BtappModel({'id':'test'});
+				model.client = new LocalTorrentClient({'btapp':model});
+				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				var remove_callback = jasmine.createSpy();
+				model.bind('remove:bt:fn', remove_callback);
+				model.updateState('testsession', null, {'fn':'[nf]()'}, 'testurl');
+				expect(remove_callback).toHaveBeenCalled();
+				model.unbind('remove:bt:fn', remove_callback);
 			});
 			it('triggers change event', function() {
 				var model = new BtappModel({'id':'test'});
