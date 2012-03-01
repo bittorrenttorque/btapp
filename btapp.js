@@ -185,8 +185,8 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	},
 	updateAddFunctionState: function(session, added, url, v) {
 		assert(!(v in this.bt), 'trying to add a function that already exists');
-		this.trigger('add:bt:' + v);
 		this.bt[v] = this.client.createFunction(session, url + v, added);
+		this.trigger('add:bt:' + v);
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v) {
 		throw 'trying to add an invalid type to a BtappCollection';
@@ -322,8 +322,8 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	},
 	updateAddFunctionState: function(session, added, url, v) {
 		assert(!(v in this.bt), 'trying to add a function that already exists');
-		this.trigger('add:bt:' + v);
 		this.bt[v] = this.client.createFunction(session, url + v, added);
+		this.trigger('add:bt:' + v);
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v, attributes) {
 		// Set non function/object variables as model attributes

@@ -277,7 +277,10 @@
 				var model = new BtappModel({'id':'test'});
 				model.client = new LocalTorrentClient({'btapp':model});
 				var add_callback = jasmine.createSpy();
-				model.bind('add:bt:fn', add_callback);
+				model.bind('add:bt:fn', _.bind(function() {
+					expect(this.bt.fn).toBeDefined();
+					add_callback();
+				}, model));
 				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
 				expect(add_callback).toHaveBeenCalled();
 				model.unbind('add:bt:fn', add_callback);
