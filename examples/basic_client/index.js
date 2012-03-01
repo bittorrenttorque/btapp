@@ -39,16 +39,34 @@ window.CreationView = Backbone.View.extend({
 	},
 	render: function() {
 		$(this.el).empty();
-		$(this.el).append('<input type="text" name="lastname" />');
-		$(this.el).append('<input type="button" value="add"></input>');
-		$(this.el).append('...');
-		$(this.el).append('<input type="button" value="create"></input>');
+		$(this.el).append('<input type="text" id="torrent_link" />');
+		var add = $('<input type="button" value="add"></input>');
+		add.click(function() {
+			btapp.get('add').bt.torrent(function() {
+				console.log($('#torrent_link').val());
+				console.log('the client has been asked to add a torrent...we will see how that goes');
+			}, $('#torrent_link').val());
+		});
+		$(this.el).append(add);
+		$(this.el).append('<font style="color:white;">...</font>');
+		var create = $('<input type="button" value="create"></input>');
+		create.click(function() {
+			btapp.bt.browseforfiles(function() {}, function(files) {
+				btapp.bt.create(function() {
+					console.log('the client has been asked to create a torrent...we will see how that goes');
+				}, 
+				'', _.values(files), function() {
+					console.log('torrent created');
+				});
+			});
+		});
+		$(this.el).append(create);
 		return this;
 	}
 });
 
 jQuery(function() {
-	var btapp = new Btapp;
+	window.btapp = new Btapp;
 	btapp.connect();
 	var torrent_views = {};
 	var listener = new BtappListener({'btapp':btapp});
