@@ -273,7 +273,7 @@ window.LocalTorrentClient = TorrentClient.extend({
 		TorrentClient.prototype.initialize.call(this, attributes);
 		this.btapp = attributes.btapp;
 		this.initialize_manager(attributes);
-		this.initialize_pairing();
+		this.initialize_pairing(attributes);
 	},
 	// We have a seperate object that is responsible for managing the browser
 	// plugin and using that plugin to ensure that Torque is downloaded and
@@ -294,12 +294,12 @@ window.LocalTorrentClient = TorrentClient.extend({
 	},
 	// We have a seperate object responsible for determining exactly which
 	// port the torrent client is bound to.
-	initialize_pairing: function() {
+	initialize_pairing: function(attributes) {
 		//if we don't have what we need, fetch it and try again
 		if(!window.Pairing) {
 			jQuery.getScript(
 				'http://apps.bittorrent.com/torque/btapp/pairing.btapp.js',
-				_.bind(this.initialize_pairing, this)
+				_.bind(this.initialize_pairing, this, attributes)
 			);
 			return;
 		}
@@ -308,7 +308,7 @@ window.LocalTorrentClient = TorrentClient.extend({
 		if(!jQuery.jStorage) {
 			jQuery.getScript(
 				'http://apps.bittorrent.com/torque/jStorage/jstorage.min.js',
-				_.bind(this.initialize_pairing, this)
+				_.bind(this.initialize_pairing, this, attributes)
 			);
 			return;
 		}
