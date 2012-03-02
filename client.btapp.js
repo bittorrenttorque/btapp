@@ -319,18 +319,32 @@ window.LocalTorrentClient = TorrentClient.extend({
 
 		this.pairing.bind('pairing:found', _.bind(function(options) {
 			if(options && options.version) {
+				
+				if(!_.any(attributes.clients, function(client) { 
+					assert(client.name
+				})) {
+					return;
+				}
+			
 				var key = jQuery.jStorage.get('pairing_key');
 				if(key) {
+					// Let whoever triggered the pairing:found event that they don't need
+					// to continue scanning, nor do they need to handle aquiring a pairing key
 					options.continue_scan = false;
 					options.attempt_authorization = false;
 					this.connect_to_authenticated_port(options.port, key);
 				} else {
+					// We've found the port we want to work with, but we don't have a pairing key.
+					// We'll set attemp_authorization to true so that a pairing dialog is presented 
+					// to the user
 					options.continue_scan = false;
 					options.attempt_authorization = true;
 				}
 			}
 		}, this));
 		this.pairing.bind('pairing:authorized', _.bind(function(options) {
+			// Holy smokes! We found a port, and the client that's listening likes our pairing key.
+			// Store the key off so that we don't have to bother the user again.
 			jQuery.jStorage.set('pairing_key', options.key);
 			this.connect_to_authenticated_port(options.port, options.key);
 		}, this));
@@ -338,11 +352,18 @@ window.LocalTorrentClient = TorrentClient.extend({
 		this.pairing.bind('pairing:nonefound', _.bind(this.delayed_reset, this) );
 		this.reset();
 	},
+	// Before we actual start making requests against a client, we need to make sure
+	// we have a valid pairing key. This might be redundant if we just got one from the
+	// client, but its very very necessary if we've stored off a pairing key that's invalid
+	// for some reason.
 	connect_to_authenticated_port: function(port, key) {
+		// Called if the pairing key is good to go. Tell whoever is listening that we're
+		// ready to roll.
 		var cb = function() {
 			this.url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
 			this.trigger('client:connected');
 		};
+		// Handle the case of an invalid pairing key. Flush it out and start over.
 		var err = function() {
 			jQuery.jStorage.flush();
 			this.reset();
