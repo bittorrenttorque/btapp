@@ -17,7 +17,7 @@ Btapp.js's has all of Backbone's dependencies, but also requires json2...the *.b
   
 [backbone.js v0.9.1](http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.1/backbone-min.js "backbone") ([documentation](http://documentcloud.github.com/backbone/ "backbone"))  
 [json2.js](http://cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js "json2") ([documentation](http://www.json.org/js.html "json2"))  
-[torque.btapp.js](http://apps.bittorrent.com/torque/btapp/torque.btapp.js "torque.btapp.js")  
+[client.btapp.js](http://apps.bittorrent.com/torque/btapp/client.btapp.js "client.btapp.js")  
 [pairing.btapp.js](http://apps.bittorrent.com/torque/btapp/pairing.btapp.js "pairing.btapp.js")  
 [plugin.btapp.js](http://apps.bittorrent.com/torque/btapp/plugin.btapp.js "plugin.btapp.js")  
   

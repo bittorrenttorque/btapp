@@ -417,7 +417,7 @@ window.Btapp = BtappModel.extend({
 			this.setClient(attributes);
 		} else {
 			jQuery.getScript(
-				'http://apps.bittorrent.com/torque/btapp/torque.btapp.js',
+				'http://apps.bittorrent.com/torque/btapp/client.btapp.js',
 			_.bind(this.setClient, this, attributes)
 			);
 		}
