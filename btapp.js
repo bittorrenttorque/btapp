@@ -40,6 +40,16 @@ window.BtappBase = {
 		this.url = null;
 		this.session = null;
 	},
+	updateRemoveFunctionState: function(v) {
+		assert(v in this.bt, 'trying to remove a function that does not exist');
+		this.trigger('remove:bt:' + v);
+		delete this.bt[v];
+	},
+	updateAddFunctionState: function(session, added, url, v) {
+		assert(!(v in this.bt), 'trying to add a function that already exists');
+		this.bt[v] = this.client.createFunction(session, url + v, added);
+		this.trigger('add:bt:' + v);
+	},
 	updateState: function(session, add, remove, url) {
 		assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + url + '")...these should have been trimmed off');
 		this.session = session;
@@ -93,17 +103,18 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 		this.bind('remove', this.customRemoveEvent)
 		this.bind('change', this.customChangeEvent);
 	},
+	customEvent: function(event, model) {
+		assert(model && model.id, 'called a custom ' + event + ' event without a valid attribute');
+		this.trigger(event + ':' + model.id, model);
+	},
 	customAddEvent: function(model) {
-		assert(model, 'called a custom event without a valid attribute');
-		this.trigger('add:' + model.id, model);
+		this.customEvent('add', model);
 	},
 	customRemoveEvent: function(model) {
-		assert(model, 'called a custom event without a valid attribute');
-		this.trigger('remove:' + model.id, model);
+		this.customEvent('remove', model);
 	},
 	customChangeEvent: function(model) {
-		assert(model, 'called a custom event without a valid attribute');
-		this.trigger('change:' + model.id, model);
+		this.customEvent('change', model);
 	},
 	destructor: function() {
 		this.unbind('add', this.customAddEvent);
@@ -131,11 +142,6 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 		if(model.isEmpty()) {
 			this.remove(model);
 		}
-	},
-	updateRemoveFunctionState: function(v) {
-		assert(v in this.bt, 'trying to remove a function that does not exist');
-		this.trigger('remove:bt:' + v);
-		delete this.bt[v];
 	},
 	updateRemoveAttributeState: function(v, removed) {
 		throw 'trying to remove an invalid type from a BtappCollection';
@@ -182,11 +188,6 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 		} else {
 			model.updateState(this.session, added, removed, childurl);
 		}
-	},
-	updateAddFunctionState: function(session, added, url, v) {
-		assert(!(v in this.bt), 'trying to add a function that already exists');
-		this.bt[v] = this.client.createFunction(session, url + v, added);
-		this.trigger('add:bt:' + v);
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v) {
 		throw 'trying to add an invalid type to a BtappCollection';
@@ -266,11 +267,6 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			attributes[v] = this.get(v);
 		}
 	},
-	updateRemoveFunctionState: function(v) {
-		assert(v in this.bt, 'trying to remove a function that does not exist');
-		this.trigger('remove:bt:' + v);
-		delete this.bt[v];
-	},
 	updateRemoveAttributeState: function(v, removed, attributes) {
 		removed = typeof removed === 'string' ? unescape(removed) : removed;
 		assert(this.get(v) === removed, 'trying to remove an attribute, but did not provide the correct previous value');
@@ -319,11 +315,6 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			attributes[escape(v)] = model;
 		}
 		model.updateState(this.session, added, removed, childurl);
-	},
-	updateAddFunctionState: function(session, added, url, v) {
-		assert(!(v in this.bt), 'trying to add a function that already exists');
-		this.bt[v] = this.client.createFunction(session, url + v, added);
-		this.trigger('add:bt:' + v);
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v, attributes) {
 		// Set non function/object variables as model attributes
