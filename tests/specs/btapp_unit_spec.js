@@ -215,6 +215,7 @@
 				collection.bind('add', add_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
 				expect(add_callback).toHaveBeenCalled();
+				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers add:key event', function() {
 				var collection = new BtappCollection;
@@ -222,6 +223,7 @@
 				collection.bind('add:' + 'ABCD', add_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
 				expect(add_callback).toHaveBeenCalled();
+				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers remove event', function() {
 				var collection = new BtappCollection;
@@ -230,6 +232,7 @@
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
 				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, 'btapp/torrent/');
 				expect(remove_callback).toHaveBeenCalled();
+				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers remove:key event', function() {
 				var collection = new BtappCollection;
@@ -238,6 +241,7 @@
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
 				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, 'btapp/torrent/');
 				expect(remove_callback).toHaveBeenCalled();
+				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers change event when a model changes in the collection', function() {
 				var collection = new BtappCollection;
@@ -246,6 +250,7 @@
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, 'btapp/torrent/');
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, 'btapp/torrent/');
 				expect(change_callback).toHaveBeenCalled();
+				expect(change_callback.callCount).toEqual(1);
 			});
 			it('triggers change:key event when a model changes in the collection', function() {
 				var collection = new BtappCollection;
@@ -254,6 +259,7 @@
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, 'btapp/torrent/');
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, 'btapp/torrent/');
 				expect(change_callback).toHaveBeenCalled();
+				expect(change_callback.callCount).toEqual(1);
 			});
 		});
 		describe('BtappModel events', function() {
@@ -264,6 +270,7 @@
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
 				expect(add_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('add', add_callback);
+				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers add:key event', function() {
 				var model = new BtappModel({'id':'test'});
@@ -272,6 +279,7 @@
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
 				expect(add_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('add:' + 'testkey', add_callback);
+				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers add:bt:func event', function() {
 				var model = new BtappModel({'id':'test'});
@@ -284,6 +292,7 @@
 				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
 				expect(add_callback).toHaveBeenCalled();
 				model.unbind('add:bt:fn', add_callback);
+				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers remove event', function() {
 				var model = new BtappModel({'id':'test'});
@@ -293,6 +302,7 @@
 				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
 				expect(remove_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('remove', remove_callback);
+				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers remove:key event', function() {
 				var model = new BtappModel({'id':'test'});
@@ -302,6 +312,7 @@
 				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
 				expect(remove_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('remove:' + 'testkey', remove_callback);
+				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers remove:bt:func event', function() {
 				var model = new BtappModel({'id':'test'});
@@ -312,6 +323,7 @@
 				model.updateState('testsession', null, {'fn':'[nf]()'}, 'testurl');
 				expect(remove_callback).toHaveBeenCalled();
 				model.unbind('remove:bt:fn', remove_callback);
+				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers change event', function() {
 				var model = new BtappModel({'id':'test'});
