@@ -302,9 +302,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		// Don't recreate a variable we already have. Just update it.
 		var model = this.get(v);
 		if(model === undefined) {
-			// This is the only hard coding that we should do in this library...
-			// As a convenience, torrents and their file/peer lists are treated as backbone collections
-			// the same is true of rss_feeds and filters...its just a more intuitive way of using them
+			// Check if the url matches a valid collection url...if so that is the type that we should create
 			if(BtappCollection.prototype.verifyUrl(childurl)) {
 				model = new BtappCollection;
 			} else {
@@ -312,18 +310,18 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 			}
 			model.url = childurl;
 			model.client = this.client;
-			attributes[escape(v)] = model;
+			attributes[v] = model;
 		}
 		model.updateState(this.session, added, removed, childurl);
 	},
 	updateAddAttributeState: function(session, added, removed, childurl, v, attributes) {
 		// Set non function/object variables as model attributes
 		added = (typeof added === 'string') ? unescape(added) : added;
-		assert(!(this.get(escape(v)) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
+		assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
 		if(!(removed === undefined)) {
-			assert(this.get(escape(v)) === removed, 'trying to update an attribute, but did not provide the correct previous value');
+			assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
 		}
-		attributes[escape(v)] = added;
+		attributes[v] = added;
 	},
 	updateAddState: function(session, add, remove, url) {
 		var attributes = {};
