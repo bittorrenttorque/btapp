@@ -319,13 +319,6 @@ window.LocalTorrentClient = TorrentClient.extend({
 
 		this.pairing.bind('pairing:found', _.bind(function(options) {
 			if(options && options.version) {
-				
-				if(!_.any(attributes.clients, function(client) { 
-					assert(client.name
-				})) {
-					return;
-				}
-			
 				var key = jQuery.jStorage.get('pairing_key');
 				if(key) {
 					// Let whoever triggered the pairing:found event that they don't need
