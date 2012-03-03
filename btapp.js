@@ -45,10 +45,91 @@ window.BtappBase = {
 		this.trigger('remove:bt:' + v);
 		delete this.bt[v];
 	},
+	updateRemoveObjectState: function(session, added, removed, childurl, v) {
+		var model = this.get(v);
+		assert(model, 'trying to remove a model that does not exist');
+		assert(model instanceof BtappModel, 'trying to remove an object, but the existing value is not a model');
+		model.updateState(session, added, removed, childurl);
+		if(model.isEmpty()) {
+			this.remove && this.remove(model);
+			this.unset && this.unset(v);
+		}
+	},
+	updateRemoveElementState: function(session, added, removed, v, url, aggregator) {
+		var childurl = url + v + '/';
+		// Most native objects coming from the client have an "all" layer before their variables,
+		// There is no need for the additional layer in javascript so we just flatten the tree a bit.
+		if(v === 'all') {
+			this.updateState(this.session, added, removed, childurl);
+			return;
+		}
+
+		if(typeof removed === 'object') {
+			this.updateRemoveObjectState(session, added, removed, childurl, v);
+		} else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
+			this.updateRemoveFunctionState(v);
+		} else if(v != 'id') {
+			this.updateRemoveAttributeState(v, removed, aggregator);
+		}
+	},
+	updateRemoveState: function(session, add, remove, url, aggregator) {
+		for(var uv in remove) {
+			var added = add[uv];
+			var removed = remove[uv];
+			var v = escape(uv);
+
+			if(added === undefined) {
+				this.updateRemoveElementState(session, added, removed, v, url, aggregator);
+			}
+		}
+	},
 	updateAddFunctionState: function(session, added, url, v) {
 		assert(!(v in this.bt), 'trying to add a function that already exists');
 		this.bt[v] = this.client.createFunction(session, url + v, added);
 		this.trigger('add:bt:' + v);
+	},
+	updateAddObjectState: function(session, added, removed, childurl, v) {
+		var model = this.get(v);
+		if(model === undefined) {
+			// Check if the url matches a valid collection url...if so that is the type that we should create
+			if(BtappCollection.prototype.verifyUrl(childurl)) {
+				model = new BtappCollection;
+			} else {
+				model = new BtappModel({'id':v});
+			}
+			model.url = childurl;
+			model.client = this.client;
+			model.updateState(this.session, added, removed, childurl);
+
+			//make sure we support running this function with this being a model or a collection
+			this.add && this.add(model);
+			this.set && this.set(v, model);
+		} else {
+			model.updateState(this.session, added, removed, childurl);
+		}
+	},
+	updateAddElementState: function(session, added, removed, v, url, aggregator) {
+		var childurl = url + v + '/';
+
+		if(v === 'all') {
+			// Special case all. It is a redundant layer that exist for the benefit of the torrent client
+			this.updateState(this.session, added, removed, childurl);
+		} else if(typeof added === 'object') {
+			this.updateAddObjectState(session, added, removed, childurl, v);
+		} else if(typeof added === 'string' && TorrentClient.prototype.isFunctionSignature(added)) {
+			this.updateAddFunctionState(session, added, url, v);
+		} else {
+			this.updateAddAttributeState(session, added, removed, childurl, v, aggregator);
+		}	
+	},
+	updateAddState: function(session, add, remove, url, aggregator) {
+		for(var uv in add) {
+			var added = add[uv];
+			var removed = remove[uv];
+			var v = escape(uv);
+
+			this.updateAddElementState(session, added, removed, v, url, aggregator);
+		}
 	},
 	updateState: function(session, add, remove, url) {
 		assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + url + '")...these should have been trimmed off');
@@ -69,8 +150,13 @@ window.BtappBase = {
 		// diff tree contains the old value when we change it to the value in the add
 		// diff tree. This should help ensure that we're completely up to date
 		// and haven't missed any state dumps
-		this.updateAddState(session, add, remove, url);
-		this.updateRemoveState(session, add, remove, url);
+
+		// We need the aggregator to be a list for collections and an associative array for models
+		var add_aggregator = this.getAggregator();
+		var remove_aggregator = this.getAggregator();
+		this.updateAddState(session, add, remove, url, add_aggregator);
+		this.updateRemoveState(session, add, remove, url, remove_aggregator);
+		this.updateFromAggregator(add_aggregator, remove_aggregator);
 	},
 	clearState: function() {
 		//we want to call clearState on all child elements
@@ -134,89 +220,21 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 			url.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/$/) ||
 			url.match(/btapp\/rss_filter\/$/);
 	},
-	updateRemoveObjectState: function(session, added, removed, childurl, v, attributes) {
-		var model = this.get(v);
-		assert(model, 'trying to remove a model that does not exist');
-		assert(model instanceof BtappModel, 'trying to remove an object, but the existing value is not a model');
-		model.updateState(session, added, removed, childurl);
-		if(model.isEmpty()) {
-			this.remove(model);
-		}
-	},
-	updateRemoveAttributeState: function(v, removed) {
+	updateRemoveAttributeState: function(v, removed, aggregator) {
 		throw 'trying to remove an invalid type from a BtappCollection';
 	},
-	updateRemoveState: function(session, add, remove, url) {
-		// Iterate over the diffs that came from the client to see what has been added (only in add),
-		// removed (only in remove), or changed (old value in remove, new value in add)
-		for(var uv in remove) {
-			var added = add[uv];
-			var removed = remove[uv];
-			var v = escape(uv);
-			var childurl = url + v + '/';
-
-
-			// Elements that are in remove aren't necessarily being removed,
-			// they might alternatively be the old value of a variable that has changed
-			if(added === undefined) {
-				// Most native objects coming from the client have an "all" layer before their variables,
-				// There is no need for the additional layer in javascript so we just flatten the tree a bit.
-				if(v === 'all') {
-					this.updateState(this.session, added, removed, childurl);
-					continue;
-				}
-
-				// We only expect objects and functions to be added to collections
-				if(typeof removed === 'object') {
-					this.updateRemoveObjectState(session, added, removed, childurl, v);
-				} else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
-					this.updateRemoveFunctionState(v);
-				} else {
-					this.updateRemoveAttributeState(v, removed);
-				}
-			}
-		}
-	},
-	updateAddObjectState: function(session, added, removed, childurl, v) {
-		var model = this.get(v);
-		if(model === undefined) {
-			model = new BtappModel({'id':v});
-			model.url = childurl;
-			model.client = this.client;
-			model.updateState(this.session, added, removed, childurl);
-			this.add(model);
-		} else {
-			model.updateState(this.session, added, removed, childurl);
-		}
-	},
-	updateAddAttributeState: function(session, added, removed, childurl, v) {
+	updateAddAttributeState: function(session, added, removed, childurl, v, aggregator) {
 		throw 'trying to add an invalid type to a BtappCollection';
-	},
-	updateAddState: function(session, add, remove, url) {
-		for(var uv in add) {
-			var added = add[uv];
-			var removed = remove[uv];
-			var v = escape(uv);
-			var childurl = url + v + '/';
-
-			// Most native objects coming from the client have an "all" layer before their variables,
-			// There is no need for the additional layer in javascript so we just flatten the tree a bit.
-			if(v === 'all') {
-				this.updateState(this.session, added, removed, childurl);
-				continue;
-			}
-
-			if(typeof added === 'object') {
-				this.updateAddObjectState(session, added, removed, childurl, v);
-			} else if(typeof added === 'string' && TorrentClient.prototype.isFunctionSignature(added)) {
-				this.updateAddFunctionState(session, added, url, v);
-			} else {
-				this.updateAddAttributeState(session, added, removed, childurl, v);
-			}
-		}
 	},
 	isEmpty: function() {
 		return jQuery.isEmptyObject(this.bt) && this.length === 0;
+	},
+	getAggregator: function() {
+		return [];
+	},
+	updateFromAggregator: function(add_aggregator, remove_aggregator) {
+		this.add(add_aggregator);
+		this.remove(remove_aggregator);
 	}
 });
 
@@ -257,99 +275,30 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	verifyUrl: function(url) {
 		return true;
 	},
-	updateRemoveObjectState: function(session, added, removed, childurl, v, attributes) {
-		//Update state downstream from here. Then remove from the collection.
-		var model = this.get(v);
-		assert(model, 'trying to remove a model that does not exist');
-		assert(model instanceof BtappModel || model instanceof BtappCollection, 'expected removed attribute to be an instance of BtappModel or BtappCollection');
-		model.updateState(session, added, removed, childurl);
-		if(model.isEmpty()) {
-			attributes[v] = this.get(v);
-		}
-	},
-	updateRemoveAttributeState: function(v, removed, attributes) {
+	updateRemoveAttributeState: function(v, removed, aggregator) {
 		removed = typeof removed === 'string' ? unescape(removed) : removed;
 		assert(this.get(v) === removed, 'trying to remove an attribute, but did not provide the correct previous value');
-		attributes[v] = this.get(v);
+		aggregator[v] = this.get(v);
 	},
-	updateRemoveState: function(session, add, remove, url) {
-		var attributes = {};
-		for(var uv in remove) {
-			var added = add[uv];
-			var removed = remove[uv];
-			var v = escape(uv);
-			var childurl = url + v + '/';
-
-			if(added === undefined) {
-				//special case all
-				if(v === 'all') {
-					this.updateState(this.session, added, removed, childurl);
-					continue;
-				}
-
-				if(typeof removed === 'object') {
-					this.updateRemoveObjectState(session, added, removed, childurl, v, attributes);
-				} else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
-					this.updateRemoveFunctionState(v);
-				} else if(v != 'id') {
-					this.updateRemoveAttributeState(v, removed, attributes);
-				}
-			}
-		}
-		this.set(attributes, {'unset': true});
-	},
-	updateAddObjectState: function(session, added, removed, childurl, v, attributes) {
-		// Don't recreate a variable we already have. Just update it.
-		var model = this.get(v);
-		if(model === undefined) {
-			// Check if the url matches a valid collection url...if so that is the type that we should create
-			if(BtappCollection.prototype.verifyUrl(childurl)) {
-				model = new BtappCollection;
-			} else {
-				model = new BtappModel({'id':v});
-			}
-			model.url = childurl;
-			model.client = this.client;
-			attributes[v] = model;
-		}
-		model.updateState(this.session, added, removed, childurl);
-	},
-	updateAddAttributeState: function(session, added, removed, childurl, v, attributes) {
+	updateAddAttributeState: function(session, added, removed, childurl, v, aggregator) {
 		// Set non function/object variables as model attributes
 		added = (typeof added === 'string') ? unescape(added) : added;
 		assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
 		if(!(removed === undefined)) {
 			assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
 		}
-		attributes[v] = added;
-	},
-	updateAddState: function(session, add, remove, url) {
-		var attributes = {};
-		for(var uv in add) {
-			var added = add[uv];
-			var removed = remove[uv];
-			var v = escape(uv);
-			var childurl = url + v + '/';
-
-			// Special case all. It is a redundant layer that exist for the benefit of the torrent client
-			if(v === 'all') {
-				this.updateState(this.session, added, removed, childurl);
-				continue;
-			}
-
-			if(typeof added === 'object') {
-				this.updateAddObjectState(session, added, removed, childurl, v, attributes);
-			} else if(typeof added === 'string' && TorrentClient.prototype.isFunctionSignature(added)) {
-				this.updateAddFunctionState(session, added, url, v);
-			} else {
-				this.updateAddAttributeState(session, added, removed, childurl, v, attributes);
-			}	
-		}
-		this.set(attributes);
+		aggregator[v] = added;
 	},
 	isEmpty: function() {
 		var keys = _.keys(this.toJSON());
 		return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
+	},
+	getAggregator: function() {
+		return {};
+	},
+	updateFromAggregator: function(add_aggregator, remove_aggregator) {
+		this.set(add_aggregator);
+		this.set(remove_aggregator, {unset: true})
 	}
 });
 
