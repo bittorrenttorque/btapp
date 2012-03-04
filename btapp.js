@@ -45,48 +45,46 @@ window.BtappBase = {
 		this.trigger('remove:bt:' + v);
 		delete this.bt[v];
 	},
-	updateRemoveObjectState: function(session, added, removed, childurl, v, aggregator) {
+	updateRemoveObjectState: function(session, added, removed, childurl, v) {
+		var ret = {};
 		var model = this.get(v);
 		assert(model, 'trying to remove a model that does not exist');
 		assert(model instanceof BtappModel, 'trying to remove an object, but the existing value is not a model');
 		model.updateState(session, added, removed, childurl);
 		if(model.isEmpty()) {
-			if(aggregator.length === undefined) {
-				aggregator[v] = model;
-			} else {
-				aggregator.push(model);
-			}
+			ret[v] = model;
 		}
+		return ret;
 	},
-	updateRemoveElementState: function(session, added, removed, v, url, aggregator) {
+	updateRemoveElementState: function(session, added, removed, v, url) {
 		var childurl = url + v + '/';
 		if(v === 'all') {
-			this.updateState(this.session, added, removed, childurl);
+			return this.updateState(this.session, added, removed, childurl);
 		} else if(typeof removed === 'object') {
-			this.updateRemoveObjectState(session, added, removed, childurl, v, aggregator);
+			return this.updateRemoveObjectState(session, added, removed, childurl, v);
 		} else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
-			this.updateRemoveFunctionState(v);
+			return this.updateRemoveFunctionState(v);
 		} else if(v != 'id') {
-			this.updateRemoveAttributeState(v, removed, aggregator);
+			return this.updateRemoveAttributeState(v, removed);
 		}
 	},
-	updateRemoveState: function(session, add, remove, url, aggregator) {
+	updateRemoveState: function(session, add, remove, url) {
+		var ret = {};
 		for(var uv in remove) {
-			var added = add[uv];
-			var removed = remove[uv];
-			var v = escape(uv);
-
-			if(added === undefined) {
-				this.updateRemoveElementState(session, added, removed, v, url, aggregator);
+			if(add[uv] === undefined) {
+				_.extend(ret, this.updateRemoveElementState(session, add[uv], remove[uv], escape(uv), url));
 			}
 		}
+		return ret;
 	},
 	updateAddFunctionState: function(session, added, url, v) {
 		assert(!(v in this.bt), 'trying to add a function that already exists');
 		this.bt[v] = this.client.createFunction(session, url + v, added);
 		this.trigger('add:bt:' + v);
+		return {};
 	},
-	updateAddObjectState: function(session, added, removed, childurl, v, aggregator) {
+	updateAddObjectState: function(session, added, removed, childurl, v) {
+		var ret = {};
 		var model = this.get(v);
 		if(model === undefined) {
 			// Check if the url matches a valid collection url...if so that is the type that we should create
@@ -97,40 +95,32 @@ window.BtappBase = {
 			}
 			model.url = childurl;
 			model.client = this.client;
-			model.updateState(this.session, added, removed, childurl);
 
-			//make sure we support running this function with this being a model or a collection
-			if(aggregator.length === undefined) {
-				aggregator[v] = model;
-			} else {
-				aggregator.push(model);
-			} 
-		} else {
-			model.updateState(this.session, added, removed, childurl);
+			ret[v] = model;
 		}
+		model.updateState(this.session, added, removed, childurl);
+		return ret;
 	},
-	updateAddElementState: function(session, added, removed, v, url, aggregator) {
+	updateAddElementState: function(session, added, removed, v, url) {
 		var childurl = url + v + '/';
 
 		// Special case all. It is a redundant layer that exist for the benefit of the torrent client
 		if(v === 'all') {
-			this.updateState(this.session, added, removed, childurl);
+			return this.updateState(this.session, added, removed, childurl);
 		} else if(typeof added === 'object') {
-			this.updateAddObjectState(session, added, removed, childurl, v, aggregator);
+			return this.updateAddObjectState(session, added, removed, childurl, v);
 		} else if(typeof added === 'string' && TorrentClient.prototype.isFunctionSignature(added)) {
-			this.updateAddFunctionState(session, added, url, v);
+			return this.updateAddFunctionState(session, added, url, v);
 		} else {
-			this.updateAddAttributeState(session, added, removed, childurl, v, aggregator);
+			return this.updateAddAttributeState(session, added, removed, childurl, v);
 		}	
 	},
-	updateAddState: function(session, add, remove, url, aggregator) {
+	updateAddState: function(session, add, remove, url) {
+		var ret = {};
 		for(var uv in add) {
-			var added = add[uv];
-			var removed = remove[uv];
-			var v = escape(uv);
-
-			this.updateAddElementState(session, added, removed, v, url, aggregator);
+			_.extend(ret, this.updateAddElementState(session, add[uv], remove[uv], escape(uv), url));
 		}
+		return ret;
 	},
 	updateState: function(session, add, remove, url) {
 		assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + url + '")...these should have been trimmed off');
@@ -144,20 +134,10 @@ window.BtappBase = {
 		add = add || {};
 		remove = remove || {};
 
-		// We're going to iterate over both the added and removed diff trees
-		// because elements that change exist in both trees, we won't delete
-		// elements that exist in remove if they also exist in add...
-		// As a nice verification step, we're also going to verify that the remove
-		// diff tree contains the old value when we change it to the value in the add
-		// diff tree. This should help ensure that we're completely up to date
-		// and haven't missed any state dumps
-
-		// We need the aggregator to be a list for collections and an associative array for models
-		var add_aggregator = this.getAggregator();
-		var remove_aggregator = this.getAggregator();
-		this.updateAddState(session, add, remove, url, add_aggregator);
-		this.updateRemoveState(session, add, remove, url, remove_aggregator);
-		this.updateFromAggregators(add_aggregator, remove_aggregator);
+		this.updateFromAggregators(
+			this.updateAddState(session, add, remove, url),
+			this.updateRemoveState(session, add, remove, url)
+		);
 	},
 	clearState: function() {
 		//we want to call clearState on all child elements
@@ -221,21 +201,18 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 			url.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/$/) ||
 			url.match(/btapp\/rss_filter\/$/);
 	},
-	updateRemoveAttributeState: function(v, removed, aggregator) {
+	updateRemoveAttributeState: function(v, removed) {
 		throw 'trying to remove an invalid type from a BtappCollection';
 	},
-	updateAddAttributeState: function(session, added, removed, childurl, v, aggregator) {
+	updateAddAttributeState: function(session, added, removed, childurl, v) {
 		throw 'trying to add an invalid type to a BtappCollection';
 	},
 	isEmpty: function() {
 		return jQuery.isEmptyObject(this.bt) && this.length === 0;
 	},
-	getAggregator: function() {
-		return [];
-	},
 	updateFromAggregators: function(add_aggregator, remove_aggregator) {
-		this.add(add_aggregator);
-		this.remove(remove_aggregator);
+		this.add(_.values(add_aggregator));
+		this.remove(_.values(remove_aggregator));
 	}
 });
 
@@ -276,26 +253,27 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	verifyUrl: function(url) {
 		return true;
 	},
-	updateRemoveAttributeState: function(v, removed, aggregator) {
+	updateRemoveAttributeState: function(v, removed) {
+		var ret = {};
 		removed = typeof removed === 'string' ? unescape(removed) : removed;
 		assert(this.get(v) === removed, 'trying to remove an attribute, but did not provide the correct previous value');
-		aggregator[v] = this.get(v);
+		ret[v] = this.get(v);
+		return ret;
 	},
-	updateAddAttributeState: function(session, added, removed, childurl, v, aggregator) {
+	updateAddAttributeState: function(session, added, removed, childurl, v) {
+		var ret = {};
 		// Set non function/object variables as model attributes
 		added = (typeof added === 'string') ? unescape(added) : added;
 		assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
 		if(!(removed === undefined)) {
 			assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
 		}
-		aggregator[v] = added;
+		ret[v] = added;
+		return ret;
 	},
 	isEmpty: function() {
 		var keys = _.keys(this.toJSON());
 		return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
-	},
-	getAggregator: function() {
-		return {};
 	},
 	updateFromAggregators: function(add_aggregator, remove_aggregator) {
 		this.set(add_aggregator);
