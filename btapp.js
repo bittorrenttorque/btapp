@@ -49,7 +49,7 @@ window.BtappBase = {
 		var ret = {};
 		var model = this.get(v);
 		assert(model, 'trying to remove a model that does not exist');
-		assert(model instanceof BtappModel || model instanceof BtappCollection, 'trying to remove an object, but the existing value is not a model');
+		assert('updateState' in model, 'trying to remove an object that does not extend BtappBase');
 		model.updateState(session, added, removed, childurl);
 		if(model.isEmpty()) {
 			ret[v] = model;
@@ -231,8 +231,11 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		this.trigger('destroy');
 	},
 	clearState: function() {
-		_.each(this.attributes, function(attribute) { attribute.clearState && attribute.clearState(); });
-		this.clear();
+		var clone = _.clone(this.attributes);
+		_.each(clone, function(attribute) { 
+			attribute.clearState && attribute.clearState(); 
+		});
+		Backbone.Model.prototype.set.call(this, clone, {unset: true});
 		this.destructor();
 		this.initializeValues();
 	},
@@ -276,8 +279,8 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
 	},
 	updateFromAggregators: function(add_aggregator, remove_aggregator) {
-		this.set(add_aggregator);
-		this.set(remove_aggregator, {unset: true});
+		Backbone.Model.prototype.set.call(this, add_aggregator);
+		Backbone.Model.prototype.set.call(this, remove_aggregator, {unset: true});
 	}
 });
 
