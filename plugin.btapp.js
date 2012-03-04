@@ -50,7 +50,7 @@ window.BtappPluginManager = Backbone.Model.extend({
 	// to determine if the browser supports our mime type...if only IE supported
 	// listing the mime types the browser supports
 	add_plugin: function(cb) {
-		assert(jQuery('#' + this.pid).length == 0);
+		assert(jQuery('#' + this.pid).length === 0);
 		var obj = document.createElement('object');
 		var onload = this.pid + 'onload';
 		window[onload] = _.once(function() {

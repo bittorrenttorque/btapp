@@ -23,11 +23,11 @@ window.Pairing = Backbone.Model.extend({
 
 		this.resultImg.onerror = function() {
 			if (_this.options.timeout && (new Date() - _this.scan_start_time > _this.options.timeout)) {
-				if (_this.numfound == 0) {
+				if (_this.numfound === 0) {
 					_this.trigger('pairing:nonefound', { reason: 'timeout' } );
 				}
 			} else if (_this.curport > _this.realistic_give_up_after_port) { // highest_port_possible takes too long...
-				if (_this.numfound == 0) {
+				if (_this.numfound === 0) {
 					_this.trigger('pairing:nonefound', { reason: 'ended scan' } );
 				}
 			} else {

@@ -167,7 +167,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 		_.bindAll(this, 'customAddEvent', 'customRemoveEvent', 'customChangeEvent');
 		
 		this.bind('add', this.customAddEvent);
-		this.bind('remove', this.customRemoveEvent)
+		this.bind('remove', this.customRemoveEvent);
 		this.bind('change', this.customChangeEvent);
 	},
 	customEvent: function(event, model) {
@@ -185,7 +185,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	},
 	destructor: function() {
 		this.unbind('add', this.customAddEvent);
-		this.unbind('remove', this.customRemoveEvent)
+		this.unbind('remove', this.customRemoveEvent);
 		this.unbind('change', this.customChangeEvent);
 		this.trigger('destroy');
 	},
@@ -277,7 +277,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	},
 	updateFromAggregators: function(add_aggregator, remove_aggregator) {
 		this.set(add_aggregator);
-		this.set(remove_aggregator, {unset: true})
+		this.set(remove_aggregator, {unset: true});
 	}
 });
 
@@ -335,7 +335,7 @@ window.Btapp = BtappModel.extend({
 		} else {
 			jQuery.getScript(
 				'http://apps.bittorrent.com/torque/btapp/client.btapp.js',
-			_.bind(this.setClient, this, attributes)
+				_.bind(this.setClient, this, attributes)
 			);
 		}
 	},

@@ -49,7 +49,7 @@ window.TorrentClient = Backbone.Model.extend({
 		assert(typeof variables === 'object', 'expected variables to be an object');
 		var signatures = functionValue.match(/\(.*?\)/g);
 		return _.any(signatures, function(signature) {
-			var signature = signature.match(/\w+/g) || []; //["string","unknown"]
+			signature = signature.match(/\w+/g) || []; //["string","unknown"]
 			return signature.length == variables.length && _.all(signature, function(type,index) {
 				switch(type) {
 					//Most of these types that the client sends up match the typeof values of the javascript
@@ -66,9 +66,10 @@ window.TorrentClient = Backbone.Model.extend({
 						return typeof variables[index] === 'object';
 					case 'dispatch':
 						return typeof variables[index] === 'object' || typeof variables[index] === 'function';
+					default:
+						//has the client provided a type that we weren't expecting?
+						throw 'there is an invalid type in the function signature exposed by the client';
 				}
-				//has the client provided a type that we weren't expecting?
-				throw 'there is an invalid type in the function signature exposed by the client';
 			});
 		});
 	},
@@ -86,17 +87,17 @@ window.TorrentClient = Backbone.Model.extend({
 			// unfortunately arguments isn't a completely authetic javascript array, so we'll have
 			// to "splice" by hand. All this just to validate the correct types! sheesh...
 			var native_args = [];
-			for(var i = 1; i < arguments.length; i++) native_args.push(arguments[i]);
+			var i;
+			for(i = 1; i < arguments.length; i++) native_args.push(arguments[i]);
 			// This is as close to a static class function as you can get in javascript i guess
 			// we should be able to use verifySignaturesArguments to determine if the client will
 			// consider the arguments that we're passing to be valid
 			if(!TorrentClient.prototype.validateArguments.call(this, signatures, native_args)) {
 				throw 'arguments do not match any of the function signatures exposed by the client';
-				return;
 			}
 
 
-			for(var i = 1; i < arguments.length; i++) {
+			for(i = 1; i < arguments.length; i++) {
 				// We are responsible for converting functions to variable names...
 				// this will be called later via a event with a callback and arguments variables
 				if(typeof arguments[i] === 'function') {
@@ -374,7 +375,7 @@ window.LocalTorrentClient = TorrentClient.extend({
 		});
 	},
 	delayed_reset: function() {
-		setTimeout( _.bind(function() { this.reset() }, this), 1000 );
+		setTimeout(_.bind(function() { this.reset(); }, this), 1000 );
 	},
 	reset: function() {
 		// Reset is called upon initialization (or when we load pairing.btapp.js)
