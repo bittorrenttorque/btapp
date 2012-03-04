@@ -138,18 +138,6 @@ window.BtappBase = {
 			this.updateAddState(session, add, remove, url),
 			this.updateRemoveState(session, add, remove, url)
 		);
-	},
-	clearState: function() {
-		//we want to call clearState on all child elements
-		this.attributes && _.each(this.attributes, function(attribute) { attribute.clearState && attribute.clearState(); });
-		this.each && this.each(function(model) { model.clearState(); });
-	
-		//once child elements have been cleared, just blow away our children elements
-		this.reset && this.reset();
-		this.clear && this.clear();
-		
-		this.destructor();
-		this.initializeValues();
 	}
 };
 
@@ -189,6 +177,12 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 		this.unbind('change', this.customChangeEvent);
 		this.trigger('destroy');
 	},
+	clearState: function() {
+		this.each(function(model) { model.clearState(); });
+		this.reset();
+		this.destructor();
+		this.initializeValues();
+	},
 	verifyUrl: function(url) {
 		return url.match(/btapp\/torrent\/$/) ||
 			url.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
@@ -213,7 +207,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	updateFromAggregators: function(add_aggregator, remove_aggregator) {
 		this.add(_.values(add_aggregator));
 		this.remove(_.values(remove_aggregator));
-	}
+	},
 });
 
 // BtappModel
@@ -235,6 +229,12 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	destructor: function() {
 		this.unbind('change', this.customEvents);
 		this.trigger('destroy');
+	},
+	clearState: function() {
+		_.each(this.attributes, function(attribute) { attribute.clearState && attribute.clearState(); });
+		this.clear();
+		this.destructor();
+		this.initializeValues();
 	},
 	customEvents: function() {
 		var attributes = this.changedAttributes();
