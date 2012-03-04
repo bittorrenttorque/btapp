@@ -49,7 +49,7 @@ window.BtappBase = {
 		var ret = {};
 		var model = this.get(v);
 		assert(model, 'trying to remove a model that does not exist');
-		assert(model instanceof BtappModel, 'trying to remove an object, but the existing value is not a model');
+		assert(model instanceof BtappModel || model instanceof BtappCollection, 'trying to remove an object, but the existing value is not a model');
 		model.updateState(session, added, removed, childurl);
 		if(model.isEmpty()) {
 			ret[v] = model;
