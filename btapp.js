@@ -45,7 +45,7 @@ window.BtappBase = {
 		this.trigger('remove:bt:' + v);
 		delete this.bt[v];
 	},
-	updateRemoveObjectState: function(session, added, removed, childurl, v) {
+	updateRemoveObjectState: function(session, added, removed, childurl, v, aggregator) {
 		var model = this.get(v);
 		assert(model, 'trying to remove a model that does not exist');
 		assert(model instanceof BtappModel, 'trying to remove an object, but the existing value is not a model');
@@ -57,15 +57,10 @@ window.BtappBase = {
 	},
 	updateRemoveElementState: function(session, added, removed, v, url, aggregator) {
 		var childurl = url + v + '/';
-		// Most native objects coming from the client have an "all" layer before their variables,
-		// There is no need for the additional layer in javascript so we just flatten the tree a bit.
 		if(v === 'all') {
 			this.updateState(this.session, added, removed, childurl);
-			return;
-		}
-
-		if(typeof removed === 'object') {
-			this.updateRemoveObjectState(session, added, removed, childurl, v);
+		} else if(typeof removed === 'object') {
+			this.updateRemoveObjectState(session, added, removed, childurl, v, aggregator);
 		} else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
 			this.updateRemoveFunctionState(v);
 		} else if(v != 'id') {
@@ -88,7 +83,7 @@ window.BtappBase = {
 		this.bt[v] = this.client.createFunction(session, url + v, added);
 		this.trigger('add:bt:' + v);
 	},
-	updateAddObjectState: function(session, added, removed, childurl, v) {
+	updateAddObjectState: function(session, added, removed, childurl, v, aggregator) {
 		var model = this.get(v);
 		if(model === undefined) {
 			// Check if the url matches a valid collection url...if so that is the type that we should create
@@ -111,11 +106,11 @@ window.BtappBase = {
 	updateAddElementState: function(session, added, removed, v, url, aggregator) {
 		var childurl = url + v + '/';
 
+		// Special case all. It is a redundant layer that exist for the benefit of the torrent client
 		if(v === 'all') {
-			// Special case all. It is a redundant layer that exist for the benefit of the torrent client
 			this.updateState(this.session, added, removed, childurl);
 		} else if(typeof added === 'object') {
-			this.updateAddObjectState(session, added, removed, childurl, v);
+			this.updateAddObjectState(session, added, removed, childurl, v, aggregator);
 		} else if(typeof added === 'string' && TorrentClient.prototype.isFunctionSignature(added)) {
 			this.updateAddFunctionState(session, added, url, v);
 		} else {
@@ -156,7 +151,7 @@ window.BtappBase = {
 		var remove_aggregator = this.getAggregator();
 		this.updateAddState(session, add, remove, url, add_aggregator);
 		this.updateRemoveState(session, add, remove, url, remove_aggregator);
-		this.updateFromAggregator(add_aggregator, remove_aggregator);
+		this.updateFromAggregators(add_aggregator, remove_aggregator);
 	},
 	clearState: function() {
 		//we want to call clearState on all child elements
@@ -232,7 +227,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	getAggregator: function() {
 		return [];
 	},
-	updateFromAggregator: function(add_aggregator, remove_aggregator) {
+	updateFromAggregators: function(add_aggregator, remove_aggregator) {
 		this.add(add_aggregator);
 		this.remove(remove_aggregator);
 	}
@@ -296,7 +291,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 	getAggregator: function() {
 		return {};
 	},
-	updateFromAggregator: function(add_aggregator, remove_aggregator) {
+	updateFromAggregators: function(add_aggregator, remove_aggregator) {
 		this.set(add_aggregator);
 		this.set(remove_aggregator, {unset: true})
 	}
