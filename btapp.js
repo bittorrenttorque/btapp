@@ -51,8 +51,11 @@ window.BtappBase = {
 		assert(model instanceof BtappModel, 'trying to remove an object, but the existing value is not a model');
 		model.updateState(session, added, removed, childurl);
 		if(model.isEmpty()) {
-			this.remove && this.remove(model);
-			this.unset && this.unset(v);
+			if(aggregator.length === undefined) {
+				aggregator[v] = model;
+			} else {
+				aggregator.push(model);
+			}
 		}
 	},
 	updateRemoveElementState: function(session, added, removed, v, url, aggregator) {
@@ -97,8 +100,11 @@ window.BtappBase = {
 			model.updateState(this.session, added, removed, childurl);
 
 			//make sure we support running this function with this being a model or a collection
-			this.add && this.add(model);
-			this.set && this.set(v, model);
+			if(aggregator.length === undefined) {
+				aggregator[v] = model;
+			} else {
+				aggregator.push(model);
+			} 
 		} else {
 			model.updateState(this.session, added, removed, childurl);
 		}
