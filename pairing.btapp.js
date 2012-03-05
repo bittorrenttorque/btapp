@@ -11,7 +11,7 @@ window.Pairing = Backbone.Model.extend({
 		this.local_url = null;
 		this.resultImg = null;
 		this.highest_port_possbile = 50000;
-		this.realistic_give_up_after_port = 15000; // don't bother scanning all the ports.
+		this.realistic_give_up_after_port = 10300; // don't bother scanning all the ports.
 		assert( this.realistic_give_up_after_port < this.highest_port_possbile );
 	},
 	scan: function(options) {

@@ -104,7 +104,7 @@ window.BtappBase = {
 	updateAddElementState: function(session, added, removed, v, url) {
 		var childurl = url + v + '/';
 
-		// Special case all. It is a redundant layer that exist for the benefit of the torrent client
+		// Special case all. It is a redundant layer that exists for the benefit of the torrent client
 		if(v === 'all') {
 			return this.updateState(this.session, added, removed, childurl);
 		} else if(typeof added === 'object') {
@@ -134,7 +134,7 @@ window.BtappBase = {
 		add = add || {};
 		remove = remove || {};
 
-		this.updateFromAggregators(
+		this.applyStateChanges(
 			this.updateAddState(session, add, remove, url),
 			this.updateRemoveState(session, add, remove, url)
 		);
@@ -179,9 +179,9 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	},
 	clearState: function() {
 		this.each(function(model) { model.clearState(); });
+		this.initializeValues();
 		this.reset();
 		this.destructor();
-		this.initializeValues();
 	},
 	verifyUrl: function(url) {
 		return url.match(/btapp\/torrent\/$/) ||
@@ -204,9 +204,9 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	isEmpty: function() {
 		return jQuery.isEmptyObject(this.bt) && this.length === 0;
 	},
-	updateFromAggregators: function(add_aggregator, remove_aggregator) {
-		this.add(_.values(add_aggregator));
-		this.remove(_.values(remove_aggregator));
+	applyStateChanges: function(add, remove) {
+		this.add(_.values(add));
+		this.remove(_.values(remove));
 	},
 });
 
@@ -231,13 +231,14 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		this.trigger('destroy');
 	},
 	clearState: function() {
+		this.initializeValues();
 		var clone = _.clone(this.attributes);
+		delete clone['id'];
 		_.each(clone, function(attribute) { 
 			attribute.clearState && attribute.clearState(); 
 		});
 		Backbone.Model.prototype.set.call(this, clone, {unset: true});
 		this.destructor();
-		this.initializeValues();
 	},
 	customEvents: function() {
 		var attributes = this.changedAttributes();
@@ -278,9 +279,9 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		var keys = _.keys(this.toJSON());
 		return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
 	},
-	updateFromAggregators: function(add_aggregator, remove_aggregator) {
-		Backbone.Model.prototype.set.call(this, add_aggregator);
-		Backbone.Model.prototype.set.call(this, remove_aggregator, {unset: true});
+	applyStateChanges: function(add, remove) {
+		Backbone.Model.prototype.set.call(this, add);
+		Backbone.Model.prototype.set.call(this, remove, {unset: true});
 	}
 });
 
