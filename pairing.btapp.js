@@ -23,7 +23,7 @@ window.Pairing = Backbone.Model.extend({
 
 		this.resultImg.onerror = function() {
 			if (_this.curport > _this.realistic_give_up_after_port) { // highest_port_possible takes too long...
-				_this.trigger('pairing:error', { found: _this.numfound });
+				_this.trigger('pairing:none_found', { found: _this.numfound });
 			} else {
 				_this.i++;
 				_this.pingimg();
@@ -88,7 +88,12 @@ window.Pairing = Backbone.Model.extend({
 			error: _.bind(function(xhr, status, text) {
 				// a client responded to /gui/pingimg but had some other error on fetching "/version"
 				// should not happen, but report an event anyway.
-				this.trigger('pairing:error', { xhr: xhr, status: status, text: text } );
+				if (this.curport > this.realistic_give_up_after_port) { // highest_port_possible takes too long...
+					this.trigger('pairing:none_found', { found: this.numfound });
+				} else {
+					this.i++;
+					this.pingimg();
+				}
 			}, this)
 		});
 	},
