@@ -319,7 +319,7 @@ window.LocalTorrentClient = TorrentClient.extend({
 		this.pairing.bind('all', this.trigger, this);
 
 		this.pairing.bind('pairing:found', _.bind(function(options) {
-			if(options && options.version) {
+			if(options && options.version === '4.2.1' && options.name === 'Torque') {
 				var key = jQuery.jStorage.get('pairing_key');
 				if(key) {
 					// Let whoever triggered the pairing:found event that they don't need
@@ -334,6 +334,9 @@ window.LocalTorrentClient = TorrentClient.extend({
 					options.continue_scan = false;
 					options.attempt_authorization = true;
 				}
+			} else {
+				options.continue_scan = true;
+				options.attempt_authorization = false;
 			}
 		}, this));
 		this.pairing.bind('pairing:authorized', _.bind(function(options) {
@@ -343,7 +346,8 @@ window.LocalTorrentClient = TorrentClient.extend({
 			this.connect_to_authenticated_port(options.port, options.key);
 		}, this));
 
-		this.pairing.bind('pairing:nonefound', _.bind(this.delayed_reset, this) );
+
+		this.pairing.bind('pairing:none_found', _.bind(this.delayed_reset, this) );
 		this.reset();
 	},
 	// Before we actual start making requests against a client, we need to make sure

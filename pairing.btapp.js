@@ -22,14 +22,8 @@ window.Pairing = Backbone.Model.extend({
 		var _this = this;
 
 		this.resultImg.onerror = function() {
-			if (_this.options.timeout && (new Date() - _this.scan_start_time > _this.options.timeout)) {
-				if (_this.numfound === 0) {
-					_this.trigger('pairing:nonefound', { reason: 'timeout' } );
-				}
-			} else if (_this.curport > _this.realistic_give_up_after_port) { // highest_port_possible takes too long...
-				if (_this.numfound === 0) {
-					_this.trigger('pairing:nonefound', { reason: 'ended scan' } );
-				}
+			if (_this.curport > _this.realistic_give_up_after_port) { // highest_port_possible takes too long...
+				_this.trigger('pairing:error', { found: _this.numfound });
 			} else {
 				_this.i++;
 				_this.pingimg();
@@ -78,10 +72,17 @@ window.Pairing = Backbone.Model.extend({
 				if(options.attempt_authorization) {
 					this.authorize_port(port);
 				}
+				//the user wants to continue scanning
 				if(options.continue_scan) {
-					// keep scanning for other clients!
-					this.i++;
-					this.pingimg();
+					//if we're already past the highest port and the user asked us to continue, notify
+					//them that we've reached our limit
+					if (this.curport > this.realistic_give_up_after_port) { // highest_port_possible takes too long...
+						this.trigger('pairing:none_found', { found: this.numfound });
+					} else {
+						// keep scanning for other clients!
+						this.i++;
+						this.pingimg();
+					}
 				}	
 			}, this),
 			error: _.bind(function(xhr, status, text) {
