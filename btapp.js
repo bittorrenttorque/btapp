@@ -207,7 +207,7 @@ window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 	applyStateChanges: function(add, remove) {
 		this.add(_.values(add));
 		this.remove(_.values(remove));
-	},
+	}
 });
 
 // BtappModel
@@ -419,7 +419,7 @@ window.Btapp = BtappModel.extend({
 });
 
 //The version of this library should always match the version of torque that it requires.
-Btapp.VERSION = '4.2.1'
+Btapp.VERSION = '4.2.1';
 Btapp.QUERIES = {
 	ALL: 'btapp/',
 	TORRENTS: 'btapp/torrent/all/*/',
