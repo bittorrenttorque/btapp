@@ -31,7 +31,15 @@
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl/');
 				var exception = 'trying to set a variable to the existing value [testurl/testkey/ -> "testvalue"]';
-				expect(function() { model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, 'testurl/') }).toThrow(exception);
+				expect(function() { 
+					model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, 'testurl/') 
+				}).toThrow(exception);
+			});
+			it('changes from url encoded strings', function() {
+				var value = "magnet:?xt=urn:btih:7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4&dn=trusted-computing&tr=http%3a//www.legaltorrents.com%3a7070/announce";
+				var model = new BtappModel({'id':'test'});
+				model.updateState('testsession', {'testkey':value}, null, 'testurl/');
+				model.updateState('testsession', {'testkey':'value'}, {'testkey':value}, 'testurl/');
 			});
 			it('handles adding and removing attributes with value 0', function() {
 				var model = new BtappModel({'id':'test'});

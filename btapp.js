@@ -270,6 +270,7 @@ window.BtappModel = Backbone.Model.extend(BtappBase).extend({
 		added = (typeof added === 'string') ? unescape(added) : added;
 		assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
 		if(!(removed === undefined)) {
+			removed = (typeof removed === 'string') ? unescape(removed) : removed;
 			assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
 		}
 		ret[v] = added;
