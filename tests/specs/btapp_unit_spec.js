@@ -1,5 +1,70 @@
 (function() {
 	describe('Btapp Unit Tests', function() {
+		describe('Btapp initialize parameter validation', function() {
+			it('defaults queries to \'btapp/\'', function() {
+				var btapp = new Btapp;
+				btapp.connect();
+				expect(btapp.queries).toEqual(['btapp/']);
+				btapp.disconnect();
+			});
+			it('accepts queries as a single string', function() {
+				var query = 'btapp/events/';
+				var btapp = new Btapp;
+				btapp.connect({
+					queries: query
+				});
+				expect(btapp.queries).toEqual([query]);
+				btapp.disconnect();
+			});
+			it('accepts queries as an array of strings', function() {
+				var queries = ['btapp/events/','btapp/create/'];
+				var btapp = new Btapp;
+				btapp.connect({
+					queries: queries
+				});
+				expect(btapp.queries).toEqual(queries);
+				btapp.disconnect();
+			});
+			it('throws an exception if a non string is provided', function() {
+				var exception = 'the queries attribute must either be a string or an array of strings';
+				var queries = false;
+				var btapp = new Btapp;
+				expect(function() {
+					btapp.connect({
+						queries: queries
+					});
+				}).toThrow(exception);
+			});
+			it('throws an exception if an array with non-strings is provided', function() {
+				var exception = 'the queries attribute must either be a string or an array of strings';
+				var queries = [false, 0, undefined];
+				var btapp = new Btapp;
+				expect(function() {
+					btapp.connect({
+						queries: queries
+					});
+				}).toThrow(exception);
+			});
+			it('throws an exception if a query string does not end with a \'/\'', function() {
+				var exception = 'the queries attribute must contain strings that end with a \'/\'';
+				var queries = ['btapp/events/','btapp/create'];
+				var btapp = new Btapp;
+				expect(function() {
+					btapp.connect({
+						queries: queries
+					});
+				}).toThrow(exception);
+			});
+			it('expects queries to be cleared after disconnect', function() {
+				var queries = ['btapp/events/','btapp/create/'];
+				var btapp = new Btapp;
+				btapp.connect({
+					queries: queries
+				});
+				btapp.disconnect();
+				expect(btapp.queries).not.toBeTruthy();
+			});
+		});
 		describe('BtappModel state updates', function() {
 			it('adds and removes an attribute', function() {
 				var model = new BtappModel({'id':'test'});
@@ -302,6 +367,19 @@
 				model.unbind('add:bt:fn', add_callback);
 				expect(add_callback.callCount).toEqual(1);
 			});
+			it('triggers add:bt event', function() {
+				var model = new BtappModel({'id':'test'});
+				model.client = new LocalTorrentClient({'btapp':model});
+				var add_callback = jasmine.createSpy();
+				model.bind('add:bt', _.bind(function() {
+					expect(this.bt.fn).toBeDefined();
+					add_callback();
+				}, model));
+				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				expect(add_callback).toHaveBeenCalled();
+				model.unbind('add:bt', add_callback);
+				expect(add_callback.callCount).toEqual(1);
+			});
 			it('triggers remove event', function() {
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
@@ -331,6 +409,17 @@
 				model.updateState('testsession', null, {'fn':'[nf]()'}, 'testurl');
 				expect(remove_callback).toHaveBeenCalled();
 				model.unbind('remove:bt:fn', remove_callback);
+				expect(remove_callback.callCount).toEqual(1);
+			});
+			it('triggers remove:bt event', function() {
+				var model = new BtappModel({'id':'test'});
+				model.client = new LocalTorrentClient({'btapp':model});
+				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				var remove_callback = jasmine.createSpy();
+				model.bind('remove:bt', remove_callback);
+				model.updateState('testsession', null, {'fn':'[nf]()'}, 'testurl');
+				expect(remove_callback).toHaveBeenCalled();
+				model.unbind('remove:bt', remove_callback);
 				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers change event', function() {

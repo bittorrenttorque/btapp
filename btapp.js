@@ -43,6 +43,7 @@ window.BtappBase = {
 	updateRemoveFunctionState: function(v) {
 		assert(v in this.bt, 'trying to remove a function that does not exist');
 		this.trigger('remove:bt:' + v);
+		this.trigger('remove:bt', this.bt[v]);
 		delete this.bt[v];
 	},
 	updateRemoveObjectState: function(session, added, removed, childurl, v) {
@@ -81,6 +82,7 @@ window.BtappBase = {
 		assert(!(v in this.bt), 'trying to add a function that already exists');
 		this.bt[v] = this.client.createFunction(session, url + v, added);
 		this.trigger('add:bt:' + v);
+		this.trigger('add:bt', this.bt[v]);
 		return {};
 	},
 	updateAddObjectState: function(session, added, removed, childurl, v) {
@@ -309,6 +311,7 @@ window.Btapp = BtappModel.extend({
 		this.url = 'btapp/';
 		this.connected_state = false;
 		this.client = null;
+		this.queries = null;
 
 		//bind stuff
 		_.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
@@ -326,7 +329,23 @@ window.Btapp = BtappModel.extend({
 		// Initialize variables
 		attributes = attributes || {};
 		this.poll_frequency = attributes.poll_frequency || 3000;
-		this.queries = attributes.queries || Btapp.QUERIES.ALL;
+		//set the queries variable...we accept either a string or an array of strings
+		if(attributes.queries === undefined) {
+			this.queries = [Btapp.QUERIES.ALL];
+		} else if(typeof attributes.queries === 'string') {
+			this.queries = [attributes.queries];
+		} else {
+			this.queries = attributes.queries;
+		}
+
+		var error = 'the queries attribute must either be a string or an array of strings';
+		assert(typeof this.queries === 'object', error);
+		assert(_.all(this.queries, function(query) {
+			return typeof query === 'string';
+		}), error);
+		assert(_.all(this.queries, function(query) {
+			return query.match(/\/$/);
+		}), 'the queries attribute must contain strings that end with a \'/\'');
 
 		// At this point, if a username password combo is provided we assume that we're trying to
 		// access a falcon client. If not, default to the client running on your local machine.
@@ -365,6 +384,7 @@ window.Btapp = BtappModel.extend({
 		}
 		this.client.btapp = null;
 		this.client = null;
+		this.queries = null;
 		this.clearState();
 	},
 	connected: function() {
