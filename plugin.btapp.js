@@ -114,16 +114,19 @@ window.BtappPluginManager = Backbone.Model.extend({
 		var css_link = 'http://apps.bittorrent.com/torque/facebox/src/facebox.css';
 		var head = jQuery('head');
 		head.append('<link rel="stylesheet" type="text/css" href="' + css_link + '" />');
-		jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js',
-			_.bind(function(data, textStatus) {
-				this.loaded = true;
-				jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
-				jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
-				jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';						
-				jQuery.facebox.settings.opacity = 0.6;
-				callback();
-			}, this)
-		);
+		var facebox_loaded = _.bind(function(data, textStatus) {
+			this.loaded = true;
+			jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
+			jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
+			jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';						
+			jQuery.facebox.settings.opacity = 0.6;
+			callback();
+		}, this);
+		if(jQuery.facebox) {
+			facebox_loaded();
+		} else {
+			jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', facebox_loaded);
+		}
 	},
 	// Its show time! Lets get this baby installed.
 	show_install_plugin_dialog: function() {
@@ -148,6 +151,7 @@ window.BtappPluginManager = Backbone.Model.extend({
 	hide_install_plugin_dialog: function() {
 		assert(this.visible);
 		jQuery(document).trigger('close.facebox');
+		jQuery('#install').remove();
 		this.visible = false;
 		this.trigger('plugin:hide_install_plugin_dialog');
 	},

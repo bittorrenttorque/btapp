@@ -41,7 +41,10 @@ window.Pairing = Backbone.Model.extend({
 	get_ping_img_url: function(port) {
 		return this.get_domain() + ':' + port + '/gui/pingimg';
 	},
-	get_pair_url: function(port) {
+	get_iframe_pair_url: function(port) {
+		return this.get_domain() + ':' + port + '/gui/pair?iframe=' + encodeURIComponent(window.location.origin);
+	},
+	get_dialog_pair_url: function(port) {
 		return this.get_domain() + ':' + port + '/gui/pair?name=' + encodeURIComponent(window.location.origin);
 	},
 	pingimg: function() {
@@ -50,7 +53,7 @@ window.Pairing = Backbone.Model.extend({
 		this.resultImg.src = url;
 	},
 	port_found: function(port) {
-		// found a listening port. now check its version...
+		// Found a listening port. now check its version...
 		this.local_url = "http://127.0.0.1:" + port;
 
 		this.test_port({
@@ -66,27 +69,29 @@ window.Pairing = Backbone.Model.extend({
 				};
 				
 				if (data == 'invalid request' || (data && data.version)) {
+					// Notify the listeners that we've found a client.
+					// Give them an opportunity to change how we handle the situation.
 					this.trigger('pairing:found', options);
 				}
 
 				if(options.attempt_authorization) {
-					this.authorize_port(port);
+					this.authorize_port_with_iframe(port);
 				}
-				//the user wants to continue scanning
+				// The user wants to continue scanning
 				if(options.continue_scan) {
-					//if we're already past the highest port and the user asked us to continue, notify
-					//them that we've reached our limit
+					// If we're already past the highest port and the user asked us to continue, notify
+					// Them that we've reached our limit
 					if (this.curport > this.realistic_give_up_after_port) { // highest_port_possible takes too long...
 						this.trigger('pairing:none_found', { found: this.numfound });
 					} else {
-						// keep scanning for other clients!
+						// Keep scanning for other clients!
 						this.i++;
 						this.pingimg();
 					}
 				}	
 			}, this),
 			error: _.bind(function(xhr, status, text) {
-				// a client responded to /gui/pingimg but had some other error on fetching "/version"
+				// A client responded to /gui/pingimg but had some other error on fetching "/version"
 				// should not happen, but report an event anyway.
 				if (this.curport > this.realistic_give_up_after_port) { // highest_port_possible takes too long...
 					this.trigger('pairing:none_found', { found: this.numfound });
@@ -97,19 +102,55 @@ window.Pairing = Backbone.Model.extend({
 			}, this)
 		});
 	},
-	authorize_port_success: function(port, data, status, xhr) {
+	authorize_port_success: function(port, data) {
 		this.trigger('pairing:authorized', {'port':port, 'key':data});
 	},
 	authorize_port_error: function(port) {
 		this.trigger('pairing:authorization_failed', port);
 	},
-	authorize_port: function(port) {
+	authorize_port_with_dialog: function(port) {
 		jQuery.ajax({
-			url: this.get_pair_url(port),
+			url: this.get_dialog_pair_url(port),
 			dataType: 'jsonp',
 			success: _.bind(this.authorize_port_success, this, port),
 			error: _.bind(this.authorize_port_error, this, port)
 		});
+	},
+	authorize_port_with_iframe: function(port) {
+		//make sure that we've loaded what we need to display
+		if(!jQuery.facebox) {
+			jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', _.bind(this.authorize_port_with_iframe, this, port));
+			return;
+		}
+
+		var dialog = jQuery('<div></div>');
+		dialog.attr('id', 'pairing');
+		dialog.css('position', 'absolute');
+		dialog.css('height', '200px');
+		dialog.css('width', '400px');
+		dialog.css('left', '%50');
+		dialog.css('margin-left', '-200px');
+
+		var frame = jQuery('<iframe></iframe>');
+		frame.attr('src', this.get_iframe_pair_url(port));
+		frame.css('padding', '0px');
+		frame.css('margin', '0px');
+		dialog.append(frame);
+
+		jQuery(window).on('message', _.bind(function(port, data) {
+			if(data && data.originalEvent && data.originalEvent.data && data.originalEvent.data.key) {
+				var key = data.originalEvent.data.key;
+				this.authorize_port_success(port, key);
+			} else {
+				this.authorize_port_error(port);
+			}
+			jQuery(document).trigger('close.facebox');
+			jQuery('#pairing').remove();
+		}, this, port));
+
+		dialog.hide();
+		jQuery('body').append(dialog);
+		jQuery.facebox({ div: '#pairing' });
 	},
 	test_port: function(opts) {
 		var test_pair_url = this.local_url + '/version/';
