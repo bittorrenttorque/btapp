@@ -145,7 +145,8 @@
 				'</object>';
 
 			document.body.appendChild(div);
-		},	remove_plugin: function() {
+		},	
+		remove_plugin: function() {
 			jQuery('#btapp_plugin').remove();
 		},
 
