@@ -7,6 +7,21 @@
 
 	function assert(b, err) { if(!b) throw err; }
 
+	_.mixin({
+		//utility function to wait for some condition
+		//this ends up being helpful as we toggle between a flow chart and a state diagram
+		when: function(condition, functionality) {
+			var when_func = function() {
+				if(condition.call()) {
+					functionality.call();
+				} else {
+					setTimeout(when_func, 500);
+				}
+			};
+			underscore.delay(when_func);
+		}
+	});
+
 	BtappPluginManager = Backbone.Model.extend({
 		//Avoid DOM collisions by having a ridiculous id.
 		PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
@@ -21,18 +36,7 @@
 			var ie  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
 			jQuery(this.mime_type_check);
 		},
-		//utility function to wait for some condition
-		//this ends up being helpful as we toggle between a flow chart and a state diagram
-		when: function(condition, functionality) {
-			var when_func = function() {
-				if(condition.call()) {
-					functionality.call();
-				} else {
-					setTimeout(when_func, 500);
-				}
-			};
-			_.delay(when_func);
-		},
+
 
 		//we know nothing. we want:
 		//the plugin installed
@@ -50,7 +54,7 @@
 			this.trigger('plugin:install_plugin', switches);
 			if(switches.install) {
 				this.show_install_plugin_dialog();
-				this.when(this.supports_mime_type, this.mime_type_check_yes);
+				_.when(this.supports_mime_type, this.mime_type_check_yes);
 			}
 		},
 		mime_type_check_yes: function() {
@@ -74,7 +78,7 @@
 			this.trigger('plugin:install_client', switches);
 			if(switches.install) {
 				this.get_plugin().downloadProgram(this.PRODUCT, this.VERSION, _.bind(this.trigger, this, 'plugin:downloaded_client'));
-				this.when(this.client_installed, this.client_installed_check_yes);
+				_.when(this.client_installed, this.client_installed_check_yes);
 			}
 		},
 		client_installed_check_yes: function() {
@@ -92,7 +96,7 @@
 		},
 		client_running_check_no: function() {
 			this.get_plugin().runProgram(this.PRODUCT, function() {});
-			this.when(this.client_running, this.client_running_check_yes);
+			_.when(this.client_running, this.client_running_check_yes);
 		},
 		client_running_check_yes: function() {
 			//well i'll be...looks like we made it to the end.
