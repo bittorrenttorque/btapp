@@ -10,12 +10,12 @@
 	_.mixin({
 		//utility function to wait for some condition
 		//this ends up being helpful as we toggle between a flow chart and a state diagram
-		when: function(condition, functionality) {
+		when: function(condition, functionality, interval) {
 			var when_func = function() {
 				if(condition.call()) {
 					functionality.call();
 				} else {
-					setTimeout(when_func, 500);
+					setTimeout(when_func, interval || 500);
 				}
 			};
 			_.delay(when_func);
@@ -27,13 +27,14 @@
 		PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
 		//All BitTorrent products have this number appended to their window names
 		WINDOW_HASH: '4823',
-		PRODUCT:'Torque',
-		VERSION:'4.2.1',
+		DEFAULT_PRODUCT:'Torque',
+		DEFAULT_VERSION:'4.2.1',
 		MIME_TYPE: 'application/x-bittorrent-torque',
 
 		initialize: function() {
 			_.bindAll(this);
-			var ie  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
+			this.PRODUCT = this.get('product') || this.DEFAULT_PRODUCT;
+			this.VERSION = this.get('version') || this.DEFAULT_VERSION;
 			jQuery(this.mime_type_check);
 		},
 
@@ -159,7 +160,10 @@
 			return running;
 		},
 		client_installed: function() {
-			return this.get_plugin().getInstallVersion(this.PRODUCT);
+			var version = this.get_plugin().getInstallVersion(this.PRODUCT);
+			var not_supported = 'This application is not supported.';
+			assert(version !== not_supported, not_supported);
+			return version;
 		},
 
 
