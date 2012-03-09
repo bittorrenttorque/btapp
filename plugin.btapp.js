@@ -18,7 +18,7 @@
 					setTimeout(when_func, 500);
 				}
 			};
-			underscore.delay(when_func);
+			_.delay(when_func);
 		}
 	});
 
