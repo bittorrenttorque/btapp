@@ -7,20 +7,18 @@
 
 	function assert(b, err) { if(!b) throw err; }
 
-	_.mixin({
-		//utility function to wait for some condition
-		//this ends up being helpful as we toggle between a flow chart and a state diagram
-		when: function(condition, functionality, interval) {
-			var when_func = function() {
-				if(condition.call()) {
-					functionality.call();
-				} else {
-					setTimeout(when_func, interval || 500);
-				}
-			};
-			_.delay(when_func);
-		}
-	});
+	//utility function to wait for some condition
+	//this ends up being helpful as we toggle between a flow chart and a state diagram
+	function when(condition, functionality, interval) {
+		var when_func = function() {
+			if(condition.call()) {
+				functionality.call();
+			} else {
+				setTimeout(when_func, interval || 500);
+			}
+		};
+		_.delay(when_func);
+	}
 
 	BtappPluginManager = Backbone.Model.extend({
 		//Avoid DOM collisions by having a ridiculous id.
@@ -34,7 +32,6 @@
 		initialize: function() {
 			_.bindAll(this);
 			this.PRODUCT = this.get('product') || this.DEFAULT_PRODUCT;
-			this.VERSION = this.get('version') || this.DEFAULT_VERSION;
 			jQuery(this.mime_type_check);
 		},
 
@@ -55,7 +52,7 @@
 			this.trigger('plugin:install_plugin', switches);
 			if(switches.install) {
 				this.show_install_plugin_dialog();
-				_.when(this.supports_mime_type, this.mime_type_check_yes);
+				when(this.supports_mime_type, this.mime_type_check_yes);
 			}
 		},
 		mime_type_check_yes: function() {
@@ -78,8 +75,8 @@
 			var switches = {'install':true};
 			this.trigger('plugin:install_client', switches);
 			if(switches.install) {
-				this.get_plugin().downloadProgram(this.PRODUCT, this.VERSION, _.bind(this.trigger, this, 'plugin:downloaded_client'));
-				_.when(this.client_installed, this.client_installed_check_yes);
+				this.get_plugin().downloadProgram(this.PRODUCT, _.bind(this.trigger, this, 'plugin:downloaded_client'));
+				when(this.client_installed, this.client_installed_check_yes);
 			}
 		},
 		client_installed_check_yes: function() {
@@ -97,7 +94,7 @@
 		},
 		client_running_check_no: function() {
 			this.get_plugin().runProgram(this.PRODUCT, function() {});
-			_.when(this.client_running, this.client_running_check_yes);
+			when(this.client_running, this.client_running_check_yes);
 		},
 		client_running_check_yes: function() {
 			//well i'll be...looks like we made it to the end.
