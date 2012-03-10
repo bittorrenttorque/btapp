@@ -326,7 +326,7 @@
 			this.pairing.bind('all', this.trigger, this);
 
 			this.pairing.bind('pairing:found', _.bind(function(options) {
-				if(options && options.version === '4.2.1' && options.name === 'Torque') {
+				if(options && options.name === 'Torque') {
 					var key = jQuery.jStorage.get('pairing_key');
 					if(key) {
 						// Let whoever triggered the pairing:found event that they don't need
