@@ -31,7 +31,7 @@
 	// reducing redundant code...both these types need a way to build up children elements
 	// from data retrieved from the torrent client, as a way to clean that data up should
 	// the client become unreachable.
-	window.BtappBase = {
+	BtappBase = {
 		initialize: function() {
 			_.bindAll(this, 'initializeValues', 'updateState', 'clearState', 'isEmpty', 'destructor');
 			this.initializeValues();
@@ -151,7 +151,7 @@
 	// currently this can only be used to represent the list of torrents,
 	// then within the torrents, their list of files...this will eventually
 	// be used for rss feeds, etc as well.
-	window.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
+	BtappCollection = Backbone.Collection.extend(BtappBase).extend({
 		initialize: function(models, options) {
 			Backbone.Collection.prototype.initialize.apply(this, arguments);
 			BtappBase.initialize.apply(this, arguments);
@@ -221,7 +221,7 @@
 	// hang off of most BtappModels is also a BtappModel...both BtappModel
 	// and BtappCollection objects are responsible for taking the json object
 	// that is returned by the client and turning that into attributes/functions/etc
-	window.BtappModel = Backbone.Model.extend(BtappBase).extend({
+	BtappModel = Backbone.Model.extend(BtappBase).extend({
 		initialize: function(attributes) {
 			Backbone.Model.prototype.initialize.apply(this, arguments);
 			BtappBase.initialize.apply(this, arguments);
@@ -305,7 +305,7 @@
 	// The primary difference is that in the original you got the state at that exact moment, where
 	// we now simply keep the backbone objects up to date (by quick polling and updating as diffs are returned)
 	// so you can query at your leisure.
-	window.Btapp = BtappModel.extend({
+	Btapp = BtappModel.extend({
 		initialize: function() {
 			BtappModel.prototype.initialize.apply(this, arguments);
 
@@ -355,7 +355,7 @@
 
 			// We'll check for TorrentClient and assume that FalconTorrentClient and LocalTorrentClient
 			// come along for the ride.
-			if(window.TorrentClient) {
+			if(TorrentClient) {
 				this.setClient(attributes);
 			} else {
 				jQuery.getScript(
