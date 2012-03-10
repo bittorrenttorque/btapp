@@ -138,8 +138,8 @@ window.Pairing = Backbone.Model.extend({
 		dialog.append(frame);
 
 		jQuery(window).on('message', _.bind(function(port, data) {
-			if(data && data.originalEvent && data.originalEvent.data && data.originalEvent.data.key) {
-				var key = data.originalEvent.data.key;
+			if(data && data.originalEvent && data.originalEvent.data) {
+				var key = data.originalEvent.data;
 				this.authorize_port_success(port, key);
 			} else {
 				this.authorize_port_error(port);
