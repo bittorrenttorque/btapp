@@ -28,6 +28,13 @@
 	    }).appendTo('head');
 	};
 
+	function initializeFacebox() {
+		jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
+		jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
+		jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';						
+		jQuery.facebox.settings.opacity = 0.6;
+	}
+
 	BtappPluginManager = Backbone.Model.extend({
 		//Avoid DOM collisions by having a ridiculous id.
 		PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
@@ -184,10 +191,7 @@
 				getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
 				var facebox_loaded = _.bind(function(data, textStatus) {
 					this.loaded = true;
-					jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
-					jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
-					jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';						
-					jQuery.facebox.settings.opacity = 0.6;
+					initializeFacebox();
 					callback();
 				}, this);
 				if(jQuery.facebox) {

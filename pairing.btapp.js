@@ -15,6 +15,13 @@
 	    }).appendTo('head');
 	};
 	
+	function initializeFacebox() {
+		jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
+		jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
+		jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';						
+		jQuery.facebox.settings.opacity = 0.6;
+	}
+
 	function get_domain() {
 		return 'http://127.0.0.1';
 	}
@@ -104,6 +111,8 @@
 				jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', _.bind(this.authorize, this, port));
 				return;
 			}
+
+			initializeFacebox();
 
 			var dialog = jQuery('<div></div>');
 			dialog.attr('id', 'pairing');
