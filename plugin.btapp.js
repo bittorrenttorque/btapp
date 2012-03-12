@@ -21,7 +21,7 @@
 	}
 
 	function getCSS(url) {
-	    jQuery( document.createElement('link') ).attr({
+	    jQuery(document.createElement('link') ).attr({
 	        href: url,
 	        type: 'text/css',
 	        rel: 'stylesheet'
