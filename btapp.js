@@ -356,12 +356,12 @@
 			// We'll check for TorrentClient and assume that FalconTorrentClient and LocalTorrentClient
 			// come along for the ride.
 			if(typeof TorrentClient === 'undefined') {
-				this.setClient(attributes);
-			} else {
 				jQuery.getScript(
 					'http://apps.bittorrent.com/torque/btapp/client.btapp.js',
 					_.bind(this.setClient, this, attributes)
 				);
+			} else {
+				this.setClient(attributes);
 			}
 		},
 		setClient: function(attributes) {
@@ -371,8 +371,7 @@
 				this.client = new LocalTorrentClient(attributes);
 			}
 			// While we don't want app writers having to interact with the client directly,
-			// it would be nice to be able to listen in on what's going on...so lets just bubble
-			// them up as client:XXX messages
+			// it would be nice to be able to listen in on what's going on...so let em bubble up
 			this.client.bind('all', this.trigger, this);
 			this.client.bind('client:connected', this.fetch);		
 		},
