@@ -296,7 +296,7 @@
 				return;
 			}
 		
-			assert(BtappPluginManager, 'expected plugin.btapp.js to be loaded by now');
+			assert(typeof BtappPluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
 			this.manager = new BtappPluginManager(attributes);
 			this.manager.bind('all', this.trigger, this);
 		},
