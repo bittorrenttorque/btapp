@@ -20,6 +20,14 @@
 		_.delay(when_func);
 	}
 
+	function getCSS(url) {
+	    jQuery( document.createElement('link') ).attr({
+	        href: url,
+	        type: 'text/css',
+	        rel: 'stylesheet'
+	    }).appendTo('head');
+	};
+
 	BtappPluginManager = Backbone.Model.extend({
 		//Avoid DOM collisions by having a ridiculous id.
 		PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
@@ -173,9 +181,7 @@
 		load_dialog_dependencies: function(callback) {
 			_.once(_.bind(function() {
 				this.loading = true;
-				var css_link = 'http://apps.bittorrent.com/torque/facebox/src/facebox.css';
-				var head = jQuery('head');
-				head.append('<link rel="stylesheet" type="text/css" href="' + css_link + '" />');
+				getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
 				var facebox_loaded = _.bind(function(data, textStatus) {
 					this.loaded = true;
 					jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it

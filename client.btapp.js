@@ -331,19 +331,19 @@
 					if(key) {
 						// Let whoever triggered the pairing:found event that they don't need
 						// to continue scanning, nor do they need to handle aquiring a pairing key
-						options.continue_scan = false;
-						options.attempt_authorization = false;
+						options.continue = false;
+						options.authorize = false;
 						this.connect_to_authenticated_port(options.port, key);
 					} else {
 						// We've found the port we want to work with, but we don't have a pairing key.
 						// We'll set attemp_authorization to true so that a pairing dialog is presented 
 						// to the user
-						options.continue_scan = false;
-						options.attempt_authorization = true;
+						options.continue = false;
+						options.authorize = true;
 					}
 				} else {
-					options.continue_scan = true;
-					options.attempt_authorization = false;
+					options.continue = true;
+					options.authorize = false;
 				}
 			}, this));
 			this.pairing.bind('pairing:authorized', _.bind(function(options) {
