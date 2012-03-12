@@ -194,10 +194,10 @@
 					initializeFacebox();
 					callback();
 				}, this);
-				if(jQuery.facebox) {
-					facebox_loaded();
-				} else {
+				if(typeof jQuery.facebox === 'undefined') {
 					jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', facebox_loaded);
+				} else {
+					facebox_loaded();
 				}
 			}, this))();
 		},

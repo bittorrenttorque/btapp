@@ -288,7 +288,7 @@
 		// running on the local machine.
 		initialize_manager: function(attributes) {
 			//if we don't have what we need, fetch it and try again
-			if(!BtappPluginManager) {
+			if(typeof BtappPluginManager === 'undefined') {
 				jQuery.getScript(
 					'http://apps.bittorrent.com/torque/btapp/plugin.btapp.js',
 					_.bind(this.initialize_manager, this, attributes)
@@ -304,7 +304,7 @@
 		// port the torrent client is bound to.
 		initialize_pairing: function(attributes) {
 			//if we don't have what we need, fetch it and try again
-			if(!Pairing) {
+			if(typeof Pairing === 'undefined') {
 				jQuery.getScript(
 					'http://apps.bittorrent.com/torque/btapp/pairing.btapp.js',
 					_.bind(this.initialize_pairing, this, attributes)
@@ -313,7 +313,7 @@
 			}
 			
 			//if we don't have what we need, fetch it and try again
-			if(!jQuery.jStorage) {
+			if(typeof jQuery.jStorage === 'undefined') {
 				jQuery.getScript(
 					'http://apps.bittorrent.com/torque/jStorage/jstorage.min.js',
 					_.bind(this.initialize_pairing, this, attributes)

@@ -106,7 +106,7 @@
 		},
 		authorize: function(port) {
 			//make sure that we've loaded what we need to display
-			if(!jQuery.facebox) {
+			if(typeof jQuery.facebox === 'undefined') {
 				getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
 				jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', _.bind(this.authorize, this, port));
 				return;

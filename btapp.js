@@ -355,7 +355,7 @@
 
 			// We'll check for TorrentClient and assume that FalconTorrentClient and LocalTorrentClient
 			// come along for the ride.
-			if(TorrentClient) {
+			if(typeof TorrentClient === 'undefined') {
 				this.setClient(attributes);
 			} else {
 				jQuery.getScript(
