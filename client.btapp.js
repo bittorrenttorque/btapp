@@ -354,7 +354,7 @@
 			}, this));
 
 
-			this.pairing.bind('pairing:none_found', _.bind(this.delayed_reset, this) );
+			this.pairing.bind('pairing:stop', _.bind(this.delayed_reset, this) );
 			this.reset();
 		},
 		// Before we actual start making requests against a client, we need to make sure
