@@ -8,9 +8,8 @@
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
 						expect(options.name).toEqual('Torque');
-						expect(options.version).toEqual(Btapp.VERSION);
-						options.attempt_authorization = false;
-						options.continue_scan = false;
+						options.authorize = false;
+						options.continue = false;
 					}, this));
 					this.pairing.scan();
 				});
@@ -31,13 +30,12 @@
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
 						expect(options.name).toEqual('Torque');
-						expect(options.version).toEqual(Btapp.VERSION);
 						if(this.port) {
 							expect(options.port).toEqual(this.port);
 						}
 						this.port = options.port;
-						options.attempt_authorization = false;
-						options.continue_scan = false;
+						options.authorize = false;
+						options.continue = false;
 					}, this));
 					this.pairing.scan();
 				});
