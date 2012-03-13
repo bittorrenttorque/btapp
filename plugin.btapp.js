@@ -17,7 +17,7 @@
 				setTimeout(when_func, interval || 500);
 			}
 		};
-		_.delay(when_func);
+		_.defer(when_func);
 	}
 
 	function getCSS(url) {
@@ -47,7 +47,8 @@
 		initialize: function() {
 			_.bindAll(this);
 			this.PRODUCT = this.get('product') || this.DEFAULT_PRODUCT;
-			jQuery(this.mime_type_check);
+			//when we load jquery, we should defer a call to mime_type_check
+			jQuery(_.bind(_.defer, this, this.mime_type_check));
 		},
 
 
