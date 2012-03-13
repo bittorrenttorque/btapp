@@ -90,7 +90,7 @@
 						'name':(typeof data === 'object' ? data.name : 'unknown'), 
 						'port':port,
 						'authorize':true,
-						'continue':true
+						'abort':false
 					};
 					
 					if(data == 'invalid request' || (data && data.version)) {
@@ -100,7 +100,7 @@
 							this.authorize(port);
 						} 
 
-						if(options.continue) {
+						if(!options.abort) {
 							this.ping(get_next_port(port));
 						}
 					}
