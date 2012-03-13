@@ -41,7 +41,6 @@
 		//All BitTorrent products have this number appended to their window names
 		WINDOW_HASH: '4823',
 		DEFAULT_PRODUCT:'Torque',
-		DEFAULT_VERSION:'4.2.1',
 		MIME_TYPE: 'application/x-bittorrent-torque',
 
 		initialize: function() {
