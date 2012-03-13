@@ -16,7 +16,6 @@
 					this.btapp.bind('pairing:found', _.bind(function(info) {
 						this.paired = true;
 						expect(info.name).toEqual('Torque');
-						expect(info.version).toEqual(Btapp.VERSION);
 					}, this));
 					this.btapp.connect();
 				});
@@ -122,14 +121,6 @@
 					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
 				}, 'torrent to appear after being added', 5000);
 			});
-			it('downloads those popular torrents', function() {
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4').get('properties');
-				});
-				waitsFor(function() {
-					return this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4').get('properties').get('downloaded') > 0;
-				}, 'some of the file to be downloaded');
-			});
 			it('deletes those popular torrents', function() {
 				waitsFor(function() {
 					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
@@ -143,11 +134,12 @@
 			});
 		});
 		describe('Btapp Interactive Client Function Calls', function() {
+			it('OPERATOR: SELECT ANY FILE', function() {});
 			it('shows a file selection dialog and creates a torrent', function() {
 				runs(function() {
 					this.btapp = new Btapp;
 					this.btapp.connect();	
-					this.created = false;
+					this.hash = null;
 				});
 				
 				waitsFor(function() {
@@ -159,11 +151,12 @@
 						function() {}, 
 						_.bind(function(files) { 
 							this.files = files;
+							expect(_.values(this.files).length).toEqual(1);
 							this.btapp.bt.create(
 								function() {}, 
 								'', 
 								_.values(this.files), 
-								_.bind(function() { this.created = true; }, this)
+								_.bind(function(hash) { this.hash = hash; }, this)
 							); 
 						}, this)
 					);
@@ -174,8 +167,194 @@
 				}, 20000, 'file selection');
 
 				waitsFor(function() {
-					return this.created;
+					return this.hash;
 				}, 20000, 'torrent creation');
+
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
+				}, 5000, 'torrent to show up in the diffs');
+			});
+			it('OPERATOR: SELECT A FILE WITH A SPACE IN THE NAME', function() {});
+			it('it creates a torrent from a file with a space in the name', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect();	
+					this.hash = null;
+				});
+				
+				waitsFor(function() {
+					return this.btapp.bt.browseforfiles;
+				});
+				
+				runs(function() {
+					this.btapp.bt.browseforfiles(
+						function() {}, 
+						_.bind(function(files) { 
+							this.files = files;
+							expect(_.values(this.files).length).toEqual(1);
+							expect(_.values(this.files)[0].indexOf(' ')).not.toEqual(-1);
+							this.btapp.bt.create(
+								function() {}, 
+								'', 
+								_.values(this.files), 
+								_.bind(function(hash) { this.hash = hash; }, this)
+							); 
+						}, this)
+					);
+				});
+				
+				waitsFor(function() {
+					return this.files;
+				}, 20000, 'file selection');
+
+				waitsFor(function() {
+					return this.hash;
+				}, 20000, 'torrent creation');
+
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
+				}, 5000, 'torrent to show up in the diffs');
+			});
+			it('OPERATOR: SELECT A FILE WITH A UNICODE CHARACTER IN THE NAME', function() {});
+			it('it creates a torrent from a file with a unicode character in the name', function() {
+				function isDoubleByte(str) {
+				    for (var i = 0, n = str.length; i < n; i++) {
+				        if (str.charCodeAt( i ) > 255) { return true; }
+				    }
+				    return false;
+				}
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect();	
+					this.hash = null;
+				});
+				
+				waitsFor(function() {
+					return this.btapp.bt.browseforfiles;
+				});
+				
+				runs(function() {
+					this.btapp.bt.browseforfiles(
+						function() {}, 
+						_.bind(function(files) { 
+							this.files = files;
+							expect(_.values(this.files).length).toEqual(1);
+							expect(isDoubleByte(_.values(this.files)[0])).toBeTruthy();
+							this.btapp.bt.create(
+								function() {}, 
+								'', 
+								_.values(this.files), 
+								_.bind(function(hash) { this.hash = hash; }, this)
+							); 
+						}, this)
+					);
+				});
+				
+				waitsFor(function() {
+					return this.files;
+				}, 20000, 'file selection');
+
+				waitsFor(function() {
+					return this.hash;
+				}, 20000, 'torrent creation');
+
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
+				}, 5000, 'torrent to show up in the diffs');
+			});
+			it('OPERATOR: SELECT A FILE WITH A \'(\' CHARACTER IN THE NAME', function() {});
+			it('it creates a torrent from a file with a \'(\' character in the name', function() {
+				function isDoubleByte(str) {
+				    for (var i = 0, n = str.length; i < n; i++) {
+				        if (str.charCodeAt( i ) > 255) { return true; }
+				    }
+				    return false;
+				}
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect();	
+					this.hash = null;
+				});
+				
+				waitsFor(function() {
+					return this.btapp.bt.browseforfiles;
+				});
+				
+				runs(function() {
+					this.btapp.bt.browseforfiles(
+						function() {}, 
+						_.bind(function(files) { 
+							this.files = files;
+							expect(_.values(this.files).length).toEqual(1);
+							expect(_.values(this.files)[0].indexOf('(')).not.toEqual(-1);
+							this.btapp.bt.create(
+								function() {}, 
+								'', 
+								_.values(this.files), 
+								_.bind(function(hash) { this.hash = hash; }, this)
+							); 
+						}, this)
+					);
+				});
+				
+				waitsFor(function() {
+					return this.files;
+				}, 20000, 'file selection');
+
+				waitsFor(function() {
+					return this.hash;
+				}, 20000, 'torrent creation');
+
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
+				}, 5000, 'torrent to show up in the diffs');
+			});
+			it('OPERATOR: SELECT A FILE WITH A \')\' CHARACTER IN THE NAME', function() {});
+			it('it creates a torrent from a file with a \')\' character in the name', function() {
+				function isDoubleByte(str) {
+				    for (var i = 0, n = str.length; i < n; i++) {
+				        if (str.charCodeAt( i ) > 255) { return true; }
+				    }
+				    return false;
+				}
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect();	
+					this.hash = null;
+				});
+				
+				waitsFor(function() {
+					return this.btapp.bt.browseforfiles;
+				});
+				
+				runs(function() {
+					this.btapp.bt.browseforfiles(
+						function() {}, 
+						_.bind(function(files) { 
+							this.files = files;
+							expect(_.values(this.files).length).toEqual(1);
+							expect(_.values(this.files)[0].indexOf(')')).not.toEqual(-1);
+							this.btapp.bt.create(
+								function() {}, 
+								'', 
+								_.values(this.files), 
+								_.bind(function(hash) { this.hash = hash; }, this)
+							); 
+						}, this)
+					);
+				});
+				
+				waitsFor(function() {
+					return this.files;
+				}, 20000, 'file selection');
+
+				waitsFor(function() {
+					return this.hash;
+				}, 20000, 'torrent creation');
+
+				waitsFor(function() {
+					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
+				}, 5000, 'torrent to show up in the diffs');
 			});
 		});
 	});
