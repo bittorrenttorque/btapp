@@ -179,7 +179,7 @@
 			// We can just skip straight to the good stuff (signing in) if we've
 			// done this previously...the last dependency we load sets the
 			// window.falcon variable, so we can just check for that
-			if(falcon) {
+			if(typeof falcon !== 'undefined') {
 				_.defer(_.bind(this.reset, this));
 				return;
 			}
