@@ -25,7 +25,13 @@
 	function get_domain() {
 		return 'http://127.0.0.1';
 	}
-	
+
+	function authorized_domain() {
+		return location.host.match(/([^.]+)\.utorrent.com/i) ||
+			location.host.match(/([^.]+)\.bittorrent.com/i) ||
+			location.host.match(/([^.]+)\.getshareapp.com/i);
+	}
+
 	function get_ping_img_url(port) {
 		return get_domain() + ':' + port + '/gui/pingimg';
 	}
@@ -105,6 +111,28 @@
 			});
 		},
 		authorize: function(port) {
+			if(authorized_domain()) {
+				//this will use the old school dialogs which allow bittorrent domains to pair automatically
+				this.authorize_basic(port);
+			} else {
+				this.authorize_iframe(port);
+			}
+		},
+		authorize_port_success: function(port, key) {
+			this.trigger('pairing:authorized', {'port':port, 'key':key});
+		},
+		authorize_port_error: function(port) {
+			this.trigger('pairing:denied', port);
+		},
+		authorize_basic: function(port) {
+			jQuery.ajax({
+				url: get_dialog_pair_url(port),
+				dataType: 'jsonp',
+				success: _.bind(this.authorize_port_success, this, port),
+				error: _.bind(this.authorize_port_error, this, port)
+			});
+		},
+		authorize_iframe: function(port) {
 			//make sure that we've loaded what we need to display
 			if(typeof jQuery.facebox === 'undefined') {
 				getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
@@ -130,9 +158,9 @@
 
 			jQuery(window).on('message', _.bind(function(port, data) {
 				if(data && data.originalEvent && data.originalEvent.data && data.originalEvent.data !== 'denied') {
-					this.trigger('pairing:authorized', {'port': port, 'key': data.originalEvent.data});
+					this.authorize_port_success(port, data.originalEvent.data);
 				} else {
-					this.trigger('pairing:denied', {'port': port});
+					this.authorize_port_error(port);
 				}
 				jQuery(document).trigger('close.facebox');
 				jQuery('#pairing').remove();
