@@ -75,7 +75,11 @@
 
 			this.trigger('pairing:attempt', {'port': port});
 			var img = new Image();
-			img.onerror = _.bind(this.ping, this, get_next_port(port));
+			img.onerror = _.bind(function() {
+				setTimeout(_.bind(function() {
+					this.ping(get_next_port(port));
+				}, this), 500);
+			}, this);
 			img.onload = _.bind(this.port_found, this, port);
 			img.src = get_ping_img_url(port);
 		},
