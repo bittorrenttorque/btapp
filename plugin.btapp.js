@@ -69,7 +69,9 @@
 	    if(switches.install) {
 		this.show_install_plugin_dialog();
 		when(this.supports_mime_type, this.mime_type_check_yes);
-	    }
+	    } else {
+		when(this.supports_mime_type, this.mime_type_check_yes);
+            }
 	},
 	mime_type_check_yes: function() {
 	    this.trigger('plugin:plugin_installed');
@@ -131,7 +133,6 @@
 		}
 	    } else {
                 var numplugins = navigator.plugins.length;
-                console.log('numplugins',numplugins);
                 navigator.plugins.refresh();
                 if (navigator.plugins.length != numplugins) {
                     // new plugin was added or removed!
