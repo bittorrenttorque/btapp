@@ -280,49 +280,54 @@
         initialize: function(attributes) {
             TorrentClient.prototype.initialize.call(this, attributes);
             this.btapp = attributes.btapp;
-            this.initialize_manager(attributes);
+            this.initialize_objects(attributes);
+        },
+        initialize_objects: function(attributes) {
+            //if we don't have what we need, fetch it and try again
+            if(typeof BtappPluginManager === 'undefined') {
+                jQuery.getScript(
+                    'http://apps.bittorrent.com/torque/btapp/plugin.btapp.js',
+                    _.bind(this.initialize_objects, this, attributes)
+                );
+                return;
+            }
+
+            //if we don't have what we need, fetch it and try again
+            if(typeof Pairing === 'undefined') {
+                jQuery.getScript(
+                    'http://apps.bittorrent.com/torque/btapp/pairing.btapp.js',
+                    _.bind(this.initialize_objects, this, attributes)
+                );
+                return;
+            }
+
+            //if we don't have what we need, fetch it and try again
+            if(typeof jQuery.jStorage === 'undefined') {
+                jQuery.getScript(
+                    'http://apps.bittorrent.com/torque/jStorage/jstorage.min.js',
+                    _.bind(this.initialize_objects, this, attributes)
+                );
+                return;
+            }
+
+            this.initialize_plugin(attributes);
             this.initialize_pairing(attributes);
         },
         // We have a seperate object that is responsible for managing the browser
         // plugin and using that plugin to ensure that Torque is downloaded and
         // running on the local machine.
-        initialize_manager: function(attributes) {
-            //if we don't have what we need, fetch it and try again
-            if(typeof BtappPluginManager === 'undefined') {
-                jQuery.getScript(
-                    'http://apps.bittorrent.com/torque/btapp/plugin.btapp.js',
-                    _.bind(this.initialize_manager, this, attributes)
-                );
-                return;
-            }
-        
+        initialize_plugin: function(attributes) {
             assert(typeof BtappPluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
-            this.manager = new BtappPluginManager(attributes);
-            this.manager.bind('all', this.trigger, this);
+            this.plugin_manager = new BtappPluginManager(attributes);
+            this.plugin_manager.bind('all', this.trigger, this);
         },
         // We have a seperate object responsible for determining exactly which
         // port the torrent client is bound to.
         initialize_pairing: function(attributes) {
-            //if we don't have what we need, fetch it and try again
-            if(typeof Pairing === 'undefined') {
-                jQuery.getScript(
-                    'http://apps.bittorrent.com/torque/btapp/pairing.btapp.js',
-                    _.bind(this.initialize_pairing, this, attributes)
-                );
-                return;
-            }
-            
-            //if we don't have what we need, fetch it and try again
-            if(typeof jQuery.jStorage === 'undefined') {
-                jQuery.getScript(
-                    'http://apps.bittorrent.com/torque/jStorage/jstorage.min.js',
-                    _.bind(this.initialize_pairing, this, attributes)
-                );
-                return;
-            }
-            
+            assert(typeof this.plugin_manager !== 'undefined', 'you must initialize the plugin manager before the pairing object');
+            assert(typeof Pairing !== 'undefined', 'expected pairing.btapp.js to be loaded by now');
             //all right...ready to roll.
-            this.pairing = new Pairing;
+            this.pairing = new Pairing({'plugin_manager': this.plugin_manager});
             this.pairing.bind('all', this.trigger, this);
 
             this.pairing.bind('pairing:found', _.bind(function(options) {
@@ -353,9 +358,8 @@
                 this.connect_to_authenticated_port(options.port, options.key);
             }, this));
 
-
             this.pairing.bind('pairing:stop', _.bind(this.delayed_reset, this) );
-            this.reset();
+            this.plugin_manager.bind('plugin:plugin_running', _.bind(this.reset, this) );
         },
         // Before we actual start making requests against a client, we need to make sure
         // we have a valid pairing key. This might be redundant if we just got one from the
@@ -374,16 +378,14 @@
                 this.reset();
             };
         
-            jQuery.ajax({
-                url: 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key,
-                dataType: 'jsonp',
-                context: this,
-                success: function(data) {
-                    if(data === 'invalid request') err.call(this);
-                    else cb.call(this);
-                },
-                error: err
-            });
+            var url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
+            this.plugin_manager.get_plugin().ajax(url, _.bind(function(response) {
+                if(response.allowed && response.success && response.data !== 'invalid request') {
+                    cb.call(this);
+                } else {
+                    err.call(this);
+                }
+            }, this));
         },
         delayed_reset: function() {
             setTimeout(_.bind(function() { this.reset(); }, this), 1000 );
@@ -397,14 +399,24 @@
             this.pairing.scan();
         },
         send_query: function(args, cb, err) {
-            jQuery.ajax({
-                url: this.url,
-                dataType: 'jsonp',
-                context: this,
-                data: args,
-                success: cb,
-                error: err,
-                timeout: 5000
+            var url = this.url;
+            _.each(args, function(value, key) {
+                url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+            });
+            this.plugin_manager.get_plugin().ajax(url, function(response) {
+                var obj;
+                if(!response.allowed || !response.success) {
+                    err(response);
+                    return;
+                }
+
+                try {
+                    obj = JSON.parse(response.data);
+                } catch(e) {
+                    err('parsererror');
+                    return;
+                }
+                cb(obj);
             });
         }
     }); 

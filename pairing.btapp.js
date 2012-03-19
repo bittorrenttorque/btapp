@@ -13,7 +13,7 @@
             type: 'text/css',
             rel: 'stylesheet'
         }).appendTo('head');
-    };
+    }
     
     function initializeFacebox() {
         jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
@@ -63,7 +63,65 @@
 
     var MAX_PORT = 11000;
 
+
+    PluginPairing = {
+        ping_port: function(port) {
+            this.get('plugin_manager').get_plugin().ajax(get_ping_img_url(port), _.bind(function(response) {
+                var correct_mime_type = (response.headers['Content-Type'] === 'image/x-ms-bmp');
+                var correct_size = (response.size == 66);
+                if(!response.allowed || !response.success || !correct_mime_type || !correct_size) {
+                    this.on_ping_error(port);
+                } else {
+                    this.on_ping_success(port);
+                }
+            }, this));
+        },
+        check_version: function(port) {
+            this.trigger('pairing:check_version', {'port': port});
+            this.get('plugin_manager').get_plugin().ajax(get_version_url(port), _.bind(function(response) {
+                if(!response.allowed || !response.success) {
+                    this.on_check_version_error(port);
+                } else {
+                    var obj;
+                    try {
+                        obj = JSON.parse(response.data);
+                    } catch(e) {
+                        this.on_check_version_error(port);
+                        return;
+                    }
+                    this.on_check_version_success(port, obj); 
+                }
+            }, this));
+        }
+    };
+
+    ImagePairing = {
+        ping_port: function(port) {
+            var img = new Image();
+            img.onerror = _.bind(this.on_ping_error, this, port);
+            img.onload = _.bind(this.on_ping_success, this, port);
+            img.src = get_ping_img_url(port);
+        },
+        check_version: function(port) {
+            this.trigger('pairing:check_version', {'port': port});
+            jQuery.ajax({
+                url: get_version_url(port),
+                dataType: 'jsonp',
+                success: _.bind(this.on_check_version_success, this, port),
+                error: this.on_check_version_error,
+            });
+        }
+    };
+
     Pairing = Backbone.Model.extend({
+        initialize: function() {
+            _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success');
+            if(this.get('plugin_manager')) {
+                _.extend(this, PluginPairing);
+            } else {
+                _.extend(this, ImagePairing);
+            }
+        },
         scan: function() {
             this.ping(get_port(0));
         },
@@ -74,45 +132,37 @@
             }
 
             this.trigger('pairing:attempt', {'port': port});
-            var img = new Image();
-            img.onerror = _.bind(function() {
-                setTimeout(_.bind(function() {
-                    this.ping(get_next_port(port));
-                }, this), 500);
-            }, this);
-            img.onload = _.bind(this.port_found, this, port);
-            img.src = get_ping_img_url(port);
+            this.ping_port(port);
         },
-        port_found: function(port) {
-            jQuery.ajax({
-                url: get_version_url(port),
-                dataType: 'jsonp',
-                context: this,
-                success: function(data, status, xhr) {
-                    var options = { 
-                        'version':(typeof data === 'object' ? data.version : 'unknown'),
-                        'name':(typeof data === 'object' ? data.name : 'unknown'), 
-                        'port':port,
-                        'authorize':true,
-                        'abort':false
-                    };
-                    
-                    if(data == 'invalid request' || (data && data.version)) {
-                        this.trigger('pairing:found', options);
+        on_ping_error: function(port) {
+            this.ping(get_next_port(port));
+        },
+        on_ping_success: function(port) {
+            this.check_version(port);
+        },
+        on_check_version_error: function(port, data) {
+            this.ping(get_next_port(port));
+        },
+        on_check_version_success: function(port, data) {
+            var options = { 
+                'version':(typeof data === 'object' ? data.version : 'unknown'),
+                'name':(typeof data === 'object' ? data.name : 'unknown'), 
+                'port':port,
+                'authorize':true,
+                'abort':false
+            };
+            
+            if(data == 'invalid request' || (data && data.version)) {
+                this.trigger('pairing:found', options);
 
-                        if(options.authorize) {
-                            this.authorize(port);
-                        } 
+                if(options.authorize) {
+                    this.authorize(port);
+                }
 
-                        if(!options.abort) {
-                            this.ping(get_next_port(port));
-                        }
-                    }
-                },
-                error: function() {
+                if(!options.abort) {
                     this.ping(get_next_port(port));
                 }
-            });
+            }
         },
         authorize: function(port) {
             if(authorized_domain()) {

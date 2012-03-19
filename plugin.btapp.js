@@ -20,21 +20,6 @@
         _.defer(when_func);
     }
 
-    function getCSS(url) {
-        jQuery(document.createElement('link') ).attr({
-            href: url,
-            type: 'text/css',
-            rel: 'stylesheet'
-        }).appendTo('head');
-    };
-
-    function initializeFacebox() {
-        jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
-        jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
-        jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';                     
-        jQuery.facebox.settings.opacity = 0.6;
-    }
-
     BtappPluginManager = Backbone.Model.extend({
         //Avoid DOM collisions by having a ridiculous id.
         PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
@@ -184,55 +169,6 @@
             var not_supported = 'This application is not supported.';
             assert(version !== not_supported, not_supported);
             return version;
-        },
-
-
-
-        // Dialog specific functionality
-        // ---------------------------
-        // We didn't want to burdon the browser with loading in all the facebox code
-        // if we didn't need it...well here we are.
-        load_dialog_dependencies: function(callback) {
-            _.once(_.bind(function() {
-                this.loading = true;
-                getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
-                var facebox_loaded = _.bind(function(data, textStatus) {
-                    this.loaded = true;
-                    initializeFacebox();
-                    callback();
-                }, this);
-                if(typeof jQuery.facebox === 'undefined') {
-                    jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', facebox_loaded);
-                } else {
-                    facebox_loaded();
-                }
-            }, this))();
-        },
-        dialog_dependencies_loaded: function() {
-            return jQuery.facebox !== undefined;
-        },
-        // Its show time! Lets get this baby installed.
-        show_install_plugin_dialog: function() {
-            var add_plugin_dialog_to_dom = _.once(_.bind(function() {
-                var dialog = jQuery('<div></div>');
-                dialog.attr('id', 'install');
-
-                var paragraph = jQuery('<p></p>');
-                paragraph.text('This site requires the BitTorrent Torque plugin.');
-                dialog.append(paragraph);
-
-                var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/SoShare.msi">Download</a>');
-                dialog.append(button);
-                dialog.hide();
-                jQuery('body').append(dialog);
-                jQuery.facebox({ div: '#install' });
-            }, this));
-
-            if(this.dialog_dependencies_loaded()) {
-                add_plugin_dialog_to_dom();
-            } else {
-                this.load_dialog_dependencies(add_plugin_dialog_to_dom);
-            }
         }
     });
 }).call(this);
