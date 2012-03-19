@@ -41,7 +41,7 @@
         //All BitTorrent products have this number appended to their window names
         WINDOW_HASH: '4823',
         DEFAULT_PRODUCT:'Torque',
-        MIME_TYPE: 'application/x-bittorrent-torque',
+        MIME_TYPE: 'application/x-gyre-soshare',
 
         initialize: function() {
             _.bindAll(this);
@@ -214,7 +214,7 @@
                 paragraph.text('This site requires the BitTorrent Torque plugin.');
                 dialog.append(paragraph);
 
-                var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/Torque.msi">Download</a>');
+                var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/SoShare.msi">Download</a>');
                 dialog.append(button);
                 dialog.hide();
                 jQuery('body').append(dialog);
