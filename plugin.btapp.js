@@ -42,6 +42,7 @@
         WINDOW_HASH: '4823',
         DEFAULT_PRODUCT:'Torque',
         MIME_TYPE: 'application/x-gyre-soshare',
+        ACTIVEX_PROGID: 'gyre.soshare',
 
         initialize: function() {
             _.bindAll(this);
@@ -123,14 +124,20 @@
             var isIE  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
             if(isIE) {
                 try {
-                    var tq = new ActiveXObject("bittorrent.torque");
+                    var tq = new ActiveXObject(this.ACTIVEX_PROGID);
                     return tq !== undefined;
                 } catch (e) {
                     return false;
                 }
             } else {
-                var mime = navigator.mimeTypes[this.MIME_TYPE];
-                return mime && mime.enabledPlugin;
+                navigator.plugins.refresh();
+
+                for (var i = 0; i < navigator.plugins.length; i++) {
+                    var plugin = navigator.plugins[i][0];
+                    if (plugin.type == this.MIME_TYPE) {
+                        return true;
+                    }
+                }
             }
         },
         get_plugin: function() {
