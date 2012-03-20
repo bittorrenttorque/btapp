@@ -284,7 +284,7 @@
         },
         initialize_objects: function(attributes) {
             //if we don't have what we need, fetch it and try again
-            if(typeof BtappPluginManager === 'undefined') {
+            if(typeof PluginManager === 'undefined') {
                 jQuery.getScript(
                     'http://apps.bittorrent.com/torque/btapp/plugin.btapp.js',
                     _.bind(this.initialize_objects, this, attributes)
@@ -317,8 +317,8 @@
         // plugin and using that plugin to ensure that Torque is downloaded and
         // running on the local machine.
         initialize_plugin: function(attributes) {
-            assert(typeof BtappPluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
-            this.plugin_manager = new BtappPluginManager(attributes);
+            assert(typeof PluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
+            this.plugin_manager = new PluginManager(attributes);
             this.plugin_manager.bind('all', this.trigger, this);
         },
         // We have a seperate object responsible for determining exactly which

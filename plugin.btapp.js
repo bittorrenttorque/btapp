@@ -20,7 +20,7 @@
         _.defer(when_func);
     }
 
-    BtappPluginManager = Backbone.Model.extend({
+    PluginManager = Backbone.Model.extend({
         //Avoid DOM collisions by having a ridiculous id.
         PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
         //All BitTorrent products have this number appended to their window names
