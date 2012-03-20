@@ -94,7 +94,7 @@
 
             jQuery(window).on('message', function(data) {
                 //we only want to listen for events that came from us
-                if(data.originalEvent.source === get_domain(options.port)) {
+                if(data.originalEvent.origin === get_domain(options.port)) {
                     options.callback(options.port, data);
                     jQuery(document).trigger('close.facebox');
                     jQuery('#pairing').remove();
