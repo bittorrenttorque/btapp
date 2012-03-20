@@ -109,15 +109,9 @@
 
     PluginPairing = {
         ping_port: function(port) {
-            this.get('plugin_manager').get_plugin().ajax(get_ping_img_url(port), _.bind(function(response) {
-                var correct_mime_type = (response.headers['Content-Type'] === 'image/x-ms-bmp');
-                var correct_size = (response.size == 66);
-                if(!response.allowed || !response.success || !correct_mime_type || !correct_size) {
-                    this.on_ping_error(port);
-                } else {
-                    this.on_ping_success(port);
-                }
-            }, this));
+            //the plugin doesn't support binary data, which is what the image url returns...
+            //so lets just skip straight to the version query
+            this.on_ping_success(port);
         },
         check_version: function(port) {
             this.trigger('pairing:check_version', {'port': port});
