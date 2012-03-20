@@ -24,8 +24,8 @@
         jQuery.facebox.settings.opacity = 0.6;
     }
 
-    function get_domain() {
-        return 'http://127.0.0.1';
+    function get_domain(port) {
+        return 'http://127.0.0.1:' + port;
     }
 
     function authorized_domain() {
@@ -35,19 +35,19 @@
     }
 
     function get_ping_img_url(port) {
-        return get_domain() + ':' + port + '/gui/pingimg';
+        return get_domain(port) + '/gui/pingimg';
     }
     
     function get_iframe_pair_url(port) {
-        return get_domain() + ':' + port + '/gui/pair?iframe=' + encodeURIComponent(window.location.origin);
+        return get_domain(port) + '/gui/pair?iframe=' + encodeURIComponent(window.location.origin);
     }
     
     function get_dialog_pair_url(port) {
-        return get_domain() + ':' + port + '/gui/pair?name=' + encodeURIComponent(window.location.origin);
+        return get_domain(port) + '/gui/pair?name=' + encodeURIComponent(window.location.origin);
     }
 
     function get_version_url(port) {
-        return get_domain() + ':' + port + '/version/';
+        return get_domain(port) + '/version/';
     }
 
     function get_next_port(port) {
@@ -93,9 +93,12 @@
             dialog.append(frame);
 
             jQuery(window).on('message', function(data) {
-                options.callback(options.port, data);
-                jQuery(document).trigger('close.facebox');
-                jQuery('#pairing').remove();
+                //we only want to listen for events that came from us
+                if(data.originalEvent.source === get_domain(options.port)) {
+                    options.callback(options.port, data);
+                    jQuery(document).trigger('close.facebox');
+                    jQuery('#pairing').remove();
+                }
             });
 
             dialog.hide();
@@ -240,6 +243,7 @@
             this.trigger('pairing:denied', port);
         },
         authorize_port_callback: function(port, data) {
+            assert(data === 'denied' || data.length === 40, 'this is a message from the iframe that is no bueno');
             if(data && data.originalEvent && data.originalEvent.data && data.originalEvent.data !== 'denied') {
                 this.authorize_port_success(port, data.originalEvent.data);
             } else {
