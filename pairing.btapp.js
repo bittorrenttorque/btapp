@@ -92,6 +92,15 @@
                     this.on_check_version_success(port, obj); 
                 }
             }, this));
+        },
+        authorize_basic: function(port) {
+            this.get('plugin_manager').get_plugin().ajax(get_ping_img_url(port), _.bind(function(response) {
+                if(!response.allowed || !response.success) {
+                    this.authorize_port_error(port);
+                } else {
+                    this.authorize_port_success(port);
+                }
+            }, this));
         }
     };
 
@@ -109,6 +118,14 @@
                 dataType: 'jsonp',
                 success: _.bind(this.on_check_version_success, this, port),
                 error: this.on_check_version_error,
+            });
+        },
+        authorize_basic: function(port) {
+            jQuery.ajax({
+                url: get_dialog_pair_url(port),
+                dataType: 'jsonp',
+                success: _.bind(this.authorize_port_success, this, port),
+                error: _.bind(this.authorize_port_error, this, port)
             });
         }
     };
@@ -177,14 +194,6 @@
         },
         authorize_port_error: function(port) {
             this.trigger('pairing:denied', port);
-        },
-        authorize_basic: function(port) {
-            jQuery.ajax({
-                url: get_dialog_pair_url(port),
-                dataType: 'jsonp',
-                success: _.bind(this.authorize_port_success, this, port),
-                error: _.bind(this.authorize_port_error, this, port)
-            });
         },
         authorize_iframe: function(port) {
             //make sure that we've loaded what we need to display
