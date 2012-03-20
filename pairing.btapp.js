@@ -243,11 +243,14 @@
             this.trigger('pairing:denied', port);
         },
         authorize_port_callback: function(port, data) {
-            assert(data === 'denied' || data.length === 40, 'this is a message from the iframe that is no bueno');
-            if(data && data.originalEvent && data.originalEvent.data && data.originalEvent.data !== 'denied') {
+            assert(data && data.originalEvent && data.originalEvent.data, 'no data was passed in the message from the iframe');
+
+            if(data.originalEvent.data.length === 40) {
                 this.authorize_port_success(port, data.originalEvent.data);
-            } else {
+            } else if(data.originalEvent.data === 'denied') {
                 this.authorize_port_error(port);
+            } else {
+                throw 'the message data from the iframe was neither a pairing key, nor a denied message';
             }
         }
     });
