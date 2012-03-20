@@ -328,6 +328,7 @@
             assert(typeof Pairing !== 'undefined', 'expected pairing.btapp.js to be loaded by now');
             //all right...ready to roll.
             this.pairing = new Pairing({'plugin_manager': this.plugin_manager});
+            new PairingView({'model': this.pairing});
             this.pairing.bind('all', this.trigger, this);
 
             this.pairing.bind('pairing:found', _.bind(function(options) {

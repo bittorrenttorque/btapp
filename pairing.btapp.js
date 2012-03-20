@@ -5,6 +5,8 @@
 
 (function() {
 
+    var MAX_PORT = 11000;
+
     function assert(b, err) { if(!b) throw err; }
 
     function getCSS(url) {
@@ -61,8 +63,46 @@
         return 7 * Math.pow(i, 3) + 3 * Math.pow(i, 2) + 5 * i + 10000;
     }
 
-    var MAX_PORT = 11000;
+    PairingView = Backbone.View.extend({
+        initialize: function() {
+            _.bindAll(this, 'authorize_iframe');
+            this.model.bind('pairing:authorize', this.authorize_iframe);
+        },
+        authorize_iframe: function(options) {
+            //make sure that we've loaded what we need to display
+            if(typeof jQuery.facebox === 'undefined') {
+                getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
+                jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', _.bind(this.authorize_iframe, this, options));
+                return;
+            }
 
+            initializeFacebox();
+
+            var dialog = jQuery('<div></div>');
+            dialog.attr('id', 'pairing');
+            dialog.css('position', 'absolute');
+            dialog.css('height', '200px');
+            dialog.css('width', '400px');
+            dialog.css('left', '%50');
+            dialog.css('margin-left', '-200px');
+
+            var frame = jQuery('<iframe></iframe>');
+            frame.attr('src', get_iframe_pair_url(options.port));
+            frame.css('padding', '0px');
+            frame.css('margin', '0px');
+            dialog.append(frame);
+
+            jQuery(window).on('message', function(data) {
+                options.callback(options.port, data);
+                jQuery(document).trigger('close.facebox');
+                jQuery('#pairing').remove();
+            });
+
+            dialog.hide();
+            jQuery('body').append(dialog);
+            jQuery.facebox({ div: '#pairing' });
+        }
+    });
 
     PluginPairing = {
         ping_port: function(port) {
@@ -132,7 +172,7 @@
 
     Pairing = Backbone.Model.extend({
         initialize: function() {
-            _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success');
+            _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success', 'authorize_port_callback');
             if(this.get('plugin_manager')) {
                 _.extend(this, PluginPairing);
             } else {
@@ -186,7 +226,11 @@
                 //this will use the old school dialogs which allow bittorrent domains to pair automatically
                 this.authorize_basic(port);
             } else {
-                this.authorize_iframe(port);
+                //let someone build a view to do something with this info
+                this.trigger('pairing:authorize', {
+                    'port': port,
+                    'callback': this.authorize_port_callback
+                });
             }
         },
         authorize_port_success: function(port, key) {
@@ -195,43 +239,12 @@
         authorize_port_error: function(port) {
             this.trigger('pairing:denied', port);
         },
-        authorize_iframe: function(port) {
-            //make sure that we've loaded what we need to display
-            if(typeof jQuery.facebox === 'undefined') {
-                getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
-                jQuery.getScript('http://apps.bittorrent.com/torque/facebox/src/facebox.js', _.bind(this.authorize, this, port));
-                return;
+        authorize_port_callback: function(port, data) {
+            if(data && data.originalEvent && data.originalEvent.data && data.originalEvent.data !== 'denied') {
+                this.authorize_port_success(port, data.originalEvent.data);
+            } else {
+                this.authorize_port_error(port);
             }
-
-            initializeFacebox();
-
-            var dialog = jQuery('<div></div>');
-            dialog.attr('id', 'pairing');
-            dialog.css('position', 'absolute');
-            dialog.css('height', '200px');
-            dialog.css('width', '400px');
-            dialog.css('left', '%50');
-            dialog.css('margin-left', '-200px');
-
-            var frame = jQuery('<iframe></iframe>');
-            frame.attr('src', get_iframe_pair_url(port));
-            frame.css('padding', '0px');
-            frame.css('margin', '0px');
-            dialog.append(frame);
-
-            jQuery(window).on('message', _.bind(function(port, data) {
-                if(data && data.originalEvent && data.originalEvent.data && data.originalEvent.data !== 'denied') {
-                    this.authorize_port_success(port, data.originalEvent.data);
-                } else {
-                    this.authorize_port_error(port);
-                }
-                jQuery(document).trigger('close.facebox');
-                jQuery('#pairing').remove();
-            }, this, port));
-
-            dialog.hide();
-            jQuery('body').append(dialog);
-            jQuery.facebox({ div: '#pairing' });
         }
     });
 }).call(this);
