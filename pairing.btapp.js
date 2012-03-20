@@ -131,11 +131,11 @@
             }, this));
         },
         authorize_basic: function(port) {
-            this.get('plugin_manager').get_plugin().ajax(get_ping_img_url(port), _.bind(function(response) {
+            this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port), _.bind(function(response) {
                 if(!response.allowed || !response.success) {
                     this.authorize_port_error(port);
                 } else {
-                    this.authorize_port_success(port);
+                    this.authorize_port_success(port, response.data);
                 }
             }, this));
         }
