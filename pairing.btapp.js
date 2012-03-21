@@ -154,7 +154,7 @@
                 url: get_version_url(port),
                 dataType: 'jsonp',
                 success: _.bind(this.on_check_version_success, this, port),
-                error: this.on_check_version_error,
+                error: this.on_check_version_error
             });
         },
         authorize_basic: function(port) {
