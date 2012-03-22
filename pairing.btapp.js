@@ -39,11 +39,11 @@
     }
     
     function get_iframe_pair_url(port) {
-        return get_domain(port) + '/gui/pair?iframe=' + encodeURIComponent(window.location.origin);
+        return get_domain(port) + '/gui/pair?iframe=' + encodeURIComponent(window.location.host);
     }
     
     function get_dialog_pair_url(port) {
-        return get_domain(port) + '/gui/pair?name=' + encodeURIComponent(window.location.origin);
+        return get_domain(port) + '/gui/pair?name=' + encodeURIComponent(window.location.host);
     }
 
     function get_version_url(port) {
