@@ -314,7 +314,7 @@
             this.initialize_pairing(attributes);
         },
         // We have a seperate object that is responsible for managing the browser
-        // plugin and using that plugin to ensure that Torque is downloaded and
+        // plugin and using that plugin to ensure that the client is downloaded and
         // running on the local machine.
         initialize_plugin: function(attributes) {
             assert(typeof PluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
@@ -332,7 +332,7 @@
             this.pairing.bind('all', this.trigger, this);
 
             this.pairing.bind('pairing:found', _.bind(function(options) {
-                if(options && options.name === 'Torque') {
+                if(options && options.name === 'SoShare') {
                     var key = jQuery.jStorage.get('pairing_key');
                     if(key) {
                         // Let whoever triggered the pairing:found event know that they don't need

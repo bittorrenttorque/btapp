@@ -25,7 +25,7 @@
         PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
         //All BitTorrent products have this number appended to their window names
         WINDOW_HASH: '4823',
-        DEFAULT_PRODUCT:'Torque',
+        DEFAULT_PRODUCT:'SoShare',
         MIME_TYPE: 'application/x-gyre-soshare',
         ACTIVEX_PROGID: 'gyre.soshare',
 
