@@ -76,7 +76,10 @@
             var switches = {'install':true};
             this.trigger('plugin:install_client', switches);
             if(switches.install) {
-                this.get_plugin().downloadProgram(this.PRODUCT, _.bind(this.trigger, this, 'plugin:downloaded_client'));
+                this.get_plugin().downloadProgram(this.PRODUCT, _.bind(function(a,b,c,d,key) {
+                    jQuery.jStorage.set('pairing_key', key);
+                    this.trigger('plugin:downloaded_client');
+                }, this));
                 when(this.client_installed, this.client_installed_check_yes);
             }
         },
