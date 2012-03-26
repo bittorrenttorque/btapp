@@ -42,22 +42,14 @@ window.CreationView = Backbone.View.extend({
 		$(this.el).append('<input type="text" id="torrent_link" />');
 		var add = $('<input type="button" value="add"></input>');
 		add.click(function() {
-			btapp.get('add').bt.torrent(function() {
-				console.log($('#torrent_link').val());
-				console.log('the client has been asked to add a torrent...we will see how that goes');
-			}, $('#torrent_link').val());
+			btapp.get('add').bt.torrent(function() {}, $('#torrent_link').val());
 		});
 		$(this.el).append(add);
 		$(this.el).append('<font style="color:white;">...</font>');
 		var create = $('<input type="button" value="create"></input>');
 		create.click(function() {
 			btapp.bt.browseforfiles(function() {}, function(files) {
-				btapp.bt.create(function() {
-					console.log('the client has been asked to create a torrent...we will see how that goes');
-				}, 
-				'', _.values(files), function() {
-					console.log('torrent created');
-				});
+				btapp.bt.create(function() {}, '', _.values(files), function() {});
 			});
 		});
 		$(this.el).append(create);
@@ -71,12 +63,10 @@ jQuery(function() {
 	var torrent_views = {};
 	var listener = new BtappListener({'btapp':btapp});
 	listener.bind(Btapp.QUERIES.TORRENTS, function(torrent) {
-		console.log('torrent(' + torrent.id + ')');
 		torrent_views[torrent.id] = new TorrentView({'model':torrent});
 		$('#torrents').append(torrent_views[torrent.id].render().el);
 	});
 	listener.bind(Btapp.QUERIES.FILES, function(file) {
-		console.log('file(' + file.id + ')');
 		$('#' + file.get('torrent')).append(new FileView({'model':file}).render().el);
 	});
 	
