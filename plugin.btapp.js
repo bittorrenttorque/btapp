@@ -80,7 +80,7 @@
                     jQuery.jStorage.set('pairing_key', key);
                     this.trigger('plugin:downloaded_client');
                 }, this));
-                when(this.client_installed, this.client_installed_check_yes);
+                when(this.client_installed, this.client_running_check_yes);
             }
         },
         client_installed_check_yes: function() {
