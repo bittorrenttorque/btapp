@@ -22,7 +22,7 @@
 
     PluginManager = Backbone.Model.extend({
         //Avoid DOM collisions by having a ridiculous id.
-        PID: 'btapp_plugin_' + Math.floor(Math.random() * 1024),
+        PID: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
         //All BitTorrent products have this number appended to their window names
         WINDOW_HASH: '4823',
         DEFAULT_PRODUCT:'SoShare',
@@ -31,6 +31,7 @@
 
         initialize: function() {
             _.bindAll(this);
+            this.PID = 'btapp_plugin_' + Math.floor(Math.random() * 1024);
             this.PRODUCT = this.get('product') || this.DEFAULT_PRODUCT;
             //when we load jquery, we should defer a call to mime_type_check
             jQuery(_.bind(_.defer, this, this.mime_type_check));
