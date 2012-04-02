@@ -40,6 +40,7 @@
 
         //we know nothing. we want:
         //the plugin installed
+        //the plugin up to date
         //the client installed
         //the client running
         mime_type_check: function() {
@@ -61,8 +62,28 @@
             this.trigger('plugin:plugin_installed');
             this.add_plugin(_.bind(function() {
                 this.trigger('plugin:plugin_running');
-                this.client_installed_check();
+                this.plugin_up_to_date_check();
             }, this));
+        },
+
+        plugin_up_to_date_check: function() {
+            if(this.plugin_up_to_date()) {
+                this.plugin_up_to_date_yes();
+            } else {
+                this.plugin_up_to_date_no();
+            }
+        },
+        plugin_up_to_date_yes: function() {
+            this.client_installed_check();
+        },
+        plugin_up_to_date_no: function() {
+            var switches = {'update':true};
+            this.trigger('plugin:update_plugin', switches);
+            if(switches.update) {
+                when(this.plugin_up_to_date, this.plugin_up_to_date_yes);
+            } else {
+                this.plugin_up_to_date_yes();
+            }
         },
 
         //the plugin is installed. good.
@@ -128,6 +149,9 @@
                     }
                 }
             }
+        },
+        plugin_up_to_date: function() {
+            return true;
         },
         get_plugin: function() {
             var ret = document.getElementById(this.PID);
