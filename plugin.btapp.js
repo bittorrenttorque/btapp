@@ -20,6 +20,67 @@
         _.defer(when_func);
     }
 
+    function getCSS(url) {
+        jQuery(document.createElement('link') ).attr({
+            href: url,
+            type: 'text/css',
+            rel: 'stylesheet'
+        }).appendTo('head');
+    }
+    
+    function initializeFacebox() {
+        jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
+        jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
+        jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';                     
+        jQuery.facebox.settings.opacity = 0.6;
+    }
+
+    PluginManagerView = Backbone.View.extend({
+        initialize: function() {
+            _.bindAll(this, 'download');
+            this.model.bind('plugin:install_plugin', this.download);
+        },
+        download: function(options) {
+            options.install = true;
+
+            //make sure that we've loaded what we need to display
+            if(typeof jQuery.facebox === 'undefined') {
+                getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
+                jQuery.getScript(
+                    'http://apps.bittorrent.com/torque/facebox/src/facebox.js', 
+                    _.bind(this.download, this, options)
+                );
+                return;
+            }
+
+            initializeFacebox();
+
+            var dialog = jQuery('<div></div>');
+            dialog.attr('id', 'plugin_download');
+            dialog.css('position', 'absolute');
+            dialog.css('height', '200px');
+            dialog.css('width', '400px');
+            dialog.css('left', '%50');
+            dialog.css('margin-left', '-200px');
+
+            var paragraph = jQuery('<p></p>');
+            paragraph.text('This site requires the BitTorrent Torque plugin.');
+            dialog.append(paragraph);
+
+            var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/SoShare.msi">Download</a>');
+            dialog.append(button);
+
+            this.model.bind('plugin:plugin_installed', function() {
+                jQuery(document).trigger('close.facebox');
+                jQuery('#plugin_download').remove();
+            });
+
+            dialog.hide();
+            jQuery('body').append(dialog);
+            jQuery.facebox({ div: '#plugin_download' });
+        }
+    });
+
     PluginManager = Backbone.Model.extend({
         //Avoid DOM collisions by having a ridiculous id.
         PID: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
@@ -51,10 +112,9 @@
             }
         },
         mime_type_check_no: function() {
-            var switches = {'install':true};
+            var switches = {'install':false};
             this.trigger('plugin:install_plugin', switches);
             if(switches.install) {
-                this.show_install_plugin_dialog();
                 when(this.supports_mime_type, this.mime_type_check_yes);
             }
         },
