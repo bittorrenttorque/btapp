@@ -27,33 +27,39 @@
             rel: 'stylesheet'
         }).appendTo('head');
     }
-    
-    function initializeFacebox() {
-        jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
-        jQuery.facebox.settings.closeImage = 'http://apps.bittorrent.com/torque/facebox/src/closelabel.png';
-        jQuery.facebox.settings.loadingImage = 'http://apps.bittorrent.com/torque/facebox/src/loading.gif';                     
-        jQuery.facebox.settings.opacity = 0.6;
-    }
 
     PluginManagerView = Backbone.View.extend({
-        initialize: function() {
+        initialize: function(attributes, options) {
+            this.attributes = {};
+            this.attributes.plugin_install_message = attributes.plugin_install_message || 'This site requires the BitTorrent Torque plugin.';
+            this.attributes.facebox_base_url = attributes.facebox_base_url || 'http://apps.bittorrent.com/torque/facebox';
+            this.attributes.windows_download_url = attributes.windows_download_url || 'http://apps.bittorrent.com/torque/SoShare.msi';
+            this.attributes.osx_download_url = attributes.osx_download_url || undefined;
             _.bindAll(this, 'download');
             this.model.bind('plugin:install_plugin', this.download);
         },
+
+        initializeFacebox: function() {
+            jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
+            jQuery.facebox.settings.closeImage = this.attributes.facebox_base_url + '/src/closelabel.png';
+            jQuery.facebox.settings.loadingImage = this.attributes.facebox_base_url + '/src/loading.gif';                     
+            jQuery.facebox.settings.opacity = 0.6;
+        },
+
         download: function(options) {
             options.install = true;
 
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
+                getCSS(this.attributes.facebox_base_url + '/src/facebox.css');
                 jQuery.getScript(
-                    'http://apps.bittorrent.com/torque/facebox/src/facebox.js', 
+                    this.attributes.facebox_base_url + '/src/facebox.js', 
                     _.bind(this.download, this, options)
                 );
                 return;
-            }
+            }            
 
-            initializeFacebox();
+            this.initializeFacebox();
 
             var dialog = jQuery('<div></div>');
             dialog.attr('id', 'plugin_download');
@@ -64,10 +70,22 @@
             dialog.css('margin-left', '-200px');
 
             var paragraph = jQuery('<p></p>');
-            paragraph.text('This site requires the BitTorrent Torque plugin.');
+            paragraph.text(this.attributes.plugin_install_message);
             dialog.append(paragraph);
 
-            var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/SoShare.msi">Download</a>');
+            var button_url;
+            debugger;
+            if ($ && $.client) {
+                if ($.client.os == 'Windows') {
+                    button_url = this.attributes.windows_download_url;
+                } else {
+                    button_url = this.attributes.osx_download_url;
+                }
+            } else {
+                button_url = this.attributes.windows_download_url;
+            }
+
+            var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
             dialog.append(button);
 
             this.model.bind('plugin:plugin_installed', function() {
@@ -82,18 +100,20 @@
     });
 
     PluginManager = Backbone.Model.extend({
-        //Avoid DOM collisions by having a ridiculous id.
-        PID: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
-        //All BitTorrent products have this number appended to their window names
-        WINDOW_HASH: '4823',
-        DEFAULT_PRODUCT:'SoShare',
-        MIME_TYPE: 'application/x-gyre-soshare',
-        ACTIVEX_PROGID: 'gyre.soshare',
+        defaults: {
+            //Avoid DOM collisions by having a ridiculous id.
+            pid: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
+            //All BitTorrent products have this number appended to their window names
+            window_hash: '4823',
+            default_product: 'SoShare',
+            mime_type: 'application/x-gyre-soshare',
+            activex_progid: 'gyre.soshare'
+        },
 
-        initialize: function() {
+        initialize: function(attributes, options) {
             _.bindAll(this);
-            this.PID = 'btapp_plugin_' + Math.floor(Math.random() * 1024);
-            this.PRODUCT = this.get('product') || this.DEFAULT_PRODUCT;
+            this.attributes.pid = 'btapp_plugin_' + Math.floor(Math.random() * 1024);
+            this.attributes.product = this.get('product') || this.attributes.default_product;
             //when we load jquery, we should defer a call to mime_type_check
             jQuery(_.bind(_.defer, this, this.mime_type_check));
         },
@@ -158,7 +178,7 @@
             var switches = {'install':true};
             this.trigger('plugin:install_client', switches);
             if(switches.install) {
-                this.get_plugin().downloadProgram(this.PRODUCT, _.bind(function(a,b,c,d,key) {
+                this.get_plugin().downloadProgram(this.attributes.product, _.bind(function(a,b,c,d,key) {
                     jQuery.jStorage.set('pairing_key', key);
                     this.trigger('plugin:downloaded_client');
                 }, this));
@@ -179,7 +199,7 @@
             }
         },
         client_running_check_no: function() {
-            this.get_plugin().runProgram(this.PRODUCT, function() {});
+            this.get_plugin().runProgram(this.attributes.product, function() {});
             when(this.client_running, this.client_running_check_yes);
         },
         client_running_check_yes: function() {
@@ -194,7 +214,7 @@
             var isIE  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
             if(isIE) {
                 try {
-                    var tq = new ActiveXObject(this.ACTIVEX_PROGID);
+                    var tq = new ActiveXObject(this.attributes.activex_progid);
                     return tq !== undefined;
                 } catch (e) {
                     return false;
@@ -204,7 +224,7 @@
 
                 for (var i = 0; i < navigator.plugins.length; i++) {
                     var plugin = navigator.plugins[i][0];
-                    if (plugin.type == this.MIME_TYPE) {
+                    if (plugin.type == this.attributes.mime_type) {
                         return true;
                     }
                 }
@@ -214,25 +234,25 @@
             return true;
         },
         get_plugin: function() {
-            var ret = document.getElementById(this.PID);
+            var ret = document.getElementById(this.attributes.pid);
             assert(ret, 'cannot call get_plugin before adding the plugin');
             return ret;
         },
         plugin_loaded: function() {
             assert(this.supports_mime_type(), 'you have not installed the plugin yet')
-            assert(jQuery('#' + this.PID).length !== 0, 'you have not yet added the plugin');
+            assert(jQuery('#' + this.attributes.pid).length !== 0, 'you have not yet added the plugin');
             return get_plugin().version;
         },
         add_plugin: function(cb) {
             assert(this.supports_mime_type(), 'you have not installed the plugin yet')
-            assert(jQuery('#' + this.PID).length === 0);
+            assert(jQuery('#' + this.attributes.pid).length === 0);
             var obj = document.createElement('object');
-            var onload = this.PID + 'onload';
+            var onload = this.attributes.pid + 'onload';
             window[onload] = cb;
             var div = document.createElement('div');            
             jQuery(div).css({'position':'absolute','left':'-999em'});
             div.innerHTML =
-                '<object id="' + this.PID + '" type="' + this.MIME_TYPE + '" width="0" height="0">' +
+                '<object id="' + this.attributes.pid + '" type="' + this.attributes.mime_type + '" width="0" height="0">' +
                     '<param name="onload" value="' + onload + '" />' +
                 '</object>';
 
@@ -248,12 +268,12 @@
         // ---------------------------
         // Lets ask the plugin if the specific client is running.
         client_running: function() {
-            var clients = this.get_plugin().isRunning(this.PRODUCT + this.WINDOW_HASH);
+            var clients = this.get_plugin().isRunning(this.attributes.product + this.attributes.window_hash);
             var running = clients && clients.length > 0;
             return running;
         },
         client_installed: function() {
-            var version = this.get_plugin().getInstallVersion(this.PRODUCT);
+            var version = this.get_plugin().getInstallVersion(this.attributes.product);
             var not_supported = 'This application is not supported.';
             assert(version !== not_supported, not_supported);
             return version;
