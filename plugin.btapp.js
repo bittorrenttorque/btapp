@@ -29,20 +29,20 @@
     }
 
     PluginManagerView = Backbone.View.extend({
-        initialize: function(attributes, options) {
-            this.attributes = {};
-            this.attributes.plugin_install_message = attributes.plugin_install_message || 'This site requires the BitTorrent Torque plugin.';
-            this.attributes.facebox_base_url = attributes.facebox_base_url || 'http://apps.bittorrent.com/torque/facebox';
-            this.attributes.windows_download_url = attributes.windows_download_url || 'http://apps.bittorrent.com/torque/SoShare.msi';
-            this.attributes.osx_download_url = attributes.osx_download_url || undefined;
+        initialize: function(options) {
+            this.plugin_install_message = options.plugin_install_message || 'This site requires the BitTorrent Torque plugin.';
+            this.facebox_base_url = options.facebox_base_url || 'http://apps.bittorrent.com/torque/facebox';
+            this.windows_download_url = options.windows_download_url || 'http://apps.bittorrent.com/torque/SoShare.msi';
+            this.osx_download_url = options.osx_download_url || undefined;
+            
             _.bindAll(this, 'download');
             this.model.bind('plugin:install_plugin', this.download);
         },
 
         initializeFacebox: function() {
             jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
-            jQuery.facebox.settings.closeImage = this.attributes.facebox_base_url + '/src/closelabel.png';
-            jQuery.facebox.settings.loadingImage = this.attributes.facebox_base_url + '/src/loading.gif';                     
+            jQuery.facebox.settings.closeImage = this.facebox_base_url + '/src/closelabel.png';
+            jQuery.facebox.settings.loadingImage = this.facebox_base_url + '/src/loading.gif';                     
             jQuery.facebox.settings.opacity = 0.6;
         },
 
@@ -51,9 +51,9 @@
 
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS(this.attributes.facebox_base_url + '/src/facebox.css');
+                getCSS(this.facebox_base_url + '/src/facebox.css');
                 jQuery.getScript(
-                    this.attributes.facebox_base_url + '/src/facebox.js', 
+                    this.facebox_base_url + '/src/facebox.js', 
                     _.bind(this.download, this, options)
                 );
                 return;
@@ -70,19 +70,19 @@
             dialog.css('margin-left', '-200px');
 
             var paragraph = jQuery('<p></p>');
-            paragraph.text(this.attributes.plugin_install_message);
+            paragraph.text(this.plugin_install_message);
             dialog.append(paragraph);
 
             var button_url;
             debugger;
             if ($ && $.client) {
                 if ($.client.os == 'Windows') {
-                    button_url = this.attributes.windows_download_url;
+                    button_url = this.windows_download_url;
                 } else {
-                    button_url = this.attributes.osx_download_url;
+                    button_url = this.osx_download_url;
                 }
             } else {
-                button_url = this.attributes.windows_download_url;
+                button_url = this.windows_download_url;
             }
 
             var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
