@@ -173,3 +173,8 @@ The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](http
 ## Examples
 ### Nud.gs
 ### Gibe
+
+##Testing
+Btapp.js uses [jasmine](https://github.com/pivotal/jasmine "jasmine") for unit/functional testing. You can run them yourself at: 
+
+[http://pwmckenna.github.com/btapp/tests/SpecRunner.html](http://pwmckenna.github.com/btapp/tests/SpecRunner.html)
