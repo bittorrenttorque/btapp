@@ -24,6 +24,10 @@
         jQuery.facebox.settings.opacity = 0.6;
     }
 
+    function isMac() {
+        return navigator.userAgent.match(/Windows/);
+    }
+
     function get_domain(port) {
         return 'http://127.0.0.1:' + port;
     }
@@ -219,7 +223,7 @@
             }
         },
         authorize: function(port) {
-            if(authorized_domain()) {
+            if(authorized_domain() || isMac()) {
                 //this will use the old school dialogs which allow bittorrent domains to pair automatically
                 this.authorize_basic(port);
             } else {
