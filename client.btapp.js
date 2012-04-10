@@ -319,6 +319,7 @@
         initialize_plugin: function(attributes) {
             assert(typeof PluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
             this.plugin_manager = new PluginManager(attributes);
+            new PluginManagerView({'model': this.plugin_manager});
             this.plugin_manager.bind('all', this.trigger, this);
         },
         // We have a seperate object responsible for determining exactly which

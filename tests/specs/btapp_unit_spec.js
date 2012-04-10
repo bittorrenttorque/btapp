@@ -273,13 +273,6 @@
 				this.func = _.bind(this.model.bt.invalidfunc, this, function() {}, 'arg1', 'arg2');
 				expect(this.func).toThrow(this.exception);
 			});
-			it('does not throw error if arguments match the expected types', function() {
-				this.func = _.bind(function() {
-					this.model.bt.testfunc(function() {}, 'arg1', function() {});
-					throw 'did not throw exception';
-				}, this);
-				expect(this.func).toThrow('did not throw exception');
-			});
 		});
 		describe('BtappCollection events', function() {
 			it('triggers add event', function() {
