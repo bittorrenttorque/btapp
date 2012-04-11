@@ -169,9 +169,6 @@ For instance, to list the name of all the files in all torrents you need to writ
 var torrents = btapp.get('torrent');
 ```
 
-### Btapp Plugin
-The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](https://github.com/pwmckenna/btapp_plugin "plugin"). It is responsible for loading the necessary plugins and running the torrent client as necessary. It is dynamically loaded btapp.js when you create a local Btapp object (unless you specifically pass in username/password arguments your Btapp object will be pointing at your local torrent client).
-
 ## Examples
 ### Nud.gs
 ### Gibe
