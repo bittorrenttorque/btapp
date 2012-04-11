@@ -19,10 +19,9 @@
 // rely on this as the  torrentStatus event function is set and the used to keep our models up to date
 
 (function() {
-
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
-    function assert(b, err) { if(!b) throw err; }
+    function assert(b, err) { if(!b) { debugger; throw err; } }
 
     // BtappBase
     // -------------
@@ -36,16 +35,48 @@
             _.bindAll(this, 'initializeValues', 'updateState', 'clearState', 'isEmpty', 'destructor');
             this.initializeValues();
         },
-        initializeValues: function() {
+        set: function() {
+            //set is called in the constructors of Backbone.Model and Backbone.Collection, so ignore those
+            if(this instanceof Backbone.Model) {
+                assert(arguments.callee.caller === Backbone.Model);
+                Backbone.Model.prototype.set.apply(this, arguments);
+            } else {
+                throw 'you cannot access the set function of btapp library objects directly. perhaps you jumped the gun waiting for the rpc version of set from the client?';
+            }
+
+        },
+        unset: function() {},
+        clearRemoteProcedureCalls: function() {
+            var keys = _.keys(this.bt || {});
+            for(var i = 0; i < keys.length; i++) {
+                var key = keys[i]
+                delete this.bt[key];
+                delete this[key];
+            }
             this.bt = {};
+        },
+        initializeValues: function() {
             this.url = null;
             this.session = null;
+            this.clearRemoteProcedureCalls();
         },
         updateRemoveFunctionState: function(v) {
+            //we have a special case for get...we never want the server rpc version
+            if(v === 'get') return;
+
             assert(v in this.bt, 'trying to remove a function that does not exist');
             this.trigger('remove:bt:' + v);
             this.trigger('remove:bt', this.bt[v]);
             delete this.bt[v];
+
+            //also remove it from the object directly
+            if(v === 'set' || v === 'unset') {
+                assert(this[v] !== BtappBase[v], 'trying to remove the wrong version of "set"');
+            } else {
+                assert(v in this, 'trying to remove the function "' + v + '", which does not exist in the prototype of this object');
+            }
+            this.trigger('remove:' + v);
+            delete this[v];
         },
         updateRemoveObjectState: function(session, added, removed, childurl, v) {
             var ret = {};
@@ -80,10 +111,26 @@
             return ret;
         },
         updateAddFunctionState: function(session, added, url, v) {
+            //we have a special case for get...we never want the server rpc version
+            if(v === 'get') return {};
+
+            var func = this.client.createFunction(session, url + v, added);
+
+            //set the function in the bt object...this is where we store just our rpc client functions
             assert(!(v in this.bt), 'trying to add a function that already exists');
-            this.bt[v] = this.client.createFunction(session, url + v, added);
+            this.bt[v] = func;
             this.trigger('add:bt:' + v);
             this.trigger('add:bt', this.bt[v]);
+
+            //also set it on the object directly...this ends up being how people expect to use the objects
+            if(v === 'set' || v === 'unset') {
+                assert(this[v] === BtappBase[v], 'trying to add the RPC version of "set", when it has already been added');
+            } else {
+                assert(!(v in this), 'trying to add the function "' + v + '", which already exists in the prototype of this object');
+            }
+            this[v] = func;
+            this.trigger('add:' + v);
+
             return {};
         },
         updateAddObjectState: function(session, added, removed, childurl, v) {
@@ -162,6 +209,9 @@
             this.bind('change', this.customChangeEvent);
         },
         customEvent: function(event, model) {
+            //we want to ignore our internal add/remove events for our client rpc functions
+            if(typeof model === 'function') return;
+
             assert(model && model.id, 'called a custom ' + event + ' event without a valid attribute');
             this.trigger(event + ':' + model.id, model);
         },
