@@ -36,8 +36,20 @@
     }
 
     PluginManagerView = Backbone.View.extend({
-        initialize: function() {
+        defaults: {
+            plugin_install_message: 'This site requires the BitTorrent Torque plugin.',
+            facebox_base_url: 'http://apps.bittorrent.com/torque/facebox/',
+            windows_download_url: 'http://apps.bittorrent.com/torque/SoShare.msi',
+            osx_download_url: undefined
+        },
+        initialize: function(options) {
             _.bindAll(this, 'download');
+
+            this.plugin_install_message = options.plugin_install_message || this.defaults.plugin_install_message;
+            this.facebox_base_url = options.facebox_base_url || this.defaults.facebox_base_url;
+            this.windows_download_url = options.windows_download_url || this.defaults.windows_download_url;
+            this.osx_download_url = options.osx_download_url || this.defaults.osx_download_url;
+
             this.model.bind('plugin:install_plugin', this.download);
         },
         download: function(options) {
@@ -45,9 +57,9 @@
 
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
+                getCSS(this.facebox_base_url + 'src/facebox.css');
                 jQuery.getScript(
-                    'http://apps.bittorrent.com/torque/facebox/src/facebox.js', 
+                    this.facebox_base_url + 'src/facebox.js', 
                     _.bind(this.download, this, options)
                 );
                 return;
@@ -64,10 +76,11 @@
             dialog.css('margin-left', '-200px');
 
             var paragraph = jQuery('<p></p>');
-            paragraph.text('This site requires the SoShare plugin.');
+            paragraph.text(this.plugin_install_message);
             dialog.append(paragraph);
 
-            var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/SoShare.msi">Download</a>');
+            var button_url = (jQuery.client.os === 'Windows') ? this.osx_download_url : this.windows_download_url;
+            var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
             dialog.append(button);
 
             this.model.bind('plugin:plugin_installed', function() {
@@ -82,22 +95,21 @@
     });
 
     PluginManager = Backbone.Model.extend({
-        //Avoid DOM collisions by having a ridiculous id.
-        PID: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
-        //All BitTorrent products have this number appended to their window names
-        WINDOW_HASH: '4823',
-        DEFAULT_PRODUCT:'SoShare',
-        MIME_TYPE: 'application/x-gyre-soshare',
-        ACTIVEX_PROGID: 'gyre.soshare',
-
+        defaults: {
+            //Avoid DOM collisions by having a ridiculous id.
+            pid: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
+            //All BitTorrent products have this number appended to their window names
+            window_hash: '4823',
+            product:'SoShare',
+            mime_type: 'application/x-gyre-soshare',
+            activex_progid: 'gyre.soshare',
+        },
         initialize: function() {
             _.bindAll(this);
-            this.PID = 'btapp_plugin_' + Math.floor(Math.random() * 1024);
-            this.PRODUCT = this.get('product') || this.DEFAULT_PRODUCT;
+            this.set('pid', 'btapp_plugin_' + Math.floor(Math.random() * 1024));
             //when we load jquery, we should defer a call to mime_type_check
             jQuery(_.bind(_.defer, this, this.mime_type_check));
         },
-
 
         //we know nothing. we want:
         //the plugin installed
@@ -158,7 +170,7 @@
             var switches = {'install':true};
             this.trigger('plugin:install_client', switches);
             if(switches.install) {
-                this.get_plugin().downloadProgram(this.PRODUCT, _.bind(function(a,b,c,d,key) {
+                this.get_plugin().downloadProgram(this.get('product'), _.bind(function(a,b,c,d,key) {
                     jQuery.jStorage.set('pairing_key', key);
                     this.trigger('plugin:downloaded_client');
                 }, this));
@@ -179,7 +191,7 @@
             }
         },
         client_running_check_no: function() {
-            this.get_plugin().runProgram(this.PRODUCT, function() {});
+            this.get_plugin().runProgram(this.get('product'), function() {});
             when(this.client_running, this.client_running_check_yes);
         },
         client_running_check_yes: function() {
@@ -191,48 +203,48 @@
         // Plugin Specific Functionality
         // ---------------------------
         supports_mime_type: function() {
-            var isIE  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
+            var isIE  = (navigator.appVersion.indexOf('MSIE') != -1) ? true : false;
             if(isIE) {
                 try {
-                    var tq = new ActiveXObject(this.ACTIVEX_PROGID);
+                    var tq = new ActiveXObject(this.get('activex_progid'));
                     return tq !== undefined;
                 } catch (e) {
                     return false;
                 }
             } else {
                 navigator.plugins.refresh();
-
                 for (var i = 0; i < navigator.plugins.length; i++) {
                     var plugin = navigator.plugins[i][0];
-                    if (plugin.type == this.MIME_TYPE) {
+                    if (plugin.type == this.get('mime_type')) {
                         return true;
                     }
                 }
+                return false;
             }
         },
         plugin_up_to_date: function() {
             return true;
         },
         get_plugin: function() {
-            var ret = document.getElementById(this.PID);
+            var ret = document.getElementById(this.get('pid'));
             assert(ret, 'cannot call get_plugin before adding the plugin');
             return ret;
         },
         plugin_loaded: function() {
             assert(this.supports_mime_type(), 'you have not installed the plugin yet')
-            assert(jQuery('#' + this.PID).length !== 0, 'you have not yet added the plugin');
+            assert(jQuery('#' + this.get('pid')).length !== 0, 'you have not yet added the plugin');
             return get_plugin().version;
         },
         add_plugin: function(cb) {
             assert(this.supports_mime_type(), 'you have not installed the plugin yet')
-            assert(jQuery('#' + this.PID).length === 0);
+            assert(jQuery('#' + this.get('pid')).length === 0);
             var obj = document.createElement('object');
-            var onload = this.PID + 'onload';
+            var onload = this.get('pid') + 'onload';
             window[onload] = cb;
             var div = document.createElement('div');            
             jQuery(div).css({'position':'absolute','left':'-999em'});
             div.innerHTML =
-                '<object id="' + this.PID + '" type="' + this.MIME_TYPE + '" width="0" height="0">' +
+                '<object id="' + this.get('pid') + '" type="' + this.get('mime_type') + '" width="0" height="0">' +
                     '<param name="onload" value="' + onload + '" />' +
                 '</object>';
 
@@ -248,12 +260,12 @@
         // ---------------------------
         // Lets ask the plugin if the specific client is running.
         client_running: function() {
-            var clients = this.get_plugin().isRunning(this.PRODUCT + this.WINDOW_HASH);
+            var clients = this.get_plugin().isRunning(this.get('product') + this.get('window_hash'));
             var running = clients && clients.length > 0;
             return running;
         },
         client_installed: function() {
-            var version = this.get_plugin().getInstallVersion(this.PRODUCT);
+            var version = this.get_plugin().getInstallVersion(this.get('product'));
             var not_supported = 'This application is not supported.';
             assert(version !== not_supported, not_supported);
             return version;
