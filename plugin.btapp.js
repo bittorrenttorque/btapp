@@ -37,7 +37,7 @@
 
     PluginManagerView = Backbone.View.extend({
         defaults: {
-            plugin_install_message: 'This site requires the BitTorrent Torque plugin.',
+            plugin_install_message: 'This site requires the Torque plugin.',
             facebox_base_url: 'http://apps.bittorrent.com/torque/facebox/',
             windows_download_url: 'http://apps.bittorrent.com/torque/SoShare.msi',
             osx_download_url: undefined
