@@ -277,6 +277,9 @@
     // consider ourselves "connected", which indicates that we're connected to the machine
     // (for falcon clients we may not ever reach the client even if it is logged into falcon)
     LocalTorrentClient = TorrentClient.extend({
+        defaults: {
+            product: 'SoShare'
+        },
         initialize: function(attributes) {
             TorrentClient.prototype.initialize.call(this, attributes);
             this.btapp = attributes.btapp;
@@ -332,7 +335,7 @@
             new PairingView({'model': this.pairing});
             this.pairing.on('all', this.trigger, this);
 
-            var product = attributes.product || 'SoShare';
+            var product = this.get('product');
             this.pairing.on('pairing:found', function(options) {
                 if(options && options.name === product) {
                     var key = jQuery.jStorage.get('pairing_key');

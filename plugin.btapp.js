@@ -7,6 +7,10 @@
 
     function assert(b, err) { if(!b) throw err; }
 
+    function isMac() {
+        return navigator.userAgent.match(/Macintosh/) != undefined;
+    }
+
     //utility function to wait for some condition
     //this ends up being helpful as we toggle between a flow chart and a state diagram
     function when(condition, functionality, interval) {
@@ -36,18 +40,7 @@
     }
 
     PluginManagerView = Backbone.View.extend({
-        defaults: {
-            plugin_install_message: 'This site requires the Torque plugin.',
-            facebox_base_url: 'http://apps.bittorrent.com/torque/facebox/',
-            windows_download_url: 'http://apps.bittorrent.com/torque/SoShare.msi',
-            osx_download_url: undefined
-        },
         initialize: function(options) {
-            this.plugin_install_message = options.plugin_install_message || this.defaults.plugin_install_message;
-            this.facebox_base_url = options.facebox_base_url || this.defaults.facebox_base_url;
-            this.windows_download_url = options.windows_download_url || this.defaults.windows_download_url;
-            this.osx_download_url = options.osx_download_url || this.defaults.osx_download_url;
-
             this.model.on('plugin:install_plugin', this.download, this);
         },
         download: function(options) {
@@ -55,9 +48,9 @@
 
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS(this.facebox_base_url + 'src/facebox.css');
+                getCSS('http://apps.bittorrent.com/torque/facebox/src/facebox.css');
                 jQuery.getScript(
-                    this.facebox_base_url + 'src/facebox.js', 
+                    'http://apps.bittorrent.com/torque/facebox/src/facebox.js', 
                     _.bind(this.download, this, options)
                 );
                 return;
@@ -74,10 +67,11 @@
             dialog.css('margin-left', '-200px');
 
             var paragraph = jQuery('<p></p>');
-            paragraph.text(this.plugin_install_message);
+            paragraph.text('This site requires the ' + this.model.get('product') + ' plugin.');
             dialog.append(paragraph);
 
-            var button_url = (jQuery.client.os === 'Windows') ? this.osx_download_url : this.windows_download_url;
+
+            var button_url = isMac() ? this.model.get('osx_download_url') : this.model.get('windows_download_url');
             var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
             dialog.append(button);
 
@@ -93,18 +87,34 @@
     });
 
     PluginManager = Backbone.Model.extend({
+        soshare_props: {
+            mime_type: 'application/x-gyre-soshare',
+            activex_progid: 'gyre.soshare',
+            windows_download_url: 'http://apps.bittorrent.com/torque/SoShare.msi',
+            osx_download_url: 'http://apps.bittorrent.com/torque/SoShare.pkg'
+        },
+        torque_props: {
+            mime_type: 'application/x-bittorrent-torque',
+            activex_progid: 'gyre.torque',
+            windows_download_url: 'http://apps.bittorrent.com/torque/Torque.msi',
+            osx_download_url: 'http://apps.bittorrent.com/torque/Torque.pkg'
+        },
         defaults: {
             //Avoid DOM collisions by having a ridiculous id.
             pid: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
             //All BitTorrent products have this number appended to their window names
             window_hash: '4823',
-            product:'SoShare',
-            mime_type: 'application/x-gyre-soshare',
-            activex_progid: 'gyre.soshare',
+            product:'SoShare'
         },
         initialize: function() {
             _.bindAll(this);
             this.set('pid', 'btapp_plugin_' + Math.floor(Math.random() * 1024));
+            if(this.get('product') === 'SoShare') {
+                this.set(this.soshare_props);
+            } else if(this.get('product') === 'Torque' || this.get('product') === 'uTorrent' || this.get('product') === 'BitTorrent') {
+                //Everyone else can piggy back on the torque plugin
+                this.set(this.torque_props);
+            }
             //when we load jquery, we should defer a call to mime_type_check
             jQuery(_.bind(_.defer, this, this.mime_type_check));
         },

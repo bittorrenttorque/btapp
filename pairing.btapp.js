@@ -25,7 +25,7 @@
     }
 
     function isMac() {
-        return navigator.userAgent.match(/Windows/);
+        return navigator.userAgent.match(/Macintosh/) != undefined;
     }
 
     function get_domain(port) {
