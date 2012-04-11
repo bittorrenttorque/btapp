@@ -202,11 +202,10 @@
         initialize: function(models, options) {
             Backbone.Collection.prototype.initialize.apply(this, arguments);
             BtappBase.initialize.apply(this, arguments);
-            _.bindAll(this, 'customAddEvent', 'customRemoveEvent', 'customChangeEvent');
-            
-            this.bind('add', this.customAddEvent);
-            this.bind('remove', this.customRemoveEvent);
-            this.bind('change', this.customChangeEvent);
+
+            this.on('add', this.customAddEvent, this);
+            this.on('remove', this.customRemoveEvent, this);
+            this.on('change', this.customChangeEvent, this);
         },
         customEvent: function(event, model) {
             //we want to ignore our internal add/remove events for our client rpc functions
@@ -225,9 +224,9 @@
             this.customEvent('change', model);
         },
         destructor: function() {
-            this.unbind('add', this.customAddEvent);
-            this.unbind('remove', this.customRemoveEvent);
-            this.unbind('change', this.customChangeEvent);
+            this.off('add', this.customAddEvent, this);
+            this.off('remove', this.customRemoveEvent, this);
+            this.off('change', this.customChangeEvent, this);
             this.trigger('destroy');
         },
         clearState: function() {
@@ -275,12 +274,11 @@
         initialize: function(attributes) {
             Backbone.Model.prototype.initialize.apply(this, arguments);
             BtappBase.initialize.apply(this, arguments);
-            _.bindAll(this, 'customEvents');
-            
-            this.bind('change', this.customEvents);
+
+            this.on('change', this.customEvents, this);
         },
         destructor: function() {
-            this.unbind('change', this.customEvents);
+            this.off('change', this.customEvents, this);
             this.trigger('destroy');
         },
         clearState: function() {

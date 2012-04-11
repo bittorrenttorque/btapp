@@ -69,8 +69,7 @@
 
     PairingView = Backbone.View.extend({
         initialize: function() {
-            _.bindAll(this, 'authorize_iframe');
-            this.model.bind('pairing:authorize', this.authorize_iframe);
+            this.model.on('pairing:authorize', this.authorize_iframe, this);
         },
         authorize_iframe: function(options) {
             //make sure that we've loaded what we need to display

@@ -320,7 +320,7 @@
             assert(typeof PluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
             this.plugin_manager = new PluginManager(attributes);
             new PluginManagerView({'model': this.plugin_manager});
-            this.plugin_manager.bind('all', this.trigger, this);
+            this.plugin_manager.on('all', this.trigger, this);
         },
         // We have a seperate object responsible for determining exactly which
         // port the torrent client is bound to.
@@ -330,9 +330,9 @@
             //all right...ready to roll.
             this.pairing = new Pairing({'plugin_manager': this.plugin_manager});
             new PairingView({'model': this.pairing});
-            this.pairing.bind('all', this.trigger, this);
+            this.pairing.on('all', this.trigger, this);
 
-            this.pairing.bind('pairing:found', _.bind(function(options) {
+            this.pairing.on('pairing:found', function(options) {
                 if(options && options.name === 'SoShare') {
                     var key = jQuery.jStorage.get('pairing_key');
                     if(key) {
@@ -352,16 +352,16 @@
                     options.abort = false;
                     options.authorize = false;
                 }
-            }, this));
-            this.pairing.bind('pairing:authorized', _.bind(function(options) {
+            }, this);
+            this.pairing.on('pairing:authorized', _.bind(function(options) {
                 // Holy smokes! We found a port, and the client that's listening likes our pairing key.
                 // Store the key off so that we don't have to bother the user again.
                 jQuery.jStorage.set('pairing_key', options.key);
                 this.connect_to_authenticated_port(options.port, options.key);
             }, this));
 
-            this.pairing.bind('pairing:stop', _.bind(this.delayed_reset, this) );
-            this.plugin_manager.bind('plugin:plugin_running', _.bind(this.reset, this) );
+            this.pairing.on('pairing:stop', this.delayed_reset, this);
+            this.plugin_manager.on('plugin:plugin_running', this.reset, this);
         },
         // Before we actual start making requests against a client, we need to make sure
         // we have a valid pairing key. This might be redundant if we just got one from the

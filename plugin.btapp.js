@@ -43,14 +43,12 @@
             osx_download_url: undefined
         },
         initialize: function(options) {
-            _.bindAll(this, 'download');
-
             this.plugin_install_message = options.plugin_install_message || this.defaults.plugin_install_message;
             this.facebox_base_url = options.facebox_base_url || this.defaults.facebox_base_url;
             this.windows_download_url = options.windows_download_url || this.defaults.windows_download_url;
             this.osx_download_url = options.osx_download_url || this.defaults.osx_download_url;
 
-            this.model.bind('plugin:install_plugin', this.download);
+            this.model.on('plugin:install_plugin', this.download, this);
         },
         download: function(options) {
             options.install = true;
@@ -83,7 +81,7 @@
             var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
             dialog.append(button);
 
-            this.model.bind('plugin:plugin_installed', function() {
+            this.model.on('plugin:plugin_installed', function() {
                 jQuery(document).trigger('close.facebox');
                 jQuery('#plugin_download').remove();
             });
