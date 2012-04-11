@@ -7,7 +7,7 @@
 					this.paired = false;
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
-						expect(options.name).toEqual('Torque');
+						expect(options.name).toEqual('SoShare');
 						options.authorize = false;
 						options.continue = false;
 					}, this));
@@ -29,7 +29,7 @@
 					this.paired = false;
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
-						expect(options.name).toEqual('Torque');
+						expect(options.name).toEqual('SoShare');
 						if(this.port) {
 							expect(options.port).toEqual(this.port);
 						}
@@ -74,7 +74,7 @@
 					this.paired = false;
 					this.btapp.bind('pairing:found', _.bind(function(info) {
 						this.paired = true;
-						expect(info.name).toEqual('Torque');
+						expect(info.name).toEqual('SoShare');
 					}, this));
 					this.btapp.connect();
 				});

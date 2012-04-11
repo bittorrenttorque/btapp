@@ -64,7 +64,7 @@
             dialog.css('margin-left', '-200px');
 
             var paragraph = jQuery('<p></p>');
-            paragraph.text('This site requires the BitTorrent Torque plugin.');
+            paragraph.text('This site requires the SoShare plugin.');
             dialog.append(paragraph);
 
             var button = jQuery('<a id="download" href="http://apps.bittorrent.com/torque/SoShare.msi">Download</a>');
