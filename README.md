@@ -5,7 +5,7 @@
 # Btapp.js
 Btapp.js provides access to a browser plugin version of uTorrent/BitTorrent via a tree of [Backbone Models and Collections](http://documentcloud.github.com/backbone/ "backbone"). The intent of this project is to allow access to the extensive functionality of a torrent client, from web apps that are as simple as a single Backbone View. Btapp.js takes responsibility for getting the plugin installed as well, so you're free to assume that its available. In addition to the local torrent client, you can also easily access a torrent client anywhere else in the world (assume you either configured it originally or have access to that client's username/password).
 
-The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/backbone.btapp.html "source") is available. An [example application](http://pwmckenna.github.com/nud.gs/ "see it run!") with [annotated source](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "annotation") is also available through [GitHub](http://github.com/pwmckenna/nud.gs/ "source").
+The project is [hosted on GitHub](https://github.com/pwmckenna/btapp/ "github"), and the [annotated source code](http://pwmckenna.github.com/btapp/docs/btapp.html "source") is available. An [example application](http://pwmckenna.github.com/nud.gs/ "see it run!") with [annotated source](http://pwmckenna.github.com/nud.gs/docs/nudgs.html "annotation") is also available through [GitHub](http://github.com/pwmckenna/nud.gs/ "source").
 
 #### Downloads and Dependencies
 [Github Bleeding Edge Version (4.2.1)](https://raw.github.com/pwmckenna/btapp/master/btapp.js "btapp.js") 20kb, Full source, lots of comments  
@@ -151,7 +151,7 @@ The following utilities are designed to get you started working with the library
 
 ### Api Viewer
 
-The api viewer is a one stop shop for examining the data coming from your torrent client in real time. It is itself a web app that uses backbone.btapp.js, so the [annotated source](http://pwmckenna.github.com/btapp_api_viewer/docs/index.html "annotated source") may be useful to skim through as well. It just creates a backbone view for each bit of info bubbled up from the torrent client.
+The api viewer is a one stop shop for examining the data coming from your torrent client in real time. It is itself a web app that uses btapp.js, so the [annotated source](http://pwmckenna.github.com/btapp_api_viewer/docs/index.html "annotated source") may be useful to skim through as well. It just creates a backbone view for each bit of info bubbled up from the torrent client.
 
 <a href="http://pwmckenna.github.com/btapp_api_viewer/"><img src="http://pwmckenna.com/img/api_viewer.png"></img></a>
 This snapshot was taken while also using the Nud.gs app, which uses labels to categorize its torrents...If you're curious about the dragon file, [check it out here](http://pwmckenna.com/img/dragon.jpg "dragon!")
@@ -168,7 +168,7 @@ var torrents = btapp.get('torrent');
 ```
 
 ### Btapp Plugin
-The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](https://github.com/pwmckenna/btapp_plugin "plugin"). It is responsible for loading the necessary plugins and running the torrent client as necessary. It is dynamically loaded by backbone.btapp.js when you create a local Btapp object (unless you specifically pass in username/password arguments your Btapp object will be pointing at your local torrent client).
+The btapp plugin in managed by plugin.btapp.js, which is hosted on [GitHub](https://github.com/pwmckenna/btapp_plugin "plugin"). It is responsible for loading the necessary plugins and running the torrent client as necessary. It is dynamically loaded btapp.js when you create a local Btapp object (unless you specifically pass in username/password arguments your Btapp object will be pointing at your local torrent client).
 
 ## Examples
 ### Nud.gs
