@@ -30,7 +30,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 
 ######Include btapp.js in your html file
 ```  
-<script type="text/javascript" src="http://apps.bittorrent.com/torque/btapp/btapp.js" />  
+<script src="http://apps.bittorrent.com/torque/btapp/btapp.js" />  
 ```  
 
 ######Create a Btapp object and connect it to your local machine
