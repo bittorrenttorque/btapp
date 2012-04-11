@@ -332,8 +332,9 @@
             new PairingView({'model': this.pairing});
             this.pairing.on('all', this.trigger, this);
 
+            var product = attributes.product || 'SoShare';
             this.pairing.on('pairing:found', function(options) {
-                if(options && options.name === 'SoShare') {
+                if(options && options.name === product) {
                     var key = jQuery.jStorage.get('pairing_key');
                     if(key) {
                         // Let whoever triggered the pairing:found event know that they don't need
