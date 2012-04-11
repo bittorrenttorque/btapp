@@ -1,111 +1,244 @@
 <!DOCTYPE html>  <html> <head>   <title>pairing.btapp.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="btapp.html">                 btapp.js               </a>                                           <a class="source" href="client.btapp.html">                 client.btapp.js               </a>                                           <a class="source" href="pairing.btapp.html">                 pairing.btapp.js               </a>                                           <a class="source" href="plugin.btapp.html">                 plugin.btapp.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               pairing.btapp.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>(c) 2012 Kyle Graehl, BitTorrent Inc.
 Btapp may be freely distributed under the MIT license.
 For all details and documentation:
-http://pwmckenna.github.com/btapp</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nb">window</span><span class="p">.</span><span class="nx">Pairing</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
-	<span class="nx">initialize</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">curport</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">numfound</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// track # found so can trigger &quot;none found&quot; event</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">local_url</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">resultImg</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">highest_port_possbile</span> <span class="o">=</span> <span class="mi">50000</span><span class="p">;</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">realistic_give_up_after_port</span> <span class="o">=</span> <span class="mi">15000</span><span class="p">;</span> <span class="c1">// don&#39;t bother scanning all the ports.</span>
-		<span class="nx">assert</span><span class="p">(</span> <span class="k">this</span><span class="p">.</span><span class="nx">realistic_give_up_after_port</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">highest_port_possbile</span> <span class="p">);</span>
-	<span class="p">},</span>
-	<span class="nx">scan</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">options</span> <span class="o">=</span> <span class="nx">options</span> <span class="o">||</span> <span class="p">{};</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">initialize</span><span class="p">();</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">scan_start_time</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">resultImg</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Image</span><span class="p">();</span>
-		<span class="kd">var</span> <span class="nx">_this</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+http://pwmckenna.github.com/btapp</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
-		<span class="k">this</span><span class="p">.</span><span class="nx">resultImg</span><span class="p">.</span><span class="nx">onerror</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-			<span class="k">if</span> <span class="p">(</span><span class="nx">_this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">timeout</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="o">-</span> <span class="nx">_this</span><span class="p">.</span><span class="nx">scan_start_time</span> <span class="o">&gt;</span> <span class="nx">_this</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">timeout</span><span class="p">))</span> <span class="p">{</span>
-				<span class="k">if</span> <span class="p">(</span><span class="nx">_this</span><span class="p">.</span><span class="nx">numfound</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-					<span class="nx">_this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:nonefound&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">reason</span><span class="o">:</span> <span class="s1">&#39;timeout&#39;</span> <span class="p">}</span> <span class="p">);</span>
-				<span class="p">}</span>
-			<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">_this</span><span class="p">.</span><span class="nx">curport</span> <span class="o">&gt;</span> <span class="nx">_this</span><span class="p">.</span><span class="nx">realistic_give_up_after_port</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// highest_port_possible takes too long...</span>
-				<span class="k">if</span> <span class="p">(</span><span class="nx">_this</span><span class="p">.</span><span class="nx">numfound</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-					<span class="nx">_this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:nonefound&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">reason</span><span class="o">:</span> <span class="s1">&#39;ended scan&#39;</span> <span class="p">}</span> <span class="p">);</span>
-				<span class="p">}</span>
-			<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-				<span class="nx">_this</span><span class="p">.</span><span class="nx">i</span><span class="o">++</span><span class="p">;</span>
-				<span class="nx">_this</span><span class="p">.</span><span class="nx">pingimg</span><span class="p">();</span>
-			<span class="p">}</span>
-		<span class="p">};</span>
+    <span class="kd">var</span> <span class="nx">MAX_PORT</span> <span class="o">=</span> <span class="mi">11000</span><span class="p">;</span>
 
-		<span class="k">this</span><span class="p">.</span><span class="nx">resultImg</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">_this</span><span class="p">.</span><span class="nx">port_found</span><span class="p">(</span><span class="nx">_this</span><span class="p">.</span><span class="nx">curport</span><span class="p">);</span> <span class="p">};</span>
+    <span class="kd">function</span> <span class="nx">assert</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">b</span><span class="p">)</span> <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span> <span class="p">}</span>
 
-		<span class="nx">_this</span><span class="p">.</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-		<span class="nx">_this</span><span class="p">.</span><span class="nx">pingimg</span><span class="p">();</span>
-	<span class="p">},</span>
-	<span class="nx">get_domain</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="s1">&#39;http://127.0.0.1&#39;</span><span class="p">;</span>
-	<span class="p">},</span>
-	<span class="nx">get_ping_img_url</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">get_domain</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nx">port</span> <span class="o">+</span> <span class="s1">&#39;/gui/pingimg&#39;</span><span class="p">;</span>
-	<span class="p">},</span>
-	<span class="nx">get_pair_url</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">get_domain</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nx">port</span> <span class="o">+</span> <span class="s1">&#39;/gui/pair?name=&#39;</span> <span class="o">+</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">origin</span><span class="p">);</span>
-	<span class="p">},</span>
-	<span class="nx">pingimg</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">curport</span> <span class="o">=</span> <span class="mi">7</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">10000</span><span class="p">;</span>
-		<span class="kd">var</span> <span class="nx">url</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">get_ping_img_url</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">curport</span><span class="p">);</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">resultImg</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">url</span><span class="p">;</span>
-	<span class="p">},</span>
-	<span class="nx">port_found</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>found a listening port. now check its version...</p>             </td>             <td class="code">               <div class="highlight"><pre>		<span class="k">this</span><span class="p">.</span><span class="nx">local_url</span> <span class="o">=</span> <span class="s2">&quot;http://127.0.0.1:&quot;</span> <span class="o">+</span> <span class="nx">port</span><span class="p">;</span>
+    <span class="kd">function</span> <span class="nx">getCSS</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">jQuery</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;link&#39;</span><span class="p">)</span> <span class="p">).</span><span class="nx">attr</span><span class="p">({</span>
+            <span class="nx">href</span><span class="o">:</span> <span class="nx">url</span><span class="p">,</span>
+            <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;text/css&#39;</span><span class="p">,</span>
+            <span class="nx">rel</span><span class="o">:</span> <span class="s1">&#39;stylesheet&#39;</span>
+        <span class="p">}).</span><span class="nx">appendTo</span><span class="p">(</span><span class="s1">&#39;head&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="kd">function</span> <span class="nx">initializeFacebox</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">facebox</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">overlay</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span> <span class="c1">// to disable click outside overlay to disable it</span>
+        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">facebox</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">closeImage</span> <span class="o">=</span> <span class="s1">&#39;http://apps.bittorrent.com/torque/facebox/src/closelabel.png&#39;</span><span class="p">;</span>
+        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">facebox</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">loadingImage</span> <span class="o">=</span> <span class="s1">&#39;http://apps.bittorrent.com/torque/facebox/src/loading.gif&#39;</span><span class="p">;</span>                     
+        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">facebox</span><span class="p">.</span><span class="nx">settings</span><span class="p">.</span><span class="nx">opacity</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">;</span>
+    <span class="p">}</span>
 
-		<span class="k">this</span><span class="p">.</span><span class="nx">test_port</span><span class="p">({</span>
-			<span class="nx">success</span><span class="o">:</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">xhr</span><span class="p">)</span> <span class="p">{</span>
-				<span class="k">this</span><span class="p">.</span><span class="nx">numfound</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-				
-				<span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span> 
-					<span class="s1">&#39;version&#39;</span><span class="o">:</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">data</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">version</span> <span class="o">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
-					<span class="s1">&#39;name&#39;</span><span class="o">:</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">data</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">name</span> <span class="o">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span> 
-					<span class="s1">&#39;port&#39;</span><span class="o">:</span><span class="nx">port</span><span class="p">,</span> 
-					<span class="s1">&#39;continue_scan&#39;</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> 
-					<span class="s1">&#39;attempt_authorization&#39;</span><span class="o">:</span><span class="kc">true</span> 
-				<span class="p">};</span>
-				
-				<span class="k">if</span> <span class="p">(</span><span class="nx">data</span> <span class="o">==</span> <span class="s1">&#39;invalid request&#39;</span> <span class="o">||</span> <span class="p">(</span><span class="nx">data</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">version</span><span class="p">))</span> <span class="p">{</span>
-					<span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:found&#39;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
-				<span class="p">}</span>
+    <span class="kd">function</span> <span class="nx">isMac</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/Macintosh/</span><span class="p">)</span> <span class="o">!=</span> <span class="kc">undefined</span><span class="p">;</span>
+    <span class="p">}</span>
 
-				<span class="k">if</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">attempt_authorization</span><span class="p">)</span> <span class="p">{</span>
-					<span class="k">this</span><span class="p">.</span><span class="nx">authorize_port</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
-				<span class="p">}</span>
-				<span class="k">if</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">continue_scan</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>keep scanning for other clients!</p>             </td>             <td class="code">               <div class="highlight"><pre>					<span class="k">this</span><span class="p">.</span><span class="nx">i</span><span class="o">++</span><span class="p">;</span>
-					<span class="k">this</span><span class="p">.</span><span class="nx">pingimg</span><span class="p">();</span>
-				<span class="p">}</span>	
-			<span class="p">},</span> <span class="k">this</span><span class="p">),</span>
-			<span class="nx">error</span><span class="o">:</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">xhr</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">text</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>a client responded to /gui/pingimg but had some other error on fetching "/version"
-should not happen, but report an event anyway.</p>             </td>             <td class="code">               <div class="highlight"><pre>				<span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:error&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">xhr</span><span class="o">:</span> <span class="nx">xhr</span><span class="p">,</span> <span class="nx">status</span><span class="o">:</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">text</span><span class="o">:</span> <span class="nx">text</span> <span class="p">}</span> <span class="p">);</span>
-			<span class="p">},</span> <span class="k">this</span><span class="p">)</span>
-		<span class="p">});</span>
-	<span class="p">},</span>
-	<span class="nx">authorize_port_success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">xhr</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:authorized&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;port&#39;</span><span class="o">:</span><span class="nx">port</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="o">:</span><span class="nx">data</span><span class="p">});</span>
-	<span class="p">},</span>
-	<span class="nx">authorize_port_error</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:authorization_failed&#39;</span><span class="p">,</span> <span class="nx">port</span><span class="p">);</span>
-	<span class="p">},</span>
-	<span class="nx">authorize_port</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nx">jQuery</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
-			<span class="nx">url</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">get_pair_url</span><span class="p">(</span><span class="nx">port</span><span class="p">),</span>
-			<span class="nx">dataType</span><span class="o">:</span> <span class="s1">&#39;jsonp&#39;</span><span class="p">,</span>
-			<span class="nx">success</span><span class="o">:</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_success</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">port</span><span class="p">),</span>
-			<span class="nx">error</span><span class="o">:</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_error</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">port</span><span class="p">)</span>
-		<span class="p">});</span>
-	<span class="p">},</span>
-	<span class="nx">test_port</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
-		<span class="kd">var</span> <span class="nx">test_pair_url</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">local_url</span> <span class="o">+</span> <span class="s1">&#39;/version/&#39;</span><span class="p">;</span>
-		<span class="nx">jQuery</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
-			<span class="nx">url</span><span class="o">:</span> <span class="nx">test_pair_url</span><span class="p">,</span>
-			<span class="nx">dataType</span><span class="o">:</span> <span class="s1">&#39;jsonp&#39;</span><span class="p">,</span>
-			<span class="nx">success</span><span class="o">:</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">success</span><span class="p">,</span>
-			<span class="nx">error</span><span class="o">:</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">error</span>
-		<span class="p">});</span>
-	<span class="p">}</span>
-<span class="p">});</span>
+    <span class="kd">function</span> <span class="nx">get_domain</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s1">&#39;http://127.0.0.1:&#39;</span> <span class="o">+</span> <span class="nx">port</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">authorized_domain</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">location</span><span class="p">.</span><span class="nx">host</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/([^.]+)\.utorrent.com/i</span><span class="p">)</span> <span class="o">||</span>
+            <span class="nx">location</span><span class="p">.</span><span class="nx">host</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/([^.]+)\.bittorrent.com/i</span><span class="p">)</span> <span class="o">||</span>
+            <span class="nx">location</span><span class="p">.</span><span class="nx">host</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/([^.]+)\.getshareapp.com/i</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">get_ping_img_url</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">get_domain</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/gui/pingimg&#39;</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="kd">function</span> <span class="nx">get_iframe_pair_url</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">get_domain</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/gui/pair?iframe=&#39;</span> <span class="o">+</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">host</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="kd">function</span> <span class="nx">get_dialog_pair_url</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">get_domain</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/gui/pair?name=&#39;</span> <span class="o">+</span> <span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">host</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">get_version_url</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">get_domain</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/version/&#39;</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">get_next_port</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">next</span><span class="p">,</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="nx">next</span> <span class="o">=</span> <span class="nx">get_port</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+            <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">while</span><span class="p">(</span><span class="nx">next</span> <span class="o">&lt;=</span> <span class="nx">port</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">next</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">get_port</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="mi">7</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">10000</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">PairingView</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+        <span class="nx">initialize</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">model</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;pairing:authorize&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">authorize_iframe</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+        <span class="p">},</span>
+        <span class="nx">authorize_iframe</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>make sure that we've loaded what we need to display</p>             </td>             <td class="code">               <div class="highlight"><pre>            <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">jQuery</span><span class="p">.</span><span class="nx">facebox</span> <span class="o">===</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">getCSS</span><span class="p">(</span><span class="s1">&#39;http://apps.bittorrent.com/torque/facebox/src/facebox.css&#39;</span><span class="p">);</span>
+                <span class="nx">jQuery</span><span class="p">.</span><span class="nx">getScript</span><span class="p">(</span><span class="s1">&#39;http://apps.bittorrent.com/torque/facebox/src/facebox.js&#39;</span><span class="p">,</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">authorize_iframe</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">options</span><span class="p">));</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="nx">initializeFacebox</span><span class="p">();</span>
+
+            <span class="kd">var</span> <span class="nx">dialog</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">(</span><span class="s1">&#39;&lt;div&gt;&lt;/div&gt;&#39;</span><span class="p">);</span>
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;pairing&#39;</span><span class="p">);</span>
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="s1">&#39;absolute&#39;</span><span class="p">);</span>
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="s1">&#39;200px&#39;</span><span class="p">);</span>
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span> <span class="s1">&#39;400px&#39;</span><span class="p">);</span>
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;%50&#39;</span><span class="p">);</span>
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;margin-left&#39;</span><span class="p">,</span> <span class="s1">&#39;-200px&#39;</span><span class="p">);</span>
+
+            <span class="kd">var</span> <span class="nx">frame</span> <span class="o">=</span> <span class="nx">jQuery</span><span class="p">(</span><span class="s1">&#39;&lt;iframe&gt;&lt;/iframe&gt;&#39;</span><span class="p">);</span>
+            <span class="nx">frame</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="nx">get_iframe_pair_url</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">port</span><span class="p">));</span>
+            <span class="nx">frame</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;padding&#39;</span><span class="p">,</span> <span class="s1">&#39;0px&#39;</span><span class="p">);</span>
+            <span class="nx">frame</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;margin&#39;</span><span class="p">,</span> <span class="s1">&#39;0px&#39;</span><span class="p">);</span>
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">frame</span><span class="p">);</span>
+
+            <span class="nx">jQuery</span><span class="p">(</span><span class="nb">window</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>we only want to listen for events that came from us</p>             </td>             <td class="code">               <div class="highlight"><pre>                <span class="k">if</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">.</span><span class="nx">origin</span> <span class="o">===</span> <span class="nx">get_domain</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">port</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">options</span><span class="p">.</span><span class="nx">callback</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+                    <span class="nx">jQuery</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;close.facebox&#39;</span><span class="p">);</span>
+                    <span class="nx">jQuery</span><span class="p">(</span><span class="s1">&#39;#pairing&#39;</span><span class="p">).</span><span class="nx">remove</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+
+            <span class="nx">dialog</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+            <span class="nx">jQuery</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">).</span><span class="nx">append</span><span class="p">(</span><span class="nx">dialog</span><span class="p">);</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">facebox</span><span class="p">({</span> <span class="nx">div</span><span class="o">:</span> <span class="s1">&#39;#pairing&#39;</span> <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+
+    <span class="nx">PluginPairing</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">ping_port</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>the plugin doesn't support binary data, which is what the image url returns...
+so lets just skip straight to the version query</p>             </td>             <td class="code">               <div class="highlight"><pre>            <span class="k">this</span><span class="p">.</span><span class="nx">on_ping_success</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+        <span class="p">},</span>
+        <span class="nx">check_version</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:check_version&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;port&#39;</span><span class="o">:</span> <span class="nx">port</span><span class="p">});</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;plugin_manager&#39;</span><span class="p">).</span><span class="nx">get_plugin</span><span class="p">().</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">get_version_url</span><span class="p">(</span><span class="nx">port</span><span class="p">),</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">allowed</span> <span class="o">||</span> <span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">on_check_version_error</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">obj</span><span class="p">;</span>
+                    <span class="k">try</span> <span class="p">{</span>
+                        <span class="nx">obj</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">on_check_version_error</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+                        <span class="k">return</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">on_check_version_success</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">obj</span><span class="p">);</span> 
+                <span class="p">}</span>
+            <span class="p">},</span> <span class="k">this</span><span class="p">));</span>
+        <span class="p">},</span>
+        <span class="nx">authorize_basic</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;plugin_manager&#39;</span><span class="p">).</span><span class="nx">get_plugin</span><span class="p">().</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">get_dialog_pair_url</span><span class="p">(</span><span class="nx">port</span><span class="p">),</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">allowed</span> <span class="o">||</span> <span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_error</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_success</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">},</span> <span class="k">this</span><span class="p">));</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="nx">ImagePairing</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">ping_port</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">img</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Image</span><span class="p">();</span>
+            <span class="nx">img</span><span class="p">.</span><span class="nx">onerror</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">on_ping_error</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">port</span><span class="p">);</span>
+            <span class="nx">img</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">on_ping_success</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">port</span><span class="p">);</span>
+            <span class="nx">img</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">get_ping_img_url</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+        <span class="p">},</span>
+        <span class="nx">check_version</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:check_version&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;port&#39;</span><span class="o">:</span> <span class="nx">port</span><span class="p">});</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+                <span class="nx">url</span><span class="o">:</span> <span class="nx">get_version_url</span><span class="p">(</span><span class="nx">port</span><span class="p">),</span>
+                <span class="nx">dataType</span><span class="o">:</span> <span class="s1">&#39;jsonp&#39;</span><span class="p">,</span>
+                <span class="nx">success</span><span class="o">:</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">on_check_version_success</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">port</span><span class="p">),</span>
+                <span class="nx">error</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">on_check_version_error</span>
+            <span class="p">});</span>
+        <span class="p">},</span>
+        <span class="nx">authorize_basic</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">jQuery</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+                <span class="nx">url</span><span class="o">:</span> <span class="nx">get_dialog_pair_url</span><span class="p">(</span><span class="nx">port</span><span class="p">),</span>
+                <span class="nx">dataType</span><span class="o">:</span> <span class="s1">&#39;jsonp&#39;</span><span class="p">,</span>
+                <span class="nx">success</span><span class="o">:</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_success</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">port</span><span class="p">),</span>
+                <span class="nx">error</span><span class="o">:</span> <span class="nx">_</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_error</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">port</span><span class="p">)</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="nx">Pairing</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+        <span class="nx">initialize</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">_</span><span class="p">.</span><span class="nx">bindAll</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;on_ping_error&#39;</span><span class="p">,</span> <span class="s1">&#39;on_ping_success&#39;</span><span class="p">,</span> <span class="s1">&#39;on_check_version_error&#39;</span><span class="p">,</span> <span class="s1">&#39;on_check_version_success&#39;</span><span class="p">,</span> <span class="s1">&#39;authorize_port_callback&#39;</span><span class="p">);</span>
+            <span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;plugin_manager&#39;</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">PluginPairing</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">ImagePairing</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="nx">scan</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">ping</span><span class="p">(</span><span class="nx">get_port</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+        <span class="p">},</span>
+        <span class="nx">ping</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">port</span> <span class="o">&gt;</span> <span class="nx">MAX_PORT</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:stop&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;reason&#39;</span><span class="o">:</span> <span class="s1">&#39;max port reached&#39;</span><span class="p">});</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:attempt&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;port&#39;</span><span class="o">:</span> <span class="nx">port</span><span class="p">});</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">ping_port</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+        <span class="p">},</span>
+        <span class="nx">on_ping_error</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">ping</span><span class="p">(</span><span class="nx">get_next_port</span><span class="p">(</span><span class="nx">port</span><span class="p">));</span>
+        <span class="p">},</span>
+        <span class="nx">on_ping_success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">check_version</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+        <span class="p">},</span>
+        <span class="nx">on_check_version_error</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">ping</span><span class="p">(</span><span class="nx">get_next_port</span><span class="p">(</span><span class="nx">port</span><span class="p">));</span>
+        <span class="p">},</span>
+        <span class="nx">on_check_version_success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span> 
+                <span class="s1">&#39;version&#39;</span><span class="o">:</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">data</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">version</span> <span class="o">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;name&#39;</span><span class="o">:</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">data</span> <span class="o">===</span> <span class="s1">&#39;object&#39;</span> <span class="o">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">name</span> <span class="o">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span> 
+                <span class="s1">&#39;port&#39;</span><span class="o">:</span><span class="nx">port</span><span class="p">,</span>
+                <span class="s1">&#39;authorize&#39;</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span>
+                <span class="s1">&#39;abort&#39;</span><span class="o">:</span><span class="kc">false</span>
+            <span class="p">};</span>
+            
+            <span class="k">if</span><span class="p">(</span><span class="nx">data</span> <span class="o">==</span> <span class="s1">&#39;invalid request&#39;</span> <span class="o">||</span> <span class="p">(</span><span class="nx">data</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">version</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:found&#39;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">authorize</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">options</span><span class="p">.</span><span class="nx">abort</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">ping</span><span class="p">(</span><span class="nx">get_next_port</span><span class="p">(</span><span class="nx">port</span><span class="p">));</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="nx">authorize</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">authorized_domain</span><span class="p">()</span> <span class="o">||</span> <span class="nx">isMac</span><span class="p">())</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>this will use the old school dialogs which allow bittorrent domains to pair automatically</p>             </td>             <td class="code">               <div class="highlight"><pre>                <span class="k">this</span><span class="p">.</span><span class="nx">authorize_basic</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>let someone build a view to do something with this info</p>             </td>             <td class="code">               <div class="highlight"><pre>                <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:authorize&#39;</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s1">&#39;port&#39;</span><span class="o">:</span> <span class="nx">port</span><span class="p">,</span>
+                    <span class="s1">&#39;callback&#39;</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_callback</span>
+                <span class="p">});</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="nx">authorize_port_success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:authorized&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;port&#39;</span><span class="o">:</span><span class="nx">port</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="o">:</span><span class="nx">key</span><span class="p">});</span>
+        <span class="p">},</span>
+        <span class="nx">authorize_port_error</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;pairing:denied&#39;</span><span class="p">,</span> <span class="nx">port</span><span class="p">);</span>
+        <span class="p">},</span>
+        <span class="nx">authorize_port_callback</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">(</span><span class="nx">data</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">originalEvent</span> <span class="o">&amp;&amp;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">.</span><span class="nx">data</span><span class="p">,</span> <span class="s1">&#39;no data was passed in the message from the iframe&#39;</span><span class="p">);</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_success</span><span class="p">(</span><span class="nx">port</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">originalEvent</span><span class="p">.</span><span class="nx">data</span> <span class="o">===</span> <span class="s1">&#39;denied&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">authorize_port_error</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="s1">&#39;the message data from the iframe was neither a pairing key, nor a denied message&#39;</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">}).</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
