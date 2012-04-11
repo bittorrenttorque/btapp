@@ -28,20 +28,22 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 
 ## Getting Started
 
-The first step is simply to create a new Btapp object. This will provide you with a javascript representation of a torrent client. You can use these to connect to either your local machine's client or a remote machine (the possibilities are less obvious with remote connections, but this is in my opinion the most powerful and truly unique part of this library)
+######Include btapp.js in your html file
+```  
+<script type="text/javascript" src="http://apps.bittorrent.com/torque/btapp/btapp.js" />  
+```  
 
-#### Local Connection
-To connect to the plugin client on your local machine...
+######Create a Btapp object and connect it to your local machine
 ```javascript
-btapp = new Btapp;
+var btapp = new Btapp;
 btapp.connect();
 ```
+
 *this code was executed when the page was loaded to ensure that the examples below work even if you forget about this...*
 
-#### Remote Connection 
-*(referred to occasionally as the falcon proxy)*
-Lets setup the local machine with some proxy credentials and see if we can't connect to it via the falcon proxy. This proxy Btapp object will point to the same torrent client as your original Btapp object (Though you might notice the update times are much longer as it gets routed through a proxy instead of over localhost). You can have unlimited objects all representing the same torrent client, but be careful that they not step on each others toes.
-
+#### Local Machine vs Remote Connection  
+When you call *connect*, by default you're connecting to your local torque client. However, if you provide a username and password, an attempt will be made to connect through BitTorrent's remote proxy. Your client must connect to remote before this option is available to you.
+  
 <div class="run" title="Run"></div>
 ```javascript
 username = prompt("Please enter your name","Harry Potter");
