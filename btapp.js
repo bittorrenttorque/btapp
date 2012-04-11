@@ -60,7 +60,7 @@
 
             //for set and unset, we don't want to set them directly on the objects
             if(v === 'set' || v === 'unset') {
-                return
+                return;
             }
                  
             assert(v in this, 'trying to remove the function "' + v + '", which does not exist in the prototype of this object');
