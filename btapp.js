@@ -35,17 +35,6 @@
             _.bindAll(this, 'initializeValues', 'updateState', 'clearState', 'isEmpty', 'destructor');
             this.initializeValues();
         },
-        set: function() {
-            //set is called in the constructors of Backbone.Model and Backbone.Collection, so ignore those
-            if(this instanceof Backbone.Model) {
-                assert(arguments.callee.caller === Backbone.Model);
-                Backbone.Model.prototype.set.apply(this, arguments);
-            } else {
-                throw 'you cannot access the set function of btapp library objects directly. perhaps you jumped the gun waiting for the rpc version of set from the client?';
-            }
-
-        },
-        unset: function() {},
         clearRemoteProcedureCalls: function() {
             var keys = _.keys(this.bt || {});
             for(var i = 0; i < keys.length; i++) {
@@ -69,12 +58,12 @@
             this.trigger('remove:bt', this.bt[v]);
             delete this.bt[v];
 
-            //also remove it from the object directly
+            //for set and unset, we don't want to set them directly on the objects
             if(v === 'set' || v === 'unset') {
-                assert(this[v] !== BtappBase[v], 'trying to remove the wrong version of "set"');
-            } else {
-                assert(v in this, 'trying to remove the function "' + v + '", which does not exist in the prototype of this object');
+                return
             }
+                 
+            assert(v in this, 'trying to remove the function "' + v + '", which does not exist in the prototype of this object');
             this.trigger('remove:' + v);
             delete this[v];
         },
@@ -124,10 +113,10 @@
 
             //also set it on the object directly...this ends up being how people expect to use the objects
             if(v === 'set' || v === 'unset') {
-                assert(this[v] === BtappBase[v], 'trying to add the RPC version of "set", when it has already been added');
-            } else {
-                assert(!(v in this), 'trying to add the function "' + v + '", which already exists in the prototype of this object');
+                return {};
             }
+
+            assert(!(v in this), 'trying to add the function "' + v + '", which already exists in the prototype of this object');
             this[v] = func;
             this.trigger('add:' + v);
 
