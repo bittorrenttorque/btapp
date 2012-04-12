@@ -130,9 +130,9 @@ __Warning__: this will launch a file browser on the machine that the client is r
 The types that bubble up from the client are either Backbone Collections or Models depending on if they are collections of other torrent client types or not...In the case of the list of torrents, its created as a Collection, which has all those convenient underscore functions available. Yippie!
 <div class="run" title="Run"></div>
 ```javascript
-	btapp.get('torrent').each(function(torrent) {
-		torrent.bt.remove();
-	});
+btapp.get('torrent').each(function(torrent) {
+	torrent.bt.remove();
+});
 ```
 
 ## General Concepts
