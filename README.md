@@ -35,7 +35,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 
 ######Create a Btapp object and connect it to your local machine
 ```javascript
-var btapp = new Btapp;
+var btapp = new Btapp;  
 btapp.connect();
 ```
 
