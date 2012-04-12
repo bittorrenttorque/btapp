@@ -36,7 +36,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 ######Create a Btapp object and connect it to your local machine
 ```javascript
 var btapp = new Btapp;  
-btapp.connect();
+btapp.connect();  
 ```
 
 *this code was executed when the page was loaded to ensure that the examples below work even if you forget about this...*
@@ -46,25 +46,25 @@ When you call *connect*, by default you're connecting to your local torque clien
   
 <div class="run" title="Run"></div>
 ```javascript
-username = prompt("Please enter your name","Harry Potter");
-password = prompt("Please enter your password","Abracadabra");
-
-btapp.bt.connect_remote(
-    function() { }, 
-	username,
-	password
-);
+username = prompt("Please enter your name","Harry Potter");  
+password = prompt("Please enter your password","Abracadabra");  
+  
+btapp.bt.connect_remote(  
+    function() { },  
+	username,  
+	password  
+);  
 ```
 
 Now that we're connected to the falcon proxy we can connect to your current local machine by executing the following code from any computer in the world!
 
 <div class="run" title="Run"></div>
 ```javascript
-remote_btapp = new Btapp;
+remote_btapp = new Btapp;  
 remote_btapp.connect({  
     'username':username,  
-	'password':password
-});
+	'password':password  
+});  
 ```
 
 ### Listening for state changes
@@ -73,16 +73,16 @@ I'm about to show you how to add and remove data, and here is where the dependen
 For instance, to show an alert each time a torrent is added to the client, just bind to the torrent list...__Note:__ We're not guaranteed the list of torrents will be there either...so lets listen for that as well.
 <div class="run" title="Run"></div>
 ```javascript
-function listen_for_torrents() {
-	if(btapp.get('torrent')) {
-		btapp.get('torrent').bind('add', function() {
-			alert('torrent added!');
-		});
-	} else {
-		btapp.bind('add:torrent', listen_for_torrents);
-	}
-}
-listen_for_torrents.call(this);
+function listen_for_torrents() {  
+	if(btapp.get('torrent')) {  
+		btapp.get('torrent').bind('add', function() {  
+			alert('torrent added!');  
+		});  
+	} else {  
+		btapp.bind('add:torrent', listen_for_torrents);  
+	}  
+}  
+listen_for_torrents.call(this);  
 ```
 
 If this seems a bit messy for you, there is an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
@@ -91,16 +91,16 @@ If this seems a bit messy for you, there is an addition bit of javascript call t
 Easy-peasy
 <div class="run" title="Run"></div>
 ```javascript
-var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
-btapp.get('add').bt.torrent(function() {}, url);
+var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';  
+btapp.get('add').bt.torrent(function() {}, url);  
 ```
 And by easy-peasy I mean, wtf?!? So, the base object has an attribute called *add*, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because *add* is a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
 
 If you find yourself down a dark alley needing rss feeds, its almost the same to add one of those.
 <div class="run" title="Run"></div>
 ```javascript
-var url = 'http://www.clearbits.net/feeds/cat/short-form-video.rss';
-btapp.get('add').bt.rss_feed(function() {}, url);
+var url = 'http://www.clearbits.net/feeds/cat/short-form-video.rss';  
+btapp.get('add').bt.rss_feed(function() {}, url);  
 ```
 
 
@@ -109,20 +109,20 @@ Ok, adding existing content is pretty nice, but your users might want to share t
 ### Creating torrents
 <div class="run" title="Run"></div>
 ```javascript
-btapp.bt.browseforfiles(function () {}, function(files) {
-	_.each(files, function(value, key) {
-			btapp.bt.create(
-				function(ret) {
-					alert('called create for ' + value);
-				}, 
-				'', 
-				[value], 
-				function(hash) {
-					alert('torrent created for ' + value);
-				}
-			);
-	});
-});
+btapp.bt.browseforfiles(function () {}, function(files) {  
+	_.each(files, function(value, key) {  
+		btapp.bt.create(  
+			function(ret) {  
+				alert('called create for ' + value);  
+			},  
+			'',  
+			[value],  
+			function(hash) {  
+				alert('torrent created for ' + value);  
+			}  
+		);  
+	});  
+});  
 ```
 __Warning__: this will launch a file browser on the machine that the client is running on...so if you're connected via falcon you won't be able to see the dialog pop up (but someone might get an unexpected surprise!)
 
@@ -130,9 +130,9 @@ __Warning__: this will launch a file browser on the machine that the client is r
 The types that bubble up from the client are either Backbone Collections or Models depending on if they are collections of other torrent client types or not...In the case of the list of torrents, its created as a Collection, which has all those convenient underscore functions available. Yippie!
 <div class="run" title="Run"></div>
 ```javascript
-btapp.get('torrent').each(function(torrent) {
-	torrent.bt.remove();
-});
+btapp.get('torrent').each(function(torrent) {  
+	torrent.bt.remove();  
+});  
 ```
 
 ## General Concepts
@@ -166,7 +166,7 @@ For instance, to list the name of all the files in all torrents you need to writ
 
 <div class="run" title="Run"></div>
 ```javascript
-var torrents = btapp.get('torrent');
+var torrents = btapp.get('torrent');  
 ```
 
 ## Examples
