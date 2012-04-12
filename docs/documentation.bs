@@ -1,0 +1,5 @@
+content="`curl http://documentup.com/pwmckenna/btapp/recompile?issues=false&twitter=pwmckenna`";
+echo $content;	
+value="$(perl -MURI::Escape -e 'print uri_escape($content);')";
+
+echo "<link rel='stylesheet' type='text/css' href='backbone.css'><script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script><script>document.open();document.write(\"$value\");document.close();</script>";	
