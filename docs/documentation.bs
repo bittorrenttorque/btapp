@@ -1,4 +1,4 @@
-content="`curl http://documentup.com/pwmckenna/btapp/recompile?issues=false&twitter=pwmckenna`";
+content="`curl http://documentup.com/pwmckenna/btapp?issues=false&twitter=pwmckenna`";
 echo $content;	
 value="$(perl -MURI::Escape -e 'print uri_escape($content);')";
 
