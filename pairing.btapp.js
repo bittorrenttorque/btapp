@@ -43,7 +43,7 @@
     }
     
     function get_iframe_pair_url(port) {
-        return get_domain(port) + '/gui/pair?iframe=' + encodeURIComponent(window.location.host);
+        return get_domain(port) + '/gui/pair?iframe=' + (encodeURIComponent(window.location.host) || 'local');
     }
     
     function get_dialog_pair_url(port) {
