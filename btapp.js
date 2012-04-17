@@ -505,9 +505,15 @@
     Btapp.VERSION = '0.1.0';
     Btapp.QUERIES = {
         ALL: 'btapp/',
+        FUNCTIONS: 'btapp//',
+        ADD: 'btapp/add/',
+        DHT: 'btapp/dht/',
         TORRENTS: 'btapp/torrent/all/*/',
-        FILES: 'btapp/torrent/all/*/file/all/*/',
-        PEERS: 'btapp/torrent/all/*/peer/all/*/',
+        TORRENT_PROPERTIES: 'btapp/torrent/all/*/properties/all/*/',
+        TORRENT_FILES: 'btapp/torrent/all/*/file/all/*/',
+        TORRENT_PEERS: 'btapp/torrent/all/*/peer/all/*/',
+        TORRENT_FUNCTIONS: 'btapp/torrent/all/*//',
+        FILE_PROPERTIES: 'btapp/torrent/all/*/file/all/*/properties/all/*/',
         SETTINGS: 'btapp/settings/all/*/'
     };
 }).call(this);
