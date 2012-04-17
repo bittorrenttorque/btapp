@@ -55,7 +55,7 @@
 
             assert(v in this.bt, 'trying to remove a function that does not exist');
             this.trigger('remove:bt:' + v);
-            this.trigger('remove:bt', this.bt[v]);
+            this.trigger('remove:bt', this.bt[v], v);
             delete this.bt[v];
 
             //for set and unset, we don't want to set them directly on the objects
@@ -109,7 +109,7 @@
             assert(!(v in this.bt), 'trying to add a function that already exists');
             this.bt[v] = func;
             this.trigger('add:bt:' + v);
-            this.trigger('add:bt', this.bt[v]);
+            this.trigger('add:bt', this.bt[v], v);
 
             //also set it on the object directly...this ends up being how people expect to use the objects
             if(v === 'set' || v === 'unset') {
@@ -177,6 +177,9 @@
                 this.updateAddState(session, add, remove, url),
                 this.updateRemoveState(session, add, remove, url)
             );
+        },
+        sync: function() {
+            //no sync for you
         }
     };
 
@@ -277,7 +280,7 @@
             _.each(clone, function(attribute) { 
                 attribute.clearState && attribute.clearState(); 
             });
-            Backbone.Model.prototype.set.call(this, clone, {unset: true});
+            Backbone.Model.prototype.set.call(this, clone, {internal: true, unset: true});
             this.destructor();
         },
         customEvents: function() {
@@ -321,8 +324,31 @@
             return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
         },
         applyStateChanges: function(add, remove) {
-            Backbone.Model.prototype.set.call(this, add);
-            Backbone.Model.prototype.set.call(this, remove, {unset: true});
+            Backbone.Model.prototype.set.call(this, add, {internal: true});
+            Backbone.Model.prototype.set.call(this, remove, {internal: true, unset: true});
+        },
+        set: function(key, value, options) {
+            var evaluate = function(value, key) {
+                if(options && 'internal' in options) return;
+                if(!this.has(key)) return;  
+                // We're trying to guide users towards using save
+                throw 'please use save to set attributes directly to the client';
+            };
+
+            // This code is basically right out of the Backbone.Model set code.
+            // Have to handle a variety of function signatures
+            if (_.isObject(key) || key == null) {
+               _(key).each(evaluate, this);
+            } else {
+                evaluate.call(this, value, key);
+            }
+
+            return Backbone.Model.prototype.set.apply(this, arguments);
+        },
+        save: function(attributes, options) {
+            _(attributes).each(function(value, key) {
+                this.bt.set(function() {}, key, value);
+            }, this);
         }
     });
 
@@ -479,9 +505,15 @@
     Btapp.VERSION = '0.1.0';
     Btapp.QUERIES = {
         ALL: 'btapp/',
+        FUNCTIONS: 'btapp//',
+        ADD: 'btapp/add/',
+        DHT: 'btapp/dht/',
         TORRENTS: 'btapp/torrent/all/*/',
-        FILES: 'btapp/torrent/all/*/file/all/*/',
-        PEERS: 'btapp/torrent/all/*/peer/all/*/',
+        TORRENT_PROPERTIES: 'btapp/torrent/all/*/properties/all/*/',
+        TORRENT_FILES: 'btapp/torrent/all/*/file/all/*/',
+        TORRENT_PEERS: 'btapp/torrent/all/*/peer/all/*/',
+        TORRENT_FUNCTIONS: 'btapp/torrent/all/*//',
+        FILE_PROPERTIES: 'btapp/torrent/all/*/file/all/*/properties/all/*/',
         SETTINGS: 'btapp/settings/all/*/'
     };
 }).call(this);
