@@ -49,7 +49,7 @@ When you call *connect*, by default you're connecting to your local torque clien
 username = prompt("Please enter your name","Harry Potter");  
 password = prompt("Please enter your password","Abracadabra");  
   
-btapp.bt.connect_remote(  
+btapp.connect_remote(  
     function() { },  
 	username,  
 	password  
@@ -92,7 +92,7 @@ Easy-peasy
 <div class="run" title="Run"></div>
 ```javascript
 var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';  
-btapp.get('add').bt.torrent(function() {}, url);  
+btapp.get('add').torrent(function() {}, url);  
 ```
 And by easy-peasy I mean, wtf?!? So, the base object has an attribute called *add*, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because *add* is a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
 
@@ -100,7 +100,7 @@ If you find yourself down a dark alley needing rss feeds, its almost the same to
 <div class="run" title="Run"></div>
 ```javascript
 var url = 'http://www.clearbits.net/feeds/cat/short-form-video.rss';  
-btapp.get('add').bt.rss_feed(function() {}, url);  
+btapp.get('add').rss_feed(function() {}, url);  
 ```
 
 
@@ -109,9 +109,9 @@ Ok, adding existing content is pretty nice, but your users might want to share t
 ### Creating torrents
 <div class="run" title="Run"></div>
 ```javascript
-btapp.bt.browseforfiles(function () {}, function(files) {  
+btapp.browseforfiles(function () {}, function(files) {  
 	_.each(files, function(value, key) {  
-		btapp.bt.create(  
+		btapp.create(  
 			function(ret) {  
 				alert('called create for ' + value);  
 			},  
@@ -131,7 +131,7 @@ The types that bubble up from the client are either Backbone Collections or Mode
 <div class="run" title="Run"></div>
 ```javascript
 btapp.get('torrent').each(function(torrent) {  
-	torrent.bt.remove();  
+	torrent.remove();  
 });  
 ```
 
