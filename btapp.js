@@ -399,7 +399,8 @@
             } else if(typeof attributes.queries === 'string') {
                 this.queries = [attributes.queries];
             } else {
-                this.queries = attributes.queries;
+                assert(typeof attributes.queries === 'object' && 'length' in attributes.queries, 'the queries attribute must be an array');
+                this.queries = _(attributes.queries).flatten();
             }
 
             var error = 'the queries attribute must either be a string or an array of strings';
@@ -505,15 +506,13 @@
     Btapp.VERSION = '0.1.0';
     Btapp.QUERIES = {
         ALL: 'btapp/',
-        FUNCTIONS: 'btapp//',
-        ADD: 'btapp/add/',
-        DHT: 'btapp/dht/',
-        TORRENTS: 'btapp/torrent/all/*/',
-        TORRENT_PROPERTIES: 'btapp/torrent/all/*/properties/all/*/',
-        TORRENT_FILES: 'btapp/torrent/all/*/file/all/*/',
-        TORRENT_PEERS: 'btapp/torrent/all/*/peer/all/*/',
-        TORRENT_FUNCTIONS: 'btapp/torrent/all/*//',
-        FILE_PROPERTIES: 'btapp/torrent/all/*/file/all/*/properties/all/*/',
-        SETTINGS: 'btapp/settings/all/*/'
+        DHT: ['btapp/dht/'],
+        TORRENTS_BASIC: [
+            'btapp/create/', 
+            'btapp/add/torrent/',
+            'btapp/torrent/all/*/file/all/*/', 
+            'btapp/torrent/all/*/properties/all/*/'
+        ],
+        REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
 }).call(this);

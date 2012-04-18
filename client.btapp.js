@@ -232,10 +232,11 @@
                 success: _.bind(function(session) {
                     if (this.login_success) { this.login_success(session); }
                     this.falcon = this.session.api;
-                    this.trigger('client:connected');
+                    this.trigger('client:connected', session);
                 }, this),
                 error: _.bind(function(xhr, status, data) {
                     if (this.login_error) { this.login_error(xhr, status, data); }
+                    this.trigger('client:error', data);
                 }, this)
             };
             this.session = new falcon.session;
