@@ -231,7 +231,7 @@
             var opts = {
                 success: _.bind(function(session) {
                     if (this.login_success) { this.login_success(session); }
-                    this.falcon = this.session.api;
+                    this.falcon = this.session;
                     this.trigger('client:connected', session);
                 }, this),
                 error: _.bind(function(xhr, status, data) {
@@ -248,8 +248,7 @@
             assert(this.falcon, 'cannot send a query to the client without falcon properly connected');
 
             this.falcon.request(
-                'POST',
-                '/client/gui/',
+                '/gui/',
                 {'btapp':'backbone.btapp.js'},
                 args,
                 function(data) {
