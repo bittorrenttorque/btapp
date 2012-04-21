@@ -528,4 +528,17 @@
         ],
         REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
+    Btapp.STATUS = {
+        TORRENT: {
+            DELETED: -1,
+            DOWNLOAD_FAILED: 0,
+            ADDED: 1,
+            COMPLETE: 2,
+            METADATA_COMPLETE: 3
+        },
+        RSS_FEED: {
+            DELETED: -1,
+            ADDED: 1
+        }
+    };
 }).call(this);
