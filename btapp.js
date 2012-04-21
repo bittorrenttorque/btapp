@@ -379,6 +379,7 @@
 
             //bind stuff
             _.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
+            this.on('add:events', this.setEvents, this);
         },
         destructor: function() {
             // We don't want to destruct the base object even when we can't connect...
@@ -438,6 +439,18 @@
             // it would be nice to be able to listen in on what's going on...so let em bubble up
             this.client.bind('all', this.trigger, this);
             this.client.bind('client:connected', this.fetch);       
+        },
+        setEvents: function(events) {
+            // For each client event, just set it to trigger an javascript side event
+            // using the same name. This way you can just bind to the base btapp object
+            // instead of understanding the slightly unconventional save mechanics. 
+            _.each(events.toJSON(), function(value, key) {
+                if(key !== 'id') {
+                    var tmp = {};
+                    tmp[key] = _.bind(this.trigger, this, key);
+                    events.save(tmp);
+                }
+            }, this);            
         },
         disconnect: function() {
             assert(this.client, 'trying to disconnect from an undefined client');
