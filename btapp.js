@@ -541,4 +541,23 @@
             ADDED: 1
         }
     };
+    // These are the valid options to pass as the optional argument to torrents' remove function
+    Btapp.REMOVE = {
+        NO_DELETE: 0,
+        DELETE_TORRENT: 1,
+        DELETE_DATA: 2,
+        DELETE_BOTH: 3,
+        DELETE_TO_TRASH: 4,
+        DELETE_CONVERTED_FILES: 5
+    }
+
+    Btapp.TORRENT = {
+        // These are the valid priority levels that you can pass to torrents' set_priority function
+        PRIORITY: {
+            LOW: 0,
+            MEDIUM: 1,
+            HIGH: 2,
+            METADATA_ONLY: 3 //Means that once the metadata has been downloaded, the torrent stops
+        }
+    }
 }).call(this);
