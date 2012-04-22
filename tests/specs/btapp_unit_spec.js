@@ -26,7 +26,7 @@
 				btapp.disconnect();
 			});
 			it('throws an exception if a non string is provided', function() {
-				var exception = 'the queries attribute must either be a string or an array of strings';
+				var exception = 'the queries attribute must be an array';
 				var queries = false;
 				var btapp = new Btapp;
 				expect(function() {
@@ -247,30 +247,24 @@
 				this.model.client = new LocalTorrentClient({'btapp':this.model});
 				this.model.updateState('testsession', {'testfunc':'[nf](string,dispatch)'}, null, 'testurl');
 			});
-			it('throws error if return callback not provided', function() {
-				this.exception = 'return value callback is not optional';
-				this.func = _.bind(this.model.bt.testfunc, this);
-				expect(this.func).toThrow(this.exception);
-			});
-			it('throws error if return callback is not of type function', function() {
-				this.exception = 'the first argument must be a function that receives the return value for the call to the client';
-				this.func = _.bind(this.model.bt.testfunc, this, 'asdf');
-				expect(this.func).toThrow(this.exception);
+			it('returns a jquery deferred object', function() {
+				var ret = this.model.bt.testfunc('asdf', function() {});
+				expect(ret instanceof jQuery.Deferred).toBeTruthy();
 			});
 			it('throws error if too many arguments are provided', function() {
 				this.exception = 'arguments do not match any of the function signatures exposed by the client';
-				this.func = _.bind(this.model.bt.testfunc, this, function() {}, 'arg1', function() {}, 'arg3');
+				this.func = _.bind(this.model.bt.testfunc, this, 'arg1', function() {}, 'arg3');
 				expect(this.func).toThrow(this.exception);
 			});
 			it('throws error if arguments are not of the correct type', function() {
 				this.exception = 'arguments do not match any of the function signatures exposed by the client';
-				this.func = _.bind(this.model.bt.testfunc, this, function() {}, 'arg1', 'arg2');
+				this.func = _.bind(this.model.bt.testfunc, this, 'arg1', 'arg2');
 				expect(this.func).toThrow(this.exception);
 			});
 			it('throws error if the function signature exposed by the client contains non recognized types', function() {
 				this.model.updateState('testsession', {'invalidfunc':'[nf](string,invalidtype)'}, null, 'testurl');
 				this.exception = 'there is an invalid type in the function signature exposed by the client';
-				this.func = _.bind(this.model.bt.invalidfunc, this, function() {}, 'arg1', 'arg2');
+				this.func = _.bind(this.model.bt.invalidfunc, this, 'arg1', 'arg2');
 				expect(this.func).toThrow(this.exception);
 			});
 		});
