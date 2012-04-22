@@ -359,15 +359,6 @@
     // Btapp is the root of the client objects' tree, and generally the only object that clients should instantiate.
     // This mirrors the original api where document.btapp was the root of everything. generally, this api attempts to be
     // as similar as possible to that one...
-
-    // BEFORE:
-    // *btapp.torrent.get('XXX').file.get('XXX').properties.get('name');*
-    // AFTER:
-    // *btapp.get('torrent').get('XXX').get('file').get('XXX').get('properties').get('name');*
-
-    // The primary difference is that in the original you got the state at that exact moment, where
-    // we now simply keep the backbone objects up to date (by quick polling and updating as diffs are returned)
-    // so you can query at your leisure.
     Btapp = BtappModel.extend({
         initialize: function() {
             BtappModel.prototype.initialize.apply(this, arguments);
