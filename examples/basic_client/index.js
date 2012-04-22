@@ -42,14 +42,14 @@ window.CreationView = Backbone.View.extend({
 		$(this.el).append('<input type="text" id="torrent_link" />');
 		var add = $('<input type="button" value="add"></input>');
 		add.click(function() {
-			btapp.get('add').bt.torrent(function() {}, $('#torrent_link').val());
+			btapp.get('add').torrent($('#torrent_link').val());
 		});
 		$(this.el).append(add);
 		$(this.el).append('<font style="color:white;">...</font>');
 		var create = $('<input type="button" value="create"></input>');
 		create.click(function() {
-			btapp.bt.browseforfiles(function() {}, function(files) {
-				btapp.bt.create(function() {}, '', _.values(files), function() {});
+			btapp.browseforfiles(function(files) {
+				btapp.create('', _.values(files), function() {});
 			});
 		});
 		$(this.el).append(create);

@@ -4,8 +4,12 @@ window.TorrentView = Backbone.View.extend({
 	
 		var INTERVAL = 2000;
 		
-		this.availability_interval = setInterval(_.bind(this.model.bt.availability, this, this.receive_availability), INTERVAL);
-		this.pieces_interval = setInterval(_.bind(this.model.bt.pieces, this, this.receive_pieces), INTERVAL);
+		this.availability_interval = setInterval(_.bind(function() {
+			this.model.availability().then(this.receive_availability);
+		}, this), INTERVAL);
+		this.pieces_interval = setInterval(_.bind(function() {
+			this.model.pieces().then(this.receive_pieces);
+		}, this), INTERVAL);
 		this.model.bind('destroy', _.bind(function() { 
 			clearInterval(this.availability_interval); 
 			clearInterval(this.pieces_interval); 
