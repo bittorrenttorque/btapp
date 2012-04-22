@@ -135,8 +135,13 @@
 				}, "events", 5000);
 				
 				runs(function() {
+					//unfortunately jQuery.Deferred does not support instance of, so
+					//lets just verify that the most common portions of the interface
+					//exist.
 					var ret = this.btapp.get('events').keys();
-					expect(ret instanceof jQuery.Deferred).toBeTruthy();
+					expect('done' in ret).toBeTruthy();
+					expect('fail' in ret).toBeTruthy();
+					expect('always' in ret).toBeTruthy();
 				});
 			});
 			it('adds a torrent to torque', function() {
