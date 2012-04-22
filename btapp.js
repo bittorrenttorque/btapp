@@ -347,7 +347,7 @@
         },
         save: function(attributes, options) {
             _(attributes).each(function(value, key) {
-                this.bt.set(function() {}, key, value);
+                this.bt.set(key, value);
             }, this);
         }
     });
