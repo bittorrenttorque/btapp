@@ -84,9 +84,7 @@
         // result of that ajax request.
         createFunction: function(session, url, signatures) {
             assert(session, 'cannot create a function without a session id');
-            var func = _.bind(function(cb) {
-                assert(cb, 'return value callback is not optional');
-                assert(typeof cb === 'function', 'the first argument must be a function that receives the return value for the call to the client');
+            var func = _.bind(function() {
                 var path = url + '(';
                 var args = [];
 
@@ -95,7 +93,7 @@
                 // to "splice" by hand. All this just to validate the correct types! sheesh...
                 var native_args = [];
                 var i;
-                for(i = 1; i < arguments.length; i++) native_args.push(arguments[i]);
+                for(i = 0; i < arguments.length; i++) native_args.push(arguments[i]);
                 // This is as close to a static class function as you can get in javascript i guess
                 // we should be able to use verifySignaturesArguments to determine if the client will
                 // consider the arguments that we're passing to be valid
@@ -104,7 +102,7 @@
                 }
 
 
-                for(i = 1; i < arguments.length; i++) {
+                for(i = 0; i < arguments.length; i++) {
                     // We are responsible for converting functions to variable names...
                     // this will be called later via a event with a callback and arguments variables
                     if(typeof arguments[i] === 'function') {
@@ -115,8 +113,16 @@
                 }
                 path += encodeURIComponent(JSON.stringify(args));
                 path += ')/';
-                this.query('function', [path], session, cb, function() {});
+                var ret = new jQuery.Deferred();
+                var success = function(data) {
+                    ret.resolveWith(data);
+                };
+                var error = function(data) {
+                    ret.rejectWith(data);
+                };
+                this.query('function', [path], session, success, error);
                 this.trigger('queries', url);
+                return ret;
             }, this);
             func.valueOf = function() { return signatures; };
             return func;
