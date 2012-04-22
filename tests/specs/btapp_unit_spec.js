@@ -247,10 +247,6 @@
 				this.model.client = new LocalTorrentClient({'btapp':this.model});
 				this.model.updateState('testsession', {'testfunc':'[nf](string,dispatch)'}, null, 'testurl');
 			});
-			it('returns a jquery deferred object', function() {
-				var ret = this.model.bt.testfunc('asdf', function() {});
-				expect(ret instanceof jQuery.Deferred).toBeTruthy();
-			});
 			it('throws error if too many arguments are provided', function() {
 				this.exception = 'arguments do not match any of the function signatures exposed by the client';
 				this.func = _.bind(this.model.bt.testfunc, this, 'arg1', function() {}, 'arg3');

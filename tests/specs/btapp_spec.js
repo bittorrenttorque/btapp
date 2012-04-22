@@ -129,6 +129,16 @@
 					expect(this.btapp.bt.sendtopeer).toBeDefined();
 				});
 			});
+			it('returns a deferred object on function calls', function() {
+				waitsFor(function() {
+					return this.btapp.get('events');
+				}, "events", 5000);
+				
+				runs(function() {
+					var ret = this.btapp.get('events').keys();
+					expect(ret instanceof jQuery.Deferred).toBeTruthy();
+				});
+			});
 			it('adds a torrent to torque', function() {
 				waitsFor(function() {
 					return this.btapp.get('add') && 'torrent' in this.btapp.get('add').bt;

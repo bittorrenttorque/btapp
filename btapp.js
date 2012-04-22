@@ -491,7 +491,7 @@
         // We also don't fire off another poll request until we've finished up here, so we don't overload the client if
         // it is generating a large diff tree. We should generally on get one element in data array. Anything more and
         // the client has wasted energy creating seperate diff trees.
-        onEvents: function(time, session, data) {
+        onEvents: function(session, data) {
             if(this.connected_state) {
                 for(var i = 0; i < data.length; i++) {
                     this.onEvent(session, data[i]);
@@ -501,12 +501,11 @@
         },
         waitForEvents: function(session) {
             if(this.client) {
-                this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
+                this.client.query('update', null, session, _.bind(this.onEvents, this, session), this.onConnectionError);
             }
         }
     });
 
-    //The version of this library should always match the version of torque that it requires.
     Btapp.VERSION = '0.1.0';
     Btapp.QUERIES = {
         ALL: 'btapp/',
@@ -519,6 +518,7 @@
         ],
         REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
+    // These are the various state values that might be set in the object recieved in event callbacks
     Btapp.STATUS = {
         TORRENT: {
             DELETED: -1,
