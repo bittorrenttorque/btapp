@@ -1,0 +1,16 @@
+#creation {
+	background-color: #754106;
+	min-height: 100px;
+	width: 100%;
+	border-radius: 10px;
+}
+#torrents {
+	background-color: pink;
+	border-radius: 10px;
+}
+.started {
+	color: black;
+}
+.stopped {
+	color: red;
+}

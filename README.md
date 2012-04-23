@@ -43,10 +43,12 @@ btapp.connect();
 
 #### Local Machine vs Remote Connection  
 When you call *connect*, by default you're connecting to your local torque client. However, if you provide a username and password, an attempt will be made to connect through BitTorrent's remote proxy. Your client must connect to remote before this option is available to you.
+  
 <div class="run" title="Run"></div>
 ```javascript
 username = prompt("Please enter your name","Harry Potter");  
 password = prompt("Please enter your password","Abracadabra");  
+  
 btapp.connect_remote(  
     function() { },  
 	username,  
@@ -55,6 +57,7 @@ btapp.connect_remote(
 ```
 
 Now that we're connected to the falcon proxy we can connect to your current local machine by executing the following code from any computer in the world!
+
 <div class="run" title="Run"></div>
 ```javascript
 remote_btapp = new Btapp;  
@@ -85,12 +88,13 @@ listen_for_torrents.call(this);
 If this seems a bit messy for you, there is an addition bit of javascript call the [Btapp Listener](#section-4-2 "listener") that you can include that will make these bind add chains much easier to deal with.
 
 ### Adding torrents via urls/magnet links
+Easy-peasy
 <div class="run" title="Run"></div>
 ```javascript
 var url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';  
 btapp.get('add').torrent(function() {}, url);  
-```  
-There are objects bubbled up from the client that are used like namespaces. For instance, the *add* and *dht* objects have no state or attributes associated with them. They simply contain groupings of functions. 
+```
+And by easy-peasy I mean, wtf?!? So, the base object has an attribute called *add*, which is an object that stores all the functionality for adding stuff to the client (torrents, rss_feeds, rss_filters, etc)...because *add* is a torrent client object, the functions are in the *bt* member. the *torrent* function of the *add* member adds a torrent to the client. Phew. 
 
 If you find yourself down a dark alley needing rss feeds, its almost the same to add one of those.
 <div class="run" title="Run"></div>
@@ -120,7 +124,6 @@ btapp.browseforfiles(function () {}, function(files) {
 	});  
 });  
 ```
-
 __Warning__: this will launch a file browser on the machine that the client is running on...so if you're connected via falcon you won't be able to see the dialog pop up (but someone might get an unexpected surprise!)
 
 ### Deleting torrents
@@ -163,7 +166,7 @@ For instance, to list the name of all the files in all torrents you need to writ
 
 <div class="run" title="Run"></div>
 ```javascript
-var TODO = 'TODO';
+var torrents = btapp.get('torrent');  
 ```
 
 ## Examples

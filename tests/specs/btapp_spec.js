@@ -129,13 +129,23 @@
 					expect(this.btapp.bt.sendtopeer).toBeDefined();
 				});
 			});
+			it('returns a deferred object on function calls', function() {
+				waitsFor(function() {
+					return this.btapp.get('events');
+				}, "events", 5000);
+				
+				runs(function() {
+					var ret = this.btapp.get('events').keys();
+					expect(ret instanceof jQuery.Deferred).toBeTruthy();
+				});
+			});
 			it('adds a torrent to torque', function() {
 				waitsFor(function() {
 					return this.btapp.get('add') && 'torrent' in this.btapp.get('add').bt;
 				}, "add", 5000);
 				
 				runs(function() {
-					this.btapp.get('add').bt.torrent(_.bind(function(ret) {}, this), 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent');
+					this.btapp.get('add').bt.torrent('http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent');
 				});
 				
 				waitsFor(function() {
@@ -149,7 +159,7 @@
 				
 				runs(function() {
 					expect(this.btapp.get('torrent'));
-					this.btapp.get('torrent').each(function(torrent) { torrent.bt.remove(function() {}); });
+					this.btapp.get('torrent').each(function(torrent) { torrent.bt.remove(); });
 				});
 				
 				waitsFor(function() {
@@ -174,7 +184,7 @@
 					return this.btapp.get('add') && 'torrent' in this.btapp.get('add').bt;
 				}, 'add', 5000);
 				runs(function() {
-					this.btapp.get('add').bt.torrent(function() { }, 'http://www.clearbits.net/get/59-trusted-computing.torrent');
+					this.btapp.get('add').bt.torrent('http://www.clearbits.net/get/59-trusted-computing.torrent');
 				});
 				waitsFor(function() {
 					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
@@ -185,7 +195,7 @@
 					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
 				}, 'torrent to be detected', 5000);
 				runs(function() {
-					this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4').bt.remove(function() {});
+					this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4').bt.remove();
 				});
 				waitsFor(function() {
 					return !this.btapp.get('torrent') || !this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
@@ -207,7 +217,6 @@
 				
 				runs(function() {
 					this.btapp.bt.browseforfiles(
-						function() {}, 
 						_.bind(function(files) { 
 							this.files = files;
 							expect(_.values(this.files).length).toEqual(1);
@@ -247,7 +256,6 @@
 				
 				runs(function() {
 					this.btapp.bt.browseforfiles(
-						function() {}, 
 						_.bind(function(files) { 
 							this.files = files;
 							expect(_.values(this.files).length).toEqual(1);
@@ -294,7 +302,6 @@
 				
 				runs(function() {
 					this.btapp.bt.browseforfiles(
-						function() {}, 
 						_.bind(function(files) { 
 							this.files = files;
 							expect(_.values(this.files).length).toEqual(1);
@@ -341,7 +348,6 @@
 				
 				runs(function() {
 					this.btapp.bt.browseforfiles(
-						function() {}, 
 						_.bind(function(files) { 
 							this.files = files;
 							expect(_.values(this.files).length).toEqual(1);
@@ -388,7 +394,6 @@
 				
 				runs(function() {
 					this.btapp.bt.browseforfiles(
-						function() {}, 
 						_.bind(function(files) { 
 							this.files = files;
 							expect(_.values(this.files).length).toEqual(1);

@@ -347,7 +347,7 @@
         },
         save: function(attributes, options) {
             _(attributes).each(function(value, key) {
-                this.bt.set(function() {}, key, value);
+                this.bt.set(key, value);
             }, this);
         }
     });
@@ -359,15 +359,6 @@
     // Btapp is the root of the client objects' tree, and generally the only object that clients should instantiate.
     // This mirrors the original api where document.btapp was the root of everything. generally, this api attempts to be
     // as similar as possible to that one...
-
-    // BEFORE:
-    // *btapp.torrent.get('XXX').file.get('XXX').properties.get('name');*
-    // AFTER:
-    // *btapp.get('torrent').get('XXX').get('file').get('XXX').get('properties').get('name');*
-
-    // The primary difference is that in the original you got the state at that exact moment, where
-    // we now simply keep the backbone objects up to date (by quick polling and updating as diffs are returned)
-    // so you can query at your leisure.
     Btapp = BtappModel.extend({
         initialize: function() {
             BtappModel.prototype.initialize.apply(this, arguments);
@@ -379,6 +370,7 @@
 
             //bind stuff
             _.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
+            this.on('add:events', this.setEvents, this);
         },
         destructor: function() {
             // We don't want to destruct the base object even when we can't connect...
@@ -439,6 +431,18 @@
             this.client.bind('all', this.trigger, this);
             this.client.bind('client:connected', this.fetch);       
         },
+        setEvents: function(events) {
+            // For each client event, just set it to trigger an javascript side event
+            // using the same name. This way you can just bind to the base btapp object
+            // instead of understanding the slightly unconventional save mechanics. 
+            _.each(events.toJSON(), function(value, key) {
+                if(key !== 'id') {
+                    var tmp = {};
+                    tmp[key] = _.bind(this.trigger, this, key);
+                    events.save(tmp);
+                }
+            }, this);            
+        },
         disconnect: function() {
             assert(this.client, 'trying to disconnect from an undefined client');
             assert(this.connected_state, 'trying to disconnect when not connected');
@@ -487,7 +491,7 @@
         // We also don't fire off another poll request until we've finished up here, so we don't overload the client if
         // it is generating a large diff tree. We should generally on get one element in data array. Anything more and
         // the client has wasted energy creating seperate diff trees.
-        onEvents: function(time, session, data) {
+        onEvents: function(session, data) {
             if(this.connected_state) {
                 for(var i = 0; i < data.length; i++) {
                     this.onEvent(session, data[i]);
@@ -497,12 +501,11 @@
         },
         waitForEvents: function(session) {
             if(this.client) {
-                this.client.query('update', null, session, _.bind(this.onEvents, this, (new Date()).getTime(), session), this.onConnectionError);
+                this.client.query('update', null, session, _.bind(this.onEvents, this, session), this.onConnectionError);
             }
         }
     });
 
-    //The version of this library should always match the version of torque that it requires.
     Btapp.VERSION = '0.1.0';
     Btapp.QUERIES = {
         ALL: 'btapp/',
@@ -515,4 +518,37 @@
         ],
         REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
+    // These are the various state values that might be set in the object recieved in event callbacks
+    Btapp.STATUS = {
+        TORRENT: {
+            DELETED: -1,
+            DOWNLOAD_FAILED: 0,
+            ADDED: 1,
+            COMPLETE: 2,
+            METADATA_COMPLETE: 3
+        },
+        RSS_FEED: {
+            DELETED: -1,
+            ADDED: 1
+        }
+    };
+    // These are the valid options to pass as the optional argument to torrents' remove function
+    Btapp.REMOVE = {
+        NO_DELETE: 0,
+        DELETE_TORRENT: 1,
+        DELETE_DATA: 2,
+        DELETE_BOTH: 3,
+        DELETE_TO_TRASH: 4,
+        DELETE_CONVERTED_FILES: 5
+    }
+
+    Btapp.TORRENT = {
+        // These are the valid priority levels that you can pass to torrents' set_priority function
+        PRIORITY: {
+            LOW: 0,
+            MEDIUM: 1,
+            HIGH: 2,
+            METADATA_ONLY: 3 //Means that once the metadata has been downloaded, the torrent stops
+        }
+    }
 }).call(this);
