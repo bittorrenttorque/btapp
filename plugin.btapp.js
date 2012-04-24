@@ -250,7 +250,7 @@
             var onload = this.get('pid') + 'onload';
             window[onload] = cb;
             var div = document.createElement('div');            
-            jQuery(div).css({'position':'absolute','left':'-999em'});
+            jQuery(div).css({'position':'absolute','left':'-999em','z-index':-1});
             div.innerHTML =
                 '<object id="' + this.get('pid') + '" type="' + this.get('mime_type') + '" width="0" height="0">' +
                     '<param name="onload" value="' + onload + '" />' +
