@@ -540,7 +540,7 @@
         DELETE_BOTH: 3,
         DELETE_TO_TRASH: 4,
         DELETE_CONVERTED_FILES: 5
-    }
+    };
 
     Btapp.TORRENT = {
         // These are the valid priority levels that you can pass to torrents' set_priority function
@@ -550,5 +550,5 @@
             HIGH: 2,
             METADATA_ONLY: 3 //Means that once the metadata has been downloaded, the torrent stops
         }
-    }
+    };
 }).call(this);
