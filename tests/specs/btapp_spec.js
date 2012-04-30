@@ -105,6 +105,36 @@
 				});
 			});
 		});
+		describe('Btapp session inconsistencies', function() {
+			it('connects, gets state, disconnects, repeatedly', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect();
+					this.remote = false;
+					this.username = 'kalsjdflkjsflkjsflkjslfjslfj';
+					this.password = 'kalsjdflkjsflkjsflkjslfjslfj';
+					this.connected = false;
+
+					this.btapp.bind('remoteStatus', function(status) {
+						debugger;
+					});
+					debugger;
+				});
+				waitsFor(function() {
+					return 'connect_remote' in this.btapp;
+				}, "remote available", 5000);
+
+				runs(function() {
+					debugger;
+					this.btapp.connect_remote(this.username, this.password);
+				});
+
+				waitsFor(function() {
+					return this.connected;
+				}, "connected", 5000);
+			});
+
+		});
 		describe('Btapp Client Function Calls', function() {
 			beforeEach(function() {
 				this.btapp = new Btapp;
