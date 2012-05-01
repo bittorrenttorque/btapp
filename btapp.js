@@ -461,7 +461,7 @@
         onConnectionError: function() {
             this.clearState();
             if(this.client) {
-                this.client.reset();
+                _.delay(_.bind(this.client.reset, this.client), 500);
             }
         },
         onFetch: function(data) {
