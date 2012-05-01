@@ -236,6 +236,24 @@
 					return !this.btapp.get('torrent') || !this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
 				}, 'torrent to be deleted', 5000);
 			});
+			it('adds torrents that cause problems with encoding', function() {
+				var hash = '929AC6FA58F74D40DA23ECAEA53145488679BFAB';
+				var magnet_link = 'magnet:?xt=urn:btih:' + hash + '&tr=udp://tracker.openbittorrent.com:80/announce';
+				waitsFor(function() {
+					return this.btapp.get('add') && this.btapp.get('add').torrent && this.btapp.get('torrent');
+				}, 'add and torrent objects to be detected', 5000);
+				runs(function() {
+					this.btapp.get('add').torrent(magnet_link);
+				});
+				waitsFor(function() {
+					var torrent = this.btapp.get('torrent').get(hash);
+					if(torrent) {
+						var files = torrent.get('file');
+						return files && files.length > 0;
+					}
+					return false;
+				}, 'metadata to resolve', 20000);
+			});
 		});
 		describe('Btapp Interactive Client Function Calls', function() {
 			it('OPERATOR: SELECT ANY FILE', function() {});
