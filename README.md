@@ -1,4 +1,3 @@
-[![Build Status](https://secure.travis-ci.org/pwmckenna/btapp.png?branch=master)](http://travis-ci.org/pwmckenna/btapp)  
 # Btapp.js
 Btapp.js provides access to a browser plugin version of uTorrent/BitTorrent via a tree of [Backbone Models and Collections](http://documentcloud.github.com/backbone/ "backbone"). The intent of this project is to allow access to the extensive functionality of a torrent client, from web apps that are as simple as a single Backbone View. Btapp.js takes responsibility for getting the plugin installed as well, so you're free to assume that its available. In addition to the local torrent client, you can also easily access a torrent client anywhere else in the world (assume you either configured it originally or have access to that client's username/password).
 
@@ -171,6 +170,5 @@ var torrents = btapp.get('torrent');
 ### Gibe
 
 ##Testing
-Btapp.js uses [jasmine](https://github.com/pivotal/jasmine "jasmine") for unit/functional testing. You can run them yourself at: 
-
-[http://pwmckenna.github.com/btapp/tests/SpecRunner.html](http://pwmckenna.github.com/btapp/tests/SpecRunner.html)
+Btapp.js uses [jasmine](https://github.com/pivotal/jasmine "jasmine") for unit/functional testing. You can run them yourself by loading *spec/SpecRunner.html* into your browser.  
+[![Build Status](https://secure.travis-ci.org/pwmckenna/btapp.png?branch=master)](http://travis-ci.org/pwmckenna/btapp)  
