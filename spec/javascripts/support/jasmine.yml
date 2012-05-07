@@ -59,7 +59,7 @@ helpers:
 #   - **/*[sS]pec.js
 #
 spec_files:
-   - **/btapp_unit_spec.js
+  - **/btapp_unit_spec.js
 
 # src_dir
 #
