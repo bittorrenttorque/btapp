@@ -15,6 +15,11 @@ src_files:
    - spec/javascripts/lib/json2.js
    - spec/javascripts/lib/underscore.js
    - spec/javascripts/lib/backbone.js
+   - btapp.js
+   - client.btapp.js
+   - pairing.btapp.js
+   - plugin.btapp.js
+
 # ADD OTHER FILES HERE!
 
 
@@ -54,6 +59,7 @@ helpers:
 #   - **/*[sS]pec.js
 #
 spec_files:
+   - **/btapp_unit_spec.js
 
 # src_dir
 #
@@ -64,6 +70,8 @@ spec_files:
 #
 # src_dir: public
 #
+
+
 src_dir:
 
 # spec_dir
