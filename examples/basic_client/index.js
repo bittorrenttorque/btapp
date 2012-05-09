@@ -59,14 +59,13 @@ window.CreationView = Backbone.View.extend({
 
 jQuery(function() {
 	window.btapp = new Btapp;
-	btapp.connect();
+	btapp.connect({style: 'soshare'});
 	var torrent_views = {};
-	var listener = new BtappListener({'btapp':btapp});
-	listener.bind(Btapp.QUERIES.TORRENTS, function(torrent) {
+	btapp.live('torrent *', function(torrent) {
 		torrent_views[torrent.id] = new TorrentView({'model':torrent});
 		$('#torrents').append(torrent_views[torrent.id].render().el);
 	});
-	listener.bind(Btapp.QUERIES.FILES, function(file) {
+	btapp.live('torrent * file *', function(file) {
 		$('#' + file.get('torrent')).append(new FileView({'model':file}).render().el);
 	});
 	
