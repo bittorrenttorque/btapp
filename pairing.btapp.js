@@ -42,14 +42,14 @@
         return get_domain(port) + '/gui/pingimg';
     }
     
-    function get_iframe_pair_url(port) {
-        return get_domain(port) + '/gui/pair?iframe=' + (encodeURIComponent(window.location.host) || 'local');
-    }
-    
-    function get_dialog_pair_url(port, style) {
-        var url = get_domain(port) + '/gui/pair?name=' + encodeURIComponent(window.location.host);
+    function get_iframe_pair_url(port, style) {
+        var url = get_domain(port) + '/gui/pair?iframe=' + (encodeURIComponent(window.location.host) || 'local');
         if(style) url += '&style=' + style;
         return url;
+    }
+    
+    function get_dialog_pair_url(port) {
+        return get_domain(port) + '/gui/pair?name=' + encodeURIComponent(window.location.host);
     }
 
     function get_version_url(port) {
@@ -92,7 +92,7 @@
             dialog.css('margin-left', '-200px');
 
             var frame = jQuery('<iframe></iframe>');
-            frame.attr('src', get_iframe_pair_url(options.port));
+            frame.attr('src', get_iframe_pair_url(options.port, this.model.get('style')));
             frame.css('padding', '0px');
             frame.css('margin', '0px');
             dialog.append(frame);
@@ -136,7 +136,7 @@
             }, this));
         },
         authorize_basic: function(port) {
-            this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port, this.get('style')), _.bind(function(response) {
+            this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port), _.bind(function(response) {
                 if(!response.allowed || !response.success) {
                     this.authorize_port_error(port);
                 } else {
@@ -164,7 +164,7 @@
         },
         authorize_basic: function(port) {
             jQuery.ajax({
-                url: get_dialog_pair_url(port, this.get('style')),
+                url: get_dialog_pair_url(port),
                 dataType: 'jsonp',
                 success: _.bind(this.authorize_port_success, this, port),
                 error: _.bind(this.authorize_port_error, this, port)
