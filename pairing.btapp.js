@@ -46,8 +46,10 @@
         return get_domain(port) + '/gui/pair?iframe=' + (encodeURIComponent(window.location.host) || 'local');
     }
     
-    function get_dialog_pair_url(port) {
-        return get_domain(port) + '/gui/pair?name=' + encodeURIComponent(window.location.host);
+    function get_dialog_pair_url(port, style) {
+        var url = get_domain(port) + '/gui/pair?name=' + encodeURIComponent(window.location.host);
+        if(style) url += '&style=' + style;
+        return url;
     }
 
     function get_version_url(port) {
@@ -134,7 +136,7 @@
             }, this));
         },
         authorize_basic: function(port) {
-            this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port), _.bind(function(response) {
+            this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port, this.get('style')), _.bind(function(response) {
                 if(!response.allowed || !response.success) {
                     this.authorize_port_error(port);
                 } else {
@@ -162,7 +164,7 @@
         },
         authorize_basic: function(port) {
             jQuery.ajax({
-                url: get_dialog_pair_url(port),
+                url: get_dialog_pair_url(port, this.get('style')),
                 dataType: 'jsonp',
                 success: _.bind(this.authorize_port_success, this, port),
                 error: _.bind(this.authorize_port_error, this, port)
