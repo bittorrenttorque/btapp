@@ -75,6 +75,7 @@
             model.updateState(session, added, removed, childurl);
             if(model.isEmpty()) {
                 ret[v] = model;
+                model.trigger('destroy');
             }
             return ret;
         },
