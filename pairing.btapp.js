@@ -32,12 +32,6 @@
         return 'http://127.0.0.1:' + port;
     }
 
-    function authorized_domain() {
-        return location.host.match(/([^.]+)\.utorrent.com/i) ||
-            location.host.match(/([^.]+)\.bittorrent.com/i) ||
-            location.host.match(/([^.]+)\.getshareapp.com/i);
-    }
-
     function get_ping_img_url(port) {
         return get_domain(port) + '/gui/pingimg';
     }
@@ -224,7 +218,7 @@
             }
         },
         authorize: function(port) {
-            if(authorized_domain() || isMac()) {
+            if(isMac()) {
                 //this will use the old school dialogs which allow bittorrent domains to pair automatically
                 this.authorize_basic(port);
             } else {
