@@ -71,7 +71,7 @@
             dialog.append(paragraph);
 
 
-            var button_url = isMac() ? this.model.get('osx_download_url') : this.model.get('windows_download_url');
+            var button_url = this.model.get('download_url');
             var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
             dialog.append(button);
 
@@ -115,6 +115,8 @@
                 //Everyone else can piggy back on the torque plugin
                 this.set(this.torque_props);
             }
+            var download_url = isMac() ? this.get('osx_download_url') : this.get('windows_download_url');
+            this.set('download_url', download_url);
             //when we load jquery, we should defer a call to mime_type_check
             jQuery(_.bind(_.defer, this, this.mime_type_check));
         },
