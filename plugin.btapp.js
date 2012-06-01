@@ -136,9 +136,7 @@
         mime_type_check_no: function() {
             var switches = {'install':false};
             this.trigger('plugin:install_plugin', switches);
-            if(switches.install) {
-                when(this.supports_mime_type, this.mime_type_check_yes);
-            }
+            when(this.supports_mime_type, this.mime_type_check_yes);
         },
         mime_type_check_yes: function() {
             this.trigger('plugin:plugin_installed');
