@@ -371,7 +371,7 @@
             }, this));
 
             this.pairing.on('pairing:stop', this.delayed_reset, this);
-            this.plugin_manager.on('plugin:plugin_running', this.reset, this);
+            this.plugin_manager.on('plugin:client_running', this.reset, this);
         },
         // Before we actual start making requests against a client, we need to make sure
         // we have a valid pairing key. This might be redundant if we just got one from the
