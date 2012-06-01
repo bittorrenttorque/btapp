@@ -268,9 +268,7 @@
         // ---------------------------
         // Lets ask the plugin if the specific client is running.
         client_running: function() {
-            var clients = this.get_plugin().isRunning(this.get('product') + this.get('window_hash'));
-            var running = clients && clients.length > 0;
-            return running;
+            return this.get_plugin().isRunning(this.get('product') + this.get('window_hash'));
         },
         client_installed: function() {
             var version = this.get_plugin().getInstallVersion(this.get('product'));
