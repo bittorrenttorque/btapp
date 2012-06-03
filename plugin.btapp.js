@@ -272,7 +272,7 @@
         // ---------------------------
         // Lets ask the plugin if the specific client is running.
         client_running: function() {
-            var ret = this.get_plugin().isRunning(this.get('product') + this.get('window_hash'));
+            var ret = this.get_plugin().isRunning(this.get('product'));
             if(typeof ret === 'object') {
                 return ret && ret.length > 0;
             } else {
