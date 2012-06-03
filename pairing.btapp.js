@@ -70,8 +70,8 @@
         authorize_iframe: function(options) {
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS('//torque.bittorrent.com/facebox/src/facebox.css');
-                jQuery.getScript('//torque.bittorrent.com/facebox/src/facebox.js', _.bind(this.authorize_iframe, this, options));
+                getCSS('http://torque.bittorrent.com/facebox/src/facebox.css');
+                jQuery.getScript('http://torque.bittorrent.com/facebox/src/facebox.js', _.bind(this.authorize_iframe, this, options));
                 return;
             }
 
