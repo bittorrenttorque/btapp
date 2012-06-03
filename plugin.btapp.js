@@ -211,6 +211,10 @@
         // Plugin Specific Functionality
         // ---------------------------
         supports_mime_type: function() {
+            if(window.location.protocol === 'chrome-extension:') {
+                //if we're in a chrome extension, assume we have the mime type available
+                return true;
+            }
             var isIE  = (navigator.appVersion.indexOf('MSIE') != -1) ? true : false;
             if(isIE) {
                 try {
