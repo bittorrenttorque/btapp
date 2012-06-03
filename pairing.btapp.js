@@ -218,7 +218,7 @@
             }
         },
         authorize: function(port) {
-            if(isMac()) {
+            if(this.get('pairing_type') === 'native' || isMac()) {
                 //this will use the old school dialogs which allow bittorrent domains to pair automatically
                 this.authorize_basic(port);
             } else {
