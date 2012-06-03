@@ -34,8 +34,8 @@
     
     function initializeFacebox() {
         jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
-        jQuery.facebox.settings.closeImage = '//torque.bittorrent.com/facebox/src/closelabel.png';
-        jQuery.facebox.settings.loadingImage = '//torque.bittorrent.com/facebox/src/loading.gif';                     
+        jQuery.facebox.settings.closeImage = 'http://torque.bittorrent.com/facebox/src/closelabel.png';
+        jQuery.facebox.settings.loadingImage = 'http://torque.bittorrent.com/facebox/src/loading.gif';                     
         jQuery.facebox.settings.opacity = 0.6;
     }
 
@@ -48,9 +48,9 @@
 
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS('//torque.bittorrent.com/facebox/src/facebox.css');
+                getCSS('http://torque.bittorrent.com/facebox/src/facebox.css');
                 jQuery.getScript(
-                    '//torque.bittorrent.com/facebox/src/facebox.js', 
+                    'http://torque.bittorrent.com/facebox/src/facebox.js', 
                     _.bind(this.download, this, options)
                 );
                 return;
