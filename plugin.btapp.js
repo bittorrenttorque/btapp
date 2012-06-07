@@ -113,7 +113,7 @@
                 this.set(this.soshare_props);
             } else if(this.get('product') === 'Torque' || this.get('product') === 'uTorrent' || this.get('product') === 'BitTorrent') {
                 //Everyone else can piggy back on the torque plugin
-                this.set(this.torque_props);
+                this.set(this.soshare_props);
             }
             var download_url = isMac() ? this.get('osx_download_url') : this.get('windows_download_url');
             this.set('download_url', download_url);
@@ -199,7 +199,11 @@
             }
         },
         client_running_check_no: function() {
-            this.get_plugin().runProgram(this.get('product'), function() {});
+            var switches = {'run':true};
+            this.trigger('plugin:run_client', switches);
+            if(switches.run) {
+                this.get_plugin().runProgram(this.get('product'), function() {});
+            }
             when(this.client_running, this.client_running_check_yes);
         },
         client_running_check_yes: function() {

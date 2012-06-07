@@ -341,6 +341,7 @@
             new PairingView({'model': this.pairing});
             this.pairing.on('all', this.trigger, this);
 
+            assert(this.has('product'), 'client does not know what product to connect to');
             var product = this.get('product');
             this.pairing.on('pairing:found', function(options) {
                 if(options && options.name === product) {
