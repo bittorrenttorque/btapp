@@ -109,17 +109,16 @@
             //set the function in the bt object...this is where we store just our rpc client functions
             assert(!(v in this.bt), 'trying to add a function that already exists');
             this.bt[v] = func;
-            this.trigger('add:bt:' + v);
-            this.trigger('add:bt', this.bt[v], v);
 
             //also set it on the object directly...this ends up being how people expect to use the objects
-            if(v === 'set' || v === 'unset') {
-                return {};
+            if(v !== 'set' && v !== 'unset') {
+                assert(!(v in this), 'trying to add the function "' + v + '", which already exists in the prototype of this object');
+                this[v] = func;
+                this.trigger('add:' + v);
             }
 
-            assert(!(v in this), 'trying to add the function "' + v + '", which already exists in the prototype of this object');
-            this[v] = func;
-            this.trigger('add:' + v);
+            this.trigger('add:bt:' + v);
+            this.trigger('add:bt', this.bt[v], v);
 
             return {};
         },
