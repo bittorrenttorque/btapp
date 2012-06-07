@@ -115,10 +115,10 @@
                 path += ')/';
                 var ret = new jQuery.Deferred();
                 var success = function(data) {
-                    ret.resolveWith(data);
+                    ret.resolve(data);
                 };
                 var error = function(data) {
-                    ret.rejectWith(data);
+                    ret.reject(data);
                 };
                 this.query('function', [path], session, success, error);
                 this.trigger('queries', url);
