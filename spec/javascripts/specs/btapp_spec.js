@@ -135,6 +135,36 @@
 			});
 
 		});
+		describe('Persistent Client Btapp Data', function() {
+			it('has a persistent stash', function() {
+				runs(function() {
+					this.works = false;
+					this.btapp = new Btapp;
+					this.btapp.connect({pairing_type: 'native', queries: ['btapp/stash/']});
+
+					this.btapp.on('add:stash', function(stash) {
+						this.btapp.off('add:stash');
+						stash.bt.set('testkey', 'testvalue');
+						this.btapp.disconnect();
+						this.btapp.connect();
+
+						this.btapp.on('add:stash', function(stash) {
+							if(stash.get('testkey')) {
+								this.success = (stash.get('testkey') === 'testvalue');
+							} else {
+								stash.on('add:testkey', function() {
+									this.success = (stash.get('testkey') === 'testvalue');
+								}, this);
+							}
+						}, this);
+					}, this);
+				});
+				
+				waitsFor(function() {
+					return this.success;
+				}, 15000);
+			});
+		});
 		describe('Btapp Client Function Calls', function() {
 			beforeEach(function() {
 				this.btapp = new Btapp;

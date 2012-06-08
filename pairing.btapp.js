@@ -65,6 +65,7 @@
 
     PairingView = Backbone.View.extend({
         initialize: function() {
+            assert(this.model.get('pairing_type') !== 'native');
             this.model.on('pairing:authorize', this.authorize_iframe, this);
         },
         authorize_iframe: function(options) {
@@ -167,6 +168,9 @@
     };
 
     Pairing = Backbone.Model.extend({
+        defaults: {
+            pairing_type: 'iframe'
+        },
         initialize: function() {
             _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success', 'authorize_port_callback');
             if(this.get('plugin_manager')) {
