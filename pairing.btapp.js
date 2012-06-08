@@ -7,9 +7,6 @@
 
     var MAX_PORT = 11000;
     
-    var protocol = (window.location.protocol === 'file:') ?
-            'http:' : window.location.protocol;
-    
     function assert(b, err) { if(!b) throw err; }
 
     function getCSS(url) {

@@ -7,9 +7,6 @@
 
     function assert(b, err) { if(!b) throw err; }
 
-    var protocol = (window.location.protocol === 'file:') ?
-            'http:' : window.location.protocol;
-
     function isMac() {
         return navigator.userAgent.match(/Macintosh/) != undefined;
     }
@@ -38,9 +35,9 @@
     function initializeFacebox() {
         jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
         jQuery.facebox.settings.closeImage = 
-            protocol + '//torque.bittorrent.com/facebox/src/closelabel.png';
+            'https://torque.bittorrent.com/facebox/src/closelabel.png';
         jQuery.facebox.settings.loadingImage = 
-            protocol + '//torque.bittorrent.com/facebox/src/loading.gif';                     
+            'https://torque.bittorrent.com/facebox/src/loading.gif';                     
         jQuery.facebox.settings.opacity = 0.6;
     }
 
@@ -53,9 +50,9 @@
 
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS(protocol + '//torque.bittorrent.com/facebox/src/facebox.css');
+                getCSS('https://torque.bittorrent.com/facebox/src/facebox.css');
                 jQuery.getScript(
-                    protocol + '//torque.bittorrent.com/facebox/src/facebox.js', 
+                    'https://torque.bittorrent.com/facebox/src/facebox.js', 
                     _.bind(this.download, this, options)
                 );
                 return;
@@ -95,14 +92,14 @@
         soshare_props: {
             mime_type: 'application/x-gyre-soshare',
             activex_progid: 'gyre.soshare',
-            windows_download_url: protocol + '//torque.bittorrent.com/SoShare.msi',
-            osx_download_url: protocol + '//torque.bittorrent.com/SoShare.pkg'
+            windows_download_url: 'https://torque.bittorrent.com/SoShare.msi',
+            osx_download_url: 'https://torque.bittorrent.com/SoShare.pkg'
         },
         torque_props: {
             mime_type: 'application/x-bittorrent-torque',
             activex_progid: 'gyre.torque',
-            windows_download_url: protocol + '//torque.bittorrent.com/Torque.msi',
-            osx_download_url: protocol + '//torque.bittorrent.com/Torque.pkg'
+            windows_download_url: 'https://torque.bittorrent.com/Torque.msi',
+            osx_download_url: 'https://torque.bittorrent.com/Torque.pkg'
         },
         defaults: {
             //Avoid DOM collisions by having a ridiculous id.

@@ -24,9 +24,6 @@
 (function() {
     function assert(b, err) { if(!b) throw err; }
 
-    var protocol = (window.location.protocol === 'file:') ?
-        'http:' : window.location.protocol;
-
     //we will sadly need to fiddle with some globals for falcon one offs.
     root = this; 
 
