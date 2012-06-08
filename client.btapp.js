@@ -22,8 +22,10 @@
 // timeouts...this can lead to some less than desirable code :(
 
 (function() {
-
     function assert(b, err) { if(!b) throw err; }
+
+    var protocol = (window.location.protocol === 'file:') ?
+        'http:' : window.location.protocol;
 
     //we will sadly need to fiddle with some globals for falcon one offs.
     root = this; 
@@ -295,7 +297,7 @@
             //if we don't have what we need, fetch it and try again
             if(typeof PluginManager === 'undefined') {
                 jQuery.getScript(
-                    '//torque.bittorrent.com/btapp/plugin.btapp.js',
+                    protocol + '//torque.bittorrent.com/btapp/plugin.btapp.js',
                     _.bind(this.initialize_objects, this, attributes)
                 );
                 return;
@@ -304,7 +306,7 @@
             //if we don't have what we need, fetch it and try again
             if(typeof Pairing === 'undefined') {
                 jQuery.getScript(
-                    '//torque.bittorrent.com/btapp/pairing.btapp.js',
+                    protocol + '//torque.bittorrent.com/btapp/pairing.btapp.js',
                     _.bind(this.initialize_objects, this, attributes)
                 );
                 return;
@@ -313,7 +315,7 @@
             //if we don't have what we need, fetch it and try again
             if(typeof jQuery.jStorage === 'undefined') {
                 jQuery.getScript(
-                    '//torque.bittorrent.com/jStorage/jstorage.min.js',
+                    protocol + '//torque.bittorrent.com/jStorage/jstorage.min.js',
                     _.bind(this.initialize_objects, this, attributes)
                 );
                 return;

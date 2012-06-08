@@ -6,7 +6,10 @@
 (function() {
 
     var MAX_PORT = 11000;
-
+    
+    var protocol = (window.location.protocol === 'file:') ?
+            'http:' : window.location.protocol;
+    
     function assert(b, err) { if(!b) throw err; }
 
     function getCSS(url) {
@@ -19,8 +22,10 @@
     
     function initializeFacebox() {
         jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
-        jQuery.facebox.settings.closeImage = '//torque.bittorrent.com/facebox/src/closelabel.png';
-        jQuery.facebox.settings.loadingImage = '//torque.bittorrent.com/facebox/src/loading.gif';                     
+        jQuery.facebox.settings.closeImage = 
+            protocol + '//torque.bittorrent.com/facebox/src/closelabel.png';
+        jQuery.facebox.settings.loadingImage = 
+            protocol + '//torque.bittorrent.com/facebox/src/loading.gif';                     
         jQuery.facebox.settings.opacity = 0.6;
     }
 
@@ -71,8 +76,8 @@
         authorize_iframe: function(options) {
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
-                getCSS('http://torque.bittorrent.com/facebox/src/facebox.css');
-                jQuery.getScript('http://torque.bittorrent.com/facebox/src/facebox.js', _.bind(this.authorize_iframe, this, options));
+                getCSS(protocol + '//torque.bittorrent.com/facebox/src/facebox.css');
+                jQuery.getScript(protocol + '//torque.bittorrent.com/facebox/src/facebox.js', _.bind(this.authorize_iframe, this, options));
                 return;
             }
 

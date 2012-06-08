@@ -22,6 +22,9 @@
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
     function assert(b, err) { if(!b) { debugger; throw err; } }
+    
+    var protocol = (window.location.protocol === 'file:') ?
+        'http:' : window.location.protocol;
 
     // BtappBase
     // -------------
@@ -413,7 +416,7 @@
             // come along for the ride.
             if(typeof TorrentClient === 'undefined') {
                 jQuery.getScript(
-                    '//torque.bittorrent.com/btapp/client.btapp.js',
+                    protocol + '//torque.bittorrent.com/btapp/client.btapp.js',
                     _.bind(this.setClient, this, attributes)
                 );
             } else {
