@@ -413,7 +413,7 @@
             // come along for the ride.
             if(typeof TorrentClient === 'undefined') {
                 jQuery.getScript(
-                    protocol + '//torque.bittorrent.com/btapp/client.btapp.js',
+                    'https://torque.bittorrent.com/btapp/client.btapp.js',
                     _.bind(this.setClient, this, attributes)
                 );
             } else {

@@ -294,7 +294,7 @@
             //if we don't have what we need, fetch it and try again
             if(typeof PluginManager === 'undefined') {
                 jQuery.getScript(
-                    protocol + '//torque.bittorrent.com/btapp/plugin.btapp.js',
+                    'https://torque.bittorrent.com/btapp/plugin.btapp.js',
                     _.bind(this.initialize_objects, this, attributes)
                 );
                 return;
@@ -303,7 +303,7 @@
             //if we don't have what we need, fetch it and try again
             if(typeof Pairing === 'undefined') {
                 jQuery.getScript(
-                    protocol + '//torque.bittorrent.com/btapp/pairing.btapp.js',
+                    'https://torque.bittorrent.com/btapp/pairing.btapp.js',
                     _.bind(this.initialize_objects, this, attributes)
                 );
                 return;
@@ -312,7 +312,7 @@
             //if we don't have what we need, fetch it and try again
             if(typeof jQuery.jStorage === 'undefined') {
                 jQuery.getScript(
-                    protocol + '//torque.bittorrent.com/jStorage/jstorage.min.js',
+                    'https://torque.bittorrent.com/jStorage/jstorage.min.js',
                     _.bind(this.initialize_objects, this, attributes)
                 );
                 return;
