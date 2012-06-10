@@ -137,6 +137,7 @@
             args['type'] = type;
             if(queries) args['queries'] = JSON.stringify(queries);
             if(session) args['session'] = session;
+            args['hostname'] = window.location.hostname;
             var success_callback = _.bind(function(data) {
                 if (data == 'invalid request') {
                     setTimeout(_.bind(this.reset, this), 1000);
