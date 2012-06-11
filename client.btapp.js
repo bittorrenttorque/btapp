@@ -389,7 +389,7 @@
             };
             // Handle the case of an invalid pairing key. Flush it out and start over.
             var err = function() {
-                jQuery.jStorage.flush();
+                jQuery.jStorage.deleteKey('pairing_key');
                 this.reset();
             };
         
