@@ -4,6 +4,7 @@
 // http://pwmckenna.github.com/btapp
 
 (function() {
+    var LATEST_PLUGIN_VERSION = '4.3.5';
 
     function assert(b, err) { if(!b) throw err; }
 
@@ -44,47 +45,73 @@
     PluginManagerView = Backbone.View.extend({
         initialize: function(options) {
             this.model.on('plugin:install_plugin', this.download, this);
+            this.model.on('plugin:plugin_updated', this.restart, this);
         },
-        download: function(options) {
-            options.install = true;
-
+        setup: function(callback, context) {
             //make sure that we've loaded what we need to display
             if(typeof jQuery.facebox === 'undefined') {
                 getCSS('https://torque.bittorrent.com/facebox/src/facebox.css');
                 jQuery.getScript(
                     'https://torque.bittorrent.com/facebox/src/facebox.js', 
-                    _.bind(this.download, this, options)
+                    _.bind(this.setup, this, callback, context)
                 );
                 return;
             }
 
             initializeFacebox();
+            callback.call(context);
+        },
+        restart: function(options) {
+            options.abort = true;
 
-            var dialog = jQuery('<div></div>');
-            dialog.attr('id', 'plugin_download');
-            dialog.css('position', 'absolute');
-            dialog.css('height', '200px');
-            dialog.css('width', '400px');
-            dialog.css('left', '%50');
-            dialog.css('margin-left', '-200px');
+            this.setup(function() {
+                var dialog = jQuery('<div></div>');
+                dialog.attr('id', 'plugin_download');
+                dialog.css('position', 'absolute');
+                dialog.css('height', '200px');
+                dialog.css('width', '400px');
+                dialog.css('left', '%50');
+                dialog.css('margin-left', '-200px');
 
-            var paragraph = jQuery('<p></p>');
-            paragraph.text('This site requires the ' + this.model.get('product') + ' plugin.');
-            dialog.append(paragraph);
+                var paragraph = jQuery('<p></p>');
+                paragraph.text('The ' + this.model.get('product') + ' plugin needs to complete an update. Please restart your browser.');
+                dialog.append(paragraph);
+
+                dialog.hide();
+                jQuery('body').append(dialog);
+                jQuery.facebox({ div: '#plugin_download' });
+            }, this);
+        },
+        download: function(options) {
+            options.install = true;
+
+            this.setup(function() {
+                var dialog = jQuery('<div></div>');
+                dialog.attr('id', 'plugin_download');
+                dialog.css('position', 'absolute');
+                dialog.css('height', '200px');
+                dialog.css('width', '400px');
+                dialog.css('left', '%50');
+                dialog.css('margin-left', '-200px');
+
+                var paragraph = jQuery('<p></p>');
+                paragraph.text('This site requires the ' + this.model.get('product') + ' plugin.');
+                dialog.append(paragraph);
 
 
-            var button_url = this.model.get('download_url');
-            var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
-            dialog.append(button);
+                var button_url = this.model.get('download_url');
+                var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
+                dialog.append(button);
 
-            this.model.on('plugin:plugin_installed', function() {
-                jQuery(document).trigger('close.facebox');
-                jQuery('#plugin_download').remove();
-            });
+                this.model.on('plugin:plugin_installed', function() {
+                    jQuery(document).trigger('close.facebox');
+                    jQuery('#plugin_download').remove();
+                });
 
-            dialog.hide();
-            jQuery('body').append(dialog);
-            jQuery.facebox({ div: '#plugin_download' });
+                dialog.hide();
+                jQuery('body').append(dialog);
+                jQuery.facebox({ div: '#plugin_download' });
+            }, this);
         }
     });
 
@@ -159,10 +186,19 @@
             this.client_installed_check();
         },
         plugin_up_to_date_no: function() {
-            var switches = {'update':true};
-            this.trigger('plugin:update_plugin', switches);
-            if(switches.update) {
-                when(this.plugin_up_to_date, this.plugin_up_to_date_yes);
+            var updateoptions = {'update':true};
+            this.trigger('plugin:update_plugin', updateoptions);
+            if(updateoptions.update) {
+                this.get_plugin().checkForUpdate(_.bind(function(func, success, errorcode) {
+                    var updatedoptions = {
+                        abort: false, 
+                        success: success
+                    };
+                    this.trigger('plugin:plugin_updated', updatedoptions);
+                    if(!updatedoptions.abort) {
+                        this.client_installed_check();
+                    }
+                }, this));
             } else {
                 this.plugin_up_to_date_yes();
             }
@@ -241,7 +277,8 @@
             }
         },
         plugin_up_to_date: function() {
-            return true;
+            var version = this.get_plugin().version;
+            return LATEST_PLUGIN_VERSION === version;
         },
         get_plugin: function() {
             var ret = document.getElementById(this.get('pid'));
