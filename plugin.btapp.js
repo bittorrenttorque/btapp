@@ -314,8 +314,15 @@
         // Client Specific Functionality
         // ---------------------------
         // Lets ask the plugin if the specific client is running.
+        get_window_name: function(product) {
+            if (product == 'uTorrent') {
+                return 'Torrent4823';
+            } else {
+                return product;
+            }
+        },
         client_running: function() {
-            var ret = this.get_plugin().isRunning(this.get('product'));
+            var ret = this.get_plugin().isRunning(this.get_window_name(this.get('product')));
             if(typeof ret === 'object') {
                 return ret && ret.length > 0;
             } else {
