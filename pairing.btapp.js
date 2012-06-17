@@ -57,7 +57,7 @@
         },
         authorize_iframe: function(options) {
             //make sure that we've loaded what we need to display
-            if(typeof jQuery.facebox === 'undefined') {
+            if(typeof jQuery.fn.modal === 'undefined') {
                 getCSS('https://torque.bittorrent.com/pairing/stylesheets/bootstrap.min.css');
                 jQuery.getScript('https://torque.bittorrent.com/pairing/javascripts/bootstrap-modal.js', _.bind(this.authorize_iframe, this, options));
                 return;
