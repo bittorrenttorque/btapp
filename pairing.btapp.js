@@ -58,12 +58,13 @@
         authorize_iframe: function(options) {
             //make sure that we've loaded what we need to display
             if(typeof jQuery.fn.modal === 'undefined') {
-                getCSS('https://torque.bittorrent.com/pairing/stylesheets/bootstrap.min.css');
+                getCSS('https://torque.bittorrent.com/pairing/stylesheets/bootstrap-modal.css');
                 jQuery.getScript('https://torque.bittorrent.com/pairing/javascripts/bootstrap-modal.js', _.bind(this.authorize_iframe, this, options));
                 return;
             }
 
-            var src = 'https://torque.bittorrent.com/pairing/index.html'
+            var domain = 'https://torque.bittorrent.com';
+            var src = domain + '/pairing/index.html'
                         + '?product=' + this.model.get('product')
                         + '&mime=' + this.model.get('plugin_manager').get('mime_type')
                         + '&name=' + document.title 
@@ -83,11 +84,10 @@
                 backdrop: 'static',
                 keyboard: false
             });
-            
+
             jQuery(window).on('message', function(data) {
-                debugger;
                 //we only want to listen for events that came from us
-                if(data.originalEvent.origin === get_domain(options.port)) {
+                if(data.originalEvent.origin === domain) {
                     options.callback(options.port, data);
                     modal.modal('hide');
                 }
