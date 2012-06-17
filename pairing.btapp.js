@@ -63,13 +63,19 @@
                 return;
             }
 
+            var src = 'https://torque.bittorrent.com/pairing/index.html'
+                        + '?product=' + this.model.get('product')
+                        + '&mime=' + this.model.get('plugin_manager').get('mime_type')
+                        + '&name=' + document.title 
+                        + '&permissions=download,create,remote';
+
             var modal = $(' <div class="modal hide" id="permission_container">\
                                 <div class="modal-header"></div>\
                                 <iframe\
                                     style="width: 100%; height: auto;"\
                                     id="permission"\
                                     frameborder=0\
-                                    src="index.html?product=' + this.model.get('product') + '&mime=' + this.model.get('plugin_manager').get('mime_type') + '&name=' + document.title + '&permissions=download,create,remote"></iframe>\
+                                    src="' + src + '"></iframe>\
                                 <div class="modal-footer"></div>\
                             </div>'
             );
@@ -77,7 +83,7 @@
                 backdrop: 'static',
                 keyboard: false
             });
-
+            
             jQuery(window).on('message', function(data) {
                 debugger;
                 //we only want to listen for events that came from us
