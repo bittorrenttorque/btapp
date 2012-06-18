@@ -53,7 +53,6 @@
     PairingView = Backbone.View.extend({
         initialize: function() {
             assert(this.model.get('pairing_type') !== 'native');
-            assert(this.model.get('plugin_manager').get_plugin());
             this.model.on('pairing:authorize', this.authorize_iframe, this);
         },
         authorize_iframe: function(options) {
