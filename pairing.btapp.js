@@ -215,6 +215,7 @@
                 this.authorize_basic(port);
             } else {
                 //if we have the plugin we should check if we're a privileged domain
+                debugger;
                 var pairing_key = this.get('plugin_manager').get_plugin().pair(this.get('product'));
                 if(pairing_key.length === 40) {
                     this.authorize_port_success(port, pairing_key);
