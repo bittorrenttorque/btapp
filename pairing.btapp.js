@@ -53,6 +53,7 @@
     PairingView = Backbone.View.extend({
         initialize: function() {
             assert(this.model.get('pairing_type') !== 'native');
+            assert(this.model.get('plugin_manager').get_plugin());
             this.model.on('pairing:authorize', this.authorize_iframe, this);
         },
         authorize_iframe: function(options) {
@@ -214,11 +215,17 @@
                 //this will use the old school dialogs which allow bittorrent domains to pair automatically
                 this.authorize_basic(port);
             } else {
-                //let someone build a view to do something with this info
-                this.trigger('pairing:authorize', {
-                    'port': port,
-                    'callback': this.authorize_port_callback
-                });
+                //if we have the plugin we should check if we're a privileged domain
+                var pairing_key = this.get('plugin_manager').get_plugin().pair(this.get('product'));
+                if(pairing_key.length === 40) {
+                    this.authorize_port_success(port, pairing_key);
+                } else {
+                    //let someone build a view to do something with this info
+                    this.trigger('pairing:authorize', {
+                        'port': port,
+                        'callback': this.authorize_port_callback
+                    });
+                }
             }
         },
         authorize_port_success: function(port, key) {
