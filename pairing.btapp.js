@@ -53,6 +53,7 @@
     PairingView = Backbone.View.extend({
         initialize: function() {
             assert(this.model.get('pairing_type') !== 'native');
+            assert(this.model.get('plugin_manager').get_plugin());
             this.model.on('pairing:authorize', this.authorize_iframe, this);
         },
         authorize_iframe: function(options) {
@@ -70,8 +71,7 @@
                         + '&name=' + document.title 
                         + '&permissions=download,create,remote';
 
-            var modal_container = $('<div class="bt_modal"></div>');
-            var modal = $(' <div class="modal hide" id="permission_container">\
+            var modal = $(' <div class="bt_modal modal hide" id="permission_container">\
                                 <div class="modal-header"></div>\
                                 <iframe\
                                     style="width: 100%; height: auto;"\
@@ -81,7 +81,6 @@
                                 <div class="modal-footer"></div>\
                             </div>'
             );
-            modal_container.append(modal);
             modal.modal({
                 backdrop: 'static',
                 keyboard: false
