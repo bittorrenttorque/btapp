@@ -71,7 +71,7 @@
                         + '&name=' + document.title 
                         + '&permissions=download,create,remote';
 
-            var modal = $(' <div class="modal hide" id="permission_container">\
+            var modal = $(' <div class="bt_modal"><div class="modal hide" id="permission_container">\
                                 <div class="modal-header"></div>\
                                 <iframe\
                                     style="width: 100%; height: auto;"\
@@ -79,7 +79,7 @@
                                     frameborder=0\
                                     src="' + src + '"></iframe>\
                                 <div class="modal-footer"></div>\
-                            </div>'
+                            </div></div>'
             );
             modal.modal({
                 backdrop: 'static',
