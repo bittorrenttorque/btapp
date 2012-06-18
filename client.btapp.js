@@ -348,6 +348,7 @@
             this.pairing.on('pairing:found', function(options) {
                 if(options && options.name === product) {
                     var key = jQuery.jStorage.get('pairing_key');
+                    debugger;
                     if(key) {
                         // Let whoever triggered the pairing:found event know that they don't need
                         // to continue scanning, nor do they need to handle aquiring a pairing key
@@ -383,6 +384,7 @@
         connect_to_authenticated_port: function(port, key) {
             // Called if the pairing key is good to go. Tell whoever is listening that we're
             // ready to roll.
+            debugger;
             var cb = function() {
                 this.url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
                 this.trigger('client:connected');
@@ -413,26 +415,46 @@
             // same port when it is relaunched.
             this.pairing.scan();
         },
+        use_plugin_for_ajax: function() {
+            return false;
+            if (this.get('plugin_ajax') !== undefined) {
+                return this.get('plugin_ajax');
+            }
+            return window.location.protocol == 'https:'; // default don't use plugin if non-ssl
+        },
+        ajax: function(opts) {
+            if (this.use_plugin_for_ajax()) {
+                function on_plugin_ajax_response(response) {
+                    debugger;
+                    var obj;
+                    if(!response.allowed || !response.success) {
+                        opts.error(response);
+                        return;
+                    }
+                    try {
+                        obj = JSON.parse(response.data);
+                    } catch(e) {
+                        opts.error('parsererror');
+                        return;
+                    }
+                    opts.success(obj);
+                }
+                this.plugin_manager.get_plugin().ajax(opts.url, on_plugin_ajax_response);
+            } else {
+                return jQuery.ajax( opts );
+            }
+        },
         send_query: function(args, cb, err) {
             var url = this.url;
             _.each(args, function(value, key) {
                 url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
             });
-            this.plugin_manager.get_plugin().ajax(url, function(response) {
-                var obj;
-                if(!response.allowed || !response.success) {
-                    err(response);
-                    return;
-                }
 
-                try {
-                    obj = JSON.parse(response.data);
-                } catch(e) {
-                    err('parsererror');
-                    return;
-                }
-                cb(obj);
-            });
+            this.ajax( { url: url,
+                         dataType: 'jsonp',
+                         error: err,
+                         success: cb
+                       } );
         }
     }); 
 }).call(this);
