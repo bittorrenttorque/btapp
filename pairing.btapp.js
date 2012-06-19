@@ -17,6 +17,15 @@
         }).appendTo('head');
     }
     
+    function initializeFacebox() {
+        jQuery.facebox.settings.overlay = true; // to disable click outside overlay to disable it
+        jQuery.facebox.settings.closeImage = 
+            'https://torque.bittorrent.com/facebox/src/closelabel.png';
+        jQuery.facebox.settings.loadingImage = 
+            'https://torque.bittorrent.com/facebox/src/loading.gif';                     
+        jQuery.facebox.settings.opacity = 0.6;
+    }
+
     function isMac() {
         return navigator.userAgent.match(/Macintosh/) != undefined;
     }
@@ -57,41 +66,46 @@
         },
         authorize_iframe: function(options) {
             //make sure that we've loaded what we need to display
-            if(typeof jQuery.fn.modal === 'undefined') {
-                getCSS('https://torque.bittorrent.com/pairing/stylesheets/bootstrap-modal.css');
-                jQuery.getScript('https://torque.bittorrent.com/pairing/javascripts/bootstrap-modal.js', _.bind(this.authorize_iframe, this, options));
+            if(typeof jQuery.facebox === 'undefined') {
+                getCSS('https://torque.bittorrent.com/facebox/src/facebox.css');
+                jQuery.getScript('https://torque.bittorrent.com/facebox/src/facebox.js', _.bind(this.authorize_iframe, this, options));
                 return;
             }
 
+            initializeFacebox();
+
+            var dialog = jQuery('<div></div>');
+            dialog.attr('id', 'pairing');
+            dialog.css('position', 'absolute');
+            dialog.css('height', '200px');
+            dialog.css('width', '400px');
+            dialog.css('left', '%50');
+            dialog.css('margin-left', '-200px');
+
+            var frame = jQuery('<iframe></iframe>');
             var domain = 'https://torque.bittorrent.com';
             var src = domain + '/pairing/index.html'
                         + '?product=' + this.model.get('product')
                         + '&mime=' + this.model.get('plugin_manager').get('mime_type')
                         + '&name=' + document.title 
                         + '&permissions=download,create,remote';
-
-            var modal = $(' <div class="bt_modal modal hide" id="permission_container">\
-                                <div class="modal-header"></div>\
-                                <iframe\
-                                    style="width: 100%; height: auto;"\
-                                    id="permission"\
-                                    frameborder=0\
-                                    src="' + src + '"></iframe>\
-                                <div class="modal-footer"></div>\
-                            </div>'
-            );
-            modal.modal({
-                backdrop: 'static',
-                keyboard: false
-            });
+            frame.attr('src', src);
+            frame.css('padding', '0px');
+            frame.css('margin', '0px');
+            dialog.append(frame);
 
             jQuery(window).on('message', function(data) {
                 //we only want to listen for events that came from us
                 if(data.originalEvent.origin === domain) {
                     options.callback(options.port, data);
-                    modal.modal('hide');
+                    jQuery(document).trigger('close.facebox');
+                    jQuery('#pairing').remove();
                 }
             });
+
+            dialog.hide();
+            jQuery('body').append(dialog);
+            jQuery.facebox({ div: '#pairing' });
         }
     });
 
