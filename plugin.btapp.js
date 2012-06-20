@@ -142,7 +142,7 @@
                 this.set(this.soshare_props);
             } else if(this.get('product') === 'Torque' || this.get('product') === 'uTorrent' || this.get('product') === 'BitTorrent') {
                 //Everyone else can piggy back on the torque plugin
-                this.set(this.soshare_props);
+                this.set(this.torque_props);
             }
             var download_url = isMac() ? this.get('osx_download_url') : this.get('windows_download_url');
             this.set('download_url', download_url);
