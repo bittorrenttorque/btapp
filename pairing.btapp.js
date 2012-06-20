@@ -87,7 +87,7 @@
             var src = domain + '/pairing/index.html'
                         + '?product=' + this.model.get('product')
                         + '&mime=' + this.model.get('plugin_manager').get('mime_type')
-                        + '&name=' + document.title 
+                        + '&name=' + encodeURIComponent(document.title) 
                         + '&permissions=download,create,remote';
             frame.attr('src', src);
             frame.css('padding', '0px');
