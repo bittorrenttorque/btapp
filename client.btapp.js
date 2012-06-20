@@ -284,7 +284,7 @@
     // (for falcon clients we may not ever reach the client even if it is logged into falcon)
     LocalTorrentClient = TorrentClient.extend({
         defaults: {
-            product: 'SoShare'
+            product: 'Torque'
         },
         initialize: function(attributes) {
             TorrentClient.prototype.initialize.call(this, attributes);
