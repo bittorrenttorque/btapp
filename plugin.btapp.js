@@ -189,16 +189,7 @@
             var updateoptions = {'update':true};
             this.trigger('plugin:update_plugin', updateoptions);
             if(updateoptions.update) {
-                this.get_plugin().checkForUpdate(_.bind(function(func, success, errorcode) {
-                    var updatedoptions = {
-                        abort: false, 
-                        success: success
-                    };
-                    this.trigger('plugin:plugin_updated', updatedoptions);
-                    if(!updatedoptions.abort) {
-                        this.client_installed_check();
-                    }
-                }, this));
+                this.get_plugin().checkForUpdate(_.bind(this.plugin_up_to_date_yes, this));
             } else {
                 this.plugin_up_to_date_yes();
             }
