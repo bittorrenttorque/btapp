@@ -133,7 +133,7 @@
             pid: 'btapp_plugin_WARNING_HAVE_NOT_INITIALIZED',
             //All BitTorrent products have this number appended to their window names
             window_hash: '4823',
-            product:'Torque'
+            product: 'Torque'
         },
         initialize: function() {
             _.bindAll(this);
