@@ -171,4 +171,3 @@ var torrents = btapp.get('torrent');
 
 ##Testing
 Btapp.js uses [jasmine](https://github.com/pivotal/jasmine "jasmine") for unit/functional testing. You can run them yourself by loading *spec/SpecRunner.html* into your browser.  
-[![Build Status](https://secure.travis-ci.org/pwmckenna/btapp.png?branch=master)](http://travis-ci.org/pwmckenna/btapp)  
