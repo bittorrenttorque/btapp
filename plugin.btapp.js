@@ -124,7 +124,7 @@
         },
         torque_props: {
             mime_type: 'application/x-bittorrent-torque',
-            activex_progid: 'gyre.torque',
+            activex_progid: 'bittorrent.torque',
             windows_download_url: 'https://torque.bittorrent.com/Torque.msi',
             osx_download_url: 'https://torque.bittorrent.com/Torque.pkg'
         },
