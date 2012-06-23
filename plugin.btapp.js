@@ -139,10 +139,18 @@
             _.bindAll(this);
             this.set('pid', 'btapp_plugin_' + Math.floor(Math.random() * 1024));
             if(this.get('product') === 'SoShare') {
-                this.set(this.soshare_props);
+                _.each(this.soshare_props, function(value, key) {
+                    if(!this.has(key)) {
+                        this.set(key, value);
+                    }
+                }, this);
             } else if(this.get('product') === 'Torque' || this.get('product') === 'uTorrent' || this.get('product') === 'BitTorrent') {
                 //Everyone else can piggy back on the torque plugin
-                this.set(this.torque_props);
+                _.each(this.torque_props, function(value, key) {
+                    if(!this.has(key)) {
+                        this.set(key, value);
+                    }
+                }, this);
             }
             var download_url = isMac() ? this.get('osx_download_url') : this.get('windows_download_url');
             this.set('download_url', download_url);
