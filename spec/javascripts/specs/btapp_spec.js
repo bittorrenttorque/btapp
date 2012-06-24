@@ -7,7 +7,7 @@
 					this.paired = false;
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
-						expect(options.name).toEqual('SoShare');
+						expect(options.name).toEqual('Torque');
 						options.authorize = false;
 						options.continue = false;
 					}, this));
@@ -29,7 +29,7 @@
 					this.paired = false;
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
-						expect(options.name).toEqual('SoShare');
+						expect(options.name).toEqual('Torque');
 						if(this.port) {
 							expect(options.port).toEqual(this.port);
 						}
@@ -74,7 +74,7 @@
 					this.paired = false;
 					this.btapp.bind('pairing:found', _.bind(function(info) {
 						this.paired = true;
-						expect(info.name).toEqual('SoShare');
+						expect(info.name).toEqual('Torque');
 					}, this));
 					this.btapp.connect();
 				});
@@ -105,40 +105,10 @@
 				});
 			});
 		});
-		describe('Btapp session inconsistencies', function() {
-			it('connects, gets state, disconnects, repeatedly', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();
-					this.remote = false;
-					this.username = 'kalsjdflkjsflkjsflkjslfjslfj';
-					this.password = 'kalsjdflkjsflkjsflkjslfjslfj';
-					this.connected = false;
-
-					this.btapp.bind('remoteStatus', function(status) {
-						debugger;
-					});
-					debugger;
-				});
-				waitsFor(function() {
-					return 'connect_remote' in this.btapp;
-				}, "remote available", 5000);
-
-				runs(function() {
-					debugger;
-					this.btapp.connect_remote(this.username, this.password);
-				});
-
-				waitsFor(function() {
-					return this.connected;
-				}, "connected", 5000);
-			});
-
-		});
 		describe('Persistent Client Btapp Data', function() {
 			it('has a persistent stash', function() {
 				runs(function() {
-					this.works = false;
+					this.success = false;
 					this.btapp = new Btapp;
 					this.btapp.connect({pairing_type: 'native', queries: ['btapp/stash/']});
 
@@ -163,6 +133,49 @@
 				waitsFor(function() {
 					return this.success;
 				}, 15000);
+			});
+			it('has access to stash via remote', function() {
+			    function randomString() {
+					var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+					var string_length = 0x10;
+					var randomstring = '';
+					for (var i=0; i<string_length; i++) {
+						var rnum = Math.floor(Math.random() * chars.length);
+						randomstring += chars.substring(rnum,rnum+1);
+					}
+					return randomstring;
+				}
+				runs(function() {
+					this.works = false;
+					this.btapp = new Btapp;
+					this.btapp.connect({pairing_type: 'native', queries: ['btapp/stash/','btapp/events/','btapp/connect_remote/']});
+					this.btapp.on('add:bt:connect_remote', function() {
+						var username = randomString();
+						var password = randomString();
+						this.btapp.connect_remote(username, password);
+						this.btapp.on('remoteStatus', function(details) {
+							if(details.status === 'Status: Accessible') {
+								this.remote = new Btapp;
+								this.remote.connect({
+									username: username,
+									password: password
+								});
+								this.remote.on('add:stash', function() {
+									if(this.remote.get('stash').has('testkey')) {
+										this.works = true;
+									} else {
+										this.remote.get('stash').on('add:testkey', function() {
+											this.works = true;
+										}, this);
+									}
+								}, this);
+							}
+						}, this);
+					}, this);
+				});
+				waitsFor(function() {
+					return this.works;
+				}, 'remote', 15000);
 			});
 		});
 		describe('Btapp Client Function Calls', function() {
