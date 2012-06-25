@@ -9,7 +9,7 @@
 						this.paired = true;
 						expect(options.name).toEqual('Torque');
 						options.authorize = false;
-						options.continue = false;
+						options.abort = true;
 					}, this));
 					this.pairing.scan();
 				});
@@ -35,7 +35,7 @@
 						}
 						this.port = options.port;
 						options.authorize = false;
-						options.continue = false;
+						options.abort = true;
 					}, this));
 					this.pairing.scan();
 				});
