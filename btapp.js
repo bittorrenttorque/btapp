@@ -289,10 +289,10 @@
                 //check if this is a value that has been unset
                 if(value === undefined) {
                     var prev = this.previous(key);
-                    this.trigger('remove', prev);
+                    this.trigger('remove', prev, key);
                     this.trigger('remove:' + key, prev);
                 } else if(this.previous(key) === undefined) {
-                    this.trigger('add', value);
+                    this.trigger('add', value, key);
                     this.trigger('add:' + key, value);
                 }
             }, this));
