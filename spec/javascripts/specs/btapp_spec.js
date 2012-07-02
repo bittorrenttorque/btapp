@@ -1,4 +1,15 @@
 (function() {
+    function randomString() {
+		var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+		var string_length = 0x10;
+		var randomstring = '';
+		for (var i=0; i<string_length; i++) {
+			var rnum = Math.floor(Math.random() * chars.length);
+			randomstring += chars.substring(rnum,rnum+1);
+		}
+		return randomstring;
+	}
+
 	describe('Functional Tests', function() {
 		describe('Pairing', function() {
 			it('pairs', function() {
@@ -102,6 +113,25 @@
 				
 				runs(function() {
 					expect(this.connected).toBeTruthy();
+				});
+			});
+			it('throws error when connecting to non-existent remote connection', function() {
+				runs(function() {
+					this.connected = false;
+					this.callback = jasmine.createSpy();
+					this.btapp.bind('client:error', this.callback);
+					this.btapp.connect({
+						username: randomString(),
+						password: randomString()
+					});
+				});
+				
+				waitsFor(function() {
+					return this.callback.callCount > 0;
+				}, "remote connection", 15000);
+				
+				runs(function() {
+					expect(this.callback).toHaveBeenCalled();
 				});
 			});
 		});

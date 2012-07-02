@@ -324,7 +324,7 @@
 				var add_callback = jasmine.createSpy();
 				model.bind('add', add_callback);
 				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
-				expect(add_callback).toHaveBeenCalledWith('testvalue');
+				expect(add_callback).toHaveBeenCalledWith('testvalue', 'testkey');
 				model.unbind('add', add_callback);
 				expect(add_callback.callCount).toEqual(1);
 			});
@@ -369,7 +369,7 @@
 				var remove_callback = jasmine.createSpy();
 				model.bind('remove', remove_callback);
 				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
-				expect(remove_callback).toHaveBeenCalledWith('testvalue');
+				expect(remove_callback).toHaveBeenCalledWith('testvalue', 'testkey');
 				model.unbind('remove', remove_callback);
 				expect(remove_callback.callCount).toEqual(1);
 			});

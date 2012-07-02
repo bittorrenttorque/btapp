@@ -144,6 +144,7 @@
                     throw 'pairing occured with a torrent client that does not support the btapp api';
                 } else if(!(typeof data === 'object') || 'error' in data) {
                     err();
+                    this.trigger('client:error', data);
                 } else {
                     cb(data);
                 }
@@ -422,13 +423,16 @@
                 var obj;
                 if(!response.allowed || !response.success) {
                     err(response);
+                    this.trigger('client:error', response);
                     return;
                 }
 
                 try {
                     obj = JSON.parse(response.data);
                 } catch(e) {
-                    err('parsererror');
+                    var msg = 'parsererror';
+                    err(msg);
+                    this.trigger('client:error', msg);
                     return;
                 }
                 cb(obj);
