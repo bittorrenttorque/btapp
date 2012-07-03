@@ -57,6 +57,12 @@
             return _.any(signatures, function(signature) {
                 signature = signature.match(/\w+/g) || []; //["string","unknown"]
                 return signature.length == variables.length && _.all(signature, function(type,index) {
+                    if(typeof variables[index] === 'undefined') {
+                        throw 'client functions do not support undefined arguments';
+                    } else if(typeof variables[index] === 'null') {
+                        return true;
+                    }
+
                     switch(type) {
                         //Most of these types that the client sends up match the typeof values of the javascript
                         //types themselves so we can do a direct comparison
