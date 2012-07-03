@@ -319,6 +319,10 @@
 					this.btapp.get('add').torrent(magnet_link);
 				});
 				waitsFor(function() {
+					return this.btapp.get('torrent').get(hash);
+				}, 'magnet link to add', 20000);
+
+				waitsFor(function() {
 					var torrent = this.btapp.get('torrent').get(hash);
 					if(torrent) {
 						var files = torrent.get('file');
@@ -337,6 +341,11 @@
 					this.btapp.get('add').torrent(magnet_link);
 				});
 				waitsFor(function() {
+					return this.btapp.get('torrent').get(hash);
+				}, 'magnet link to add', 20000);
+
+				
+				waitsFor(function() {
 					var torrent = this.btapp.get('torrent').get(hash);
 					if(torrent) {
 						var files = torrent.get('file');
@@ -354,6 +363,9 @@
 				runs(function() {
 					this.btapp.get('add').torrent(magnet_link);
 				});
+				waitsFor(function() {
+					return this.btapp.get('torrent').get(hash);
+				}, 'magnet link to add', 20000);
 				waitsFor(function() {
 					var torrent = this.btapp.get('torrent').get(hash);
 					if(torrent) {
