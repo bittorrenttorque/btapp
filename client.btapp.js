@@ -425,7 +425,7 @@
             _.each(args, function(value, key) {
                 url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
             });
-            this.plugin_manager.get_plugin().ajax(url, function(response) {
+            this.plugin_manager.get_plugin().ajax(url, _.bind(function(response) {
                 var obj;
                 if(!response.allowed || !response.success) {
                     err(response);
@@ -442,7 +442,7 @@
                     return;
                 }
                 cb(obj);
-            });
+            }, this));
         }
     }); 
 }).call(this);
