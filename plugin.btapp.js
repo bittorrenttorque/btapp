@@ -94,14 +94,12 @@
                 dialog.css('left', '%50');
                 dialog.css('margin-left', '-200px');
 
-                var paragraph = jQuery('<p></p>');
-                paragraph.text('This site requires the ' + this.model.get('product') + ' plugin.');
-                dialog.append(paragraph);
-
-
                 var button_url = this.model.get('download_url');
-                var button = jQuery('<a id="download" href="' + button_url + '">Download</a>');
-                dialog.append(button);
+                var html ='<p style="text-align:center;">' + 
+                    'This site requires the ' + this.model.get('product') + ' plugin.<br>' + 
+                    '<span style="font-size:8pt;">By installing this software, you<br>are agreeing to the <a href="http://www.bittorrent.com/legal/eula">EULA</a></span><br><br>' + 
+                    '<a class="btn" id="download" href="' + button_url + '">Download</a>' + '</p>';
+                dialog.append(html);
 
                 this.model.on('plugin:plugin_installed', function() {
                     jQuery(document).trigger('close.facebox');
