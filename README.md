@@ -42,7 +42,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 #####Ready?
 ######Create a Btapp object and connect it to your local machine
 ```javascript
-var btapp = new Btapp;  
+var btapp = new Btapp();  
 btapp.connect();  
 ```
 
@@ -72,6 +72,17 @@ btapp.on('add:bt:connect_remote', function() {
   btapp.connect_remote('patrick', 'password');
 });
 ```
+Once you've connected that machine to the BitTorrent remote proxy, that computer is accessible from anywhere with those credentials.
+For example, to connect from elsewhere:
+```javascript
+remote = new Btapp();
+remote.connect({
+  username: 'patrick',
+  password: 'password'
+});
+```
+You can then continue to use that object the same way as the Btapp instance that is connected to your local machine.
+
 #### Stash
 #### Settings
 #### Permissions (Pending)
