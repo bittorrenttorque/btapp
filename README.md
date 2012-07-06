@@ -17,7 +17,7 @@ Btapp.js's has all of Backbone's dependencies, but also requires json2...the *.b
 
 ## Introduction
 
-Btapp.js builds off of Backbone.js to provide easy access to a torrent client, either on the local machine or a remote machine. The documentation and examples are designed to be as similar to the getting started experience of Backbone as possible. However, the functionality provided through these backbone models and collections is quite extensive and powerful, so its probably worth a look at the [Api Browser](http://bittorrenttorque.github.com/visualizer/ "api") to get an idea of what is possible. Many of the attributes and functions that are made available through this library have examples to give you some idea of what they can be used for. 
+Btapp.js builds off of Backbone.js to provide easy access to a torrent client, either on the local machine or a remote machine. The documentation and examples are designed to be as similar to the getting started experience of Backbone as possible. However, the functionality provided through these backbone models and collections is quite extensive and powerful, so its probably worth a look at the [Api Visualizer](http://bittorrenttorque.github.com/visualizer/ "api") to get an idea of what is possible. Many of the attributes and functions that are made available through this library have examples to give you some idea of what they can be used for. 
 
 ## Getting Started
 ######Fork the [btapp project template](https://github.com/bittorrenttorque/template "template") and just start coding
@@ -42,3 +42,5 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 var btapp = new Btapp;  
 btapp.connect();  
 ```
+
+At this point you can open your browser console and start playing with the *btapp* object. If you'd like a cleaner way to explore the api take a look at the [Api Visualizer](http://bittorrenttorque.github.com/visualizer/ "api")
