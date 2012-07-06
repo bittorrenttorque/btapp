@@ -35,6 +35,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 <script src="http://torque.bittorrent.com/btapp/plugin.btapp.js"></script>  
 <script src="http://torque.bittorrent.com/btapp/pairing.btapp.js"></script>  
 
+<!-- Backbrace was developed specifically to help with Backbone structures arranged like ours -->
 <script src="https://raw.github.com/bittorrenttorque/backbrace/master/backbrace.js"></script>
 ```  
 
