@@ -65,6 +65,12 @@ btapp.on('add:add', function(add) {
 });
 ```
 #### Streaming
+```javascript
+btapp.live('torrent * file * properties streaming_url', function(url) {
+  //if you give url to a video tag, it will stream the file directly 
+  //from the torrent client, even while the torrent dwonloads
+});
+```
 #### Remote
 This utilizes event callbacks for the Torque RPC functions
 ```javascript
