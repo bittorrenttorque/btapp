@@ -44,3 +44,16 @@ btapp.connect();
 ```
 
 At this point you can open your browser console and start playing with the *btapp* object. If you'd like a cleaner way to explore the api take a look at the [Api Visualizer](http://bittorrenttorque.github.com/visualizer/ "api").
+
+## Concepts
+#### Torrents
+#### Streaming
+#### Remote
+#### Stash
+#### Settings
+#### Permissions (Pending)
+#### Devices (Proposed)
+#### File Association (Proposed)
+#### Anti-Virus (Proposed)
+#### Folder Listener (Proposed)
+#### Transcoding (Proposed)
