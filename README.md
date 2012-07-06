@@ -50,8 +50,28 @@ At this point you can open your browser console and start playing with the *btap
 
 ## Concepts
 #### Torrents
+To iterate over your current torrents:
+```javascript
+btapp.on('add:torrent', function(torrent_list) {
+  torrent_list.each(function(torrent) { 
+    console.log(torrent.get('properties').get('name'));
+  });
+});
+```
+To add a torrent:
+```javascript
+btapp.on('add:add', function(add) {
+  add.torrent('http://featuredcontent.utorrent.com/torrents/Kumare-BitTorrent.torrent');
+});
+```
 #### Streaming
 #### Remote
+This utilizes event callbacks for the Torque RPC functions
+```javascript
+btapp.on('add:bt:connect_remote', function() {
+  btapp.connect_remote('patrick', 'password');
+});
+```
 #### Stash
 #### Settings
 #### Permissions (Pending)
