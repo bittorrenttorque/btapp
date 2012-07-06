@@ -43,4 +43,4 @@ var btapp = new Btapp;
 btapp.connect();  
 ```
 
-At this point you can open your browser console and start playing with the *btapp* object. If you'd like a cleaner way to explore the api take a look at the [Api Visualizer](http://bittorrenttorque.github.com/visualizer/ "api")
+At this point you can open your browser console and start playing with the *btapp* object. If you'd like a cleaner way to explore the api take a look at the [Api Visualizer](http://bittorrenttorque.github.com/visualizer/ "api").
