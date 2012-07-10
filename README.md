@@ -100,7 +100,18 @@ You can then continue to use that object the same way as the Btapp instance that
 #### Transcoding (Proposed)
 
 ## Products
-While by default, btapp.js will use the torque plugin/executable, it can be told to play nicely with uTorrent or BitTorrent.
+By default, btapp.js will use the torque plugin/executable.
+```javascript
+btapp.connect({
+  product: 'Torque'
+});
+```
+is the same as...
+```javascript
+btapp.connect();
+```
+
+However, btapp.js can also be used to control uTorrent/BitTorrent clients.
 
 ```javascript
 btapp.connect({
