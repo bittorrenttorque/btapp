@@ -45,7 +45,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 var btapp = new Btapp();  
 btapp.connect();  
 ```
-This will make sure you have the plugin/executable installed and will connect you to the torque executable. To see additional product/connection options, see [Products](#products).
+This will make sure you have the plugin/executable installed and will connect you to the torque executable. To see additional product/connection options, see [Product Support](#product-support).
 
 At this point you can open your browser console and start playing with the *btapp* object. If you'd like a cleaner way to explore the api take a look at the [Api Visualizer](http://bittorrenttorque.github.com/visualizer/ "api").
 
@@ -99,7 +99,7 @@ You can then continue to use that object the same way as the Btapp instance that
 #### Folder Listener (Proposed)
 #### Transcoding (Proposed)
 
-## Products
+## Product Support
 By default, btapp.js will use the torque plugin/executable.
 ```javascript
 btapp.connect({
