@@ -210,14 +210,20 @@
             }
         },
         client_installed_check_no: function() {
-            var switches = {'install':true};
-            this.trigger('plugin:install_client', switches);
-            if(switches.install) {
+            var installoptions = {'install':true};
+            this.trigger('plugin:install_client', installoptions);
+            if(installoptions.install) {
                 this.get_plugin().downloadProgram(this.get('product'), _.bind(function(a,b,c,d,key) {
                     jQuery.jStorage.set('pairing_key', key);
                     this.trigger('plugin:downloaded_client');
                 }, this));
                 when(this.client_installed, this.client_running_check_yes);
+            } else {
+                var runningcheckoptions = {'check':false};
+                this.trigger('plugin:check_for_running_client', runningcheckoptions);
+                if(runningcheckoptions.check) {
+                    this.client_running_check();
+                }
             }
         },
         client_installed_check_yes: function() {
