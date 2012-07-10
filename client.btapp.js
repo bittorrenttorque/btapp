@@ -399,7 +399,7 @@
                     dataType: 'jsonp'
                 });
             } else {
-                this.plugin_manager.get_plugin().ajax(url, function(response) {
+                this.plugin_manager.get_plugin().ajax(url, _.bind(function(response) {
                     var obj;
                     if(response.allowed && response.success && response.data !== 'invalid request') {
                         try {
@@ -415,7 +415,7 @@
                         this.trigger('client:error', response);
                         err(response);
                     }
-                });
+                }, this));
             }
         },
         // Before we actual start making requests against a client, we need to make sure
