@@ -15,6 +15,7 @@ jQuery(function() {
 	btapp.on('all', _.bind(console.log, console));
 
 	btapp.connect({
-		product: 'uTorrent'
+		product: 'uTorrent',
+		plugin: false
 	});
 });
