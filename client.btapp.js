@@ -300,7 +300,7 @@
         },
         initialize_objects: function(attributes) {
             //if we don't have what we need, fetch it and try again
-            if(typeof PluginManager === 'undefined') {
+            if(this.get('plugin') !== false && typeof PluginManager === 'undefined') {
                 jQuery.getScript(
                     'https://torque.bittorrent.com/btapp/plugin.btapp.js',
                     _.bind(this.initialize_objects, this, attributes)
@@ -333,6 +333,9 @@
         // plugin and using that plugin to ensure that the client is downloaded and
         // running on the local machine.
         initialize_plugin: function(attributes) {
+            if(this.get('plugin') === false) {
+                return;
+            }
             assert(typeof PluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
             this.plugin_manager = new PluginManager(attributes);
             new PluginManagerView({'model': this.plugin_manager});
@@ -341,7 +344,7 @@
         // We have a seperate object responsible for determining exactly which
         // port the torrent client is bound to.
         initialize_pairing: function(attributes) {
-            assert(typeof this.plugin_manager !== 'undefined', 'you must initialize the plugin manager before the pairing object');
+            assert(this.get('plugin') === false || typeof this.plugin_manager !== 'undefined', 'you must initialize the plugin manager before the pairing object');
             assert(typeof Pairing !== 'undefined', 'expected pairing.btapp.js to be loaded by now');
             //all right...ready to roll.
             this.pairing = new Pairing(_.extend(attributes, {'plugin_manager': this.plugin_manager}));
@@ -381,7 +384,39 @@
             }, this));
 
             this.pairing.on('pairing:stop', this.delayed_reset, this);
-            this.plugin_manager.on('plugin:client_running', this.reset, this);
+            if(this.get('plugin') === false) {
+                this.delayed_reset();
+            } else {
+                this.plugin_manager.on('plugin:client_running', this.reset, this);
+            }
+        },
+        ajax: function(url, cb, err) {
+            if(this.get('plugin') === false) {
+                jQuery.ajax({
+                    url: url,
+                    success: cb,
+                    error: err,
+                    dataType: 'jsonp'
+                });
+            } else {
+                this.plugin_manager.get_plugin().ajax(url, function(response) {
+                    var obj;
+                    if(response.allowed && response.success && response.data !== 'invalid request') {
+                        try {
+                            obj = JSON.parse(response.data);
+                        } catch(e) {
+                            var msg = 'parsererror';
+                            err(msg);
+                            this.trigger('client:error', msg);
+                            return;
+                        }
+                        cb(obj);
+                    } else {
+                        this.trigger('client:error', response);
+                        err(response);
+                    }
+                });
+            }
         },
         // Before we actual start making requests against a client, we need to make sure
         // we have a valid pairing key. This might be redundant if we just got one from the
@@ -390,24 +425,18 @@
         connect_to_authenticated_port: function(port, key) {
             // Called if the pairing key is good to go. Tell whoever is listening that we're
             // ready to roll.
-            var cb = function() {
+            var cb = _.bind(function() {
                 this.url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
                 this.trigger('client:connected');
-            };
+            }, this);
             // Handle the case of an invalid pairing key. Flush it out and start over.
-            var err = function() {
+            var err = _.bind(function() {
                 jQuery.jStorage.deleteKey('pairing_key');
                 this.reset();
-            };
+            }, this);
         
             var url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
-            this.plugin_manager.get_plugin().ajax(url, _.bind(function(response) {
-                if(response.allowed && response.success && response.data !== 'invalid request') {
-                    cb.call(this);
-                } else {
-                    err.call(this);
-                }
-            }, this));
+            this.ajax(url, cb, err);
         },
         delayed_reset: function() {
             setTimeout(_.bind(function() { this.reset(); }, this), 1000 );
@@ -425,24 +454,7 @@
             _.each(args, function(value, key) {
                 url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
             });
-            this.plugin_manager.get_plugin().ajax(url, _.bind(function(response) {
-                var obj;
-                if(!response.allowed || !response.success) {
-                    err(response);
-                    this.trigger('client:error', response);
-                    return;
-                }
-
-                try {
-                    obj = JSON.parse(response.data);
-                } catch(e) {
-                    var msg = 'parsererror';
-                    err(msg);
-                    this.trigger('client:error', msg);
-                    return;
-                }
-                cb(obj);
-            }, this));
+            this.ajax(url, cb, err);
         }
     }); 
 }).call(this);
