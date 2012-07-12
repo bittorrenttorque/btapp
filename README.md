@@ -65,6 +65,19 @@ btapp.on('add:add', function(add) {
   add.torrent('http://featuredcontent.utorrent.com/torrents/Kumare-BitTorrent.torrent');
 });
 ```
+To remove a torrent:
+```javascript
+var info_hash = 'EDC368812EC54125DEFC17B2E21CBB76C9CB3A95';
+var torrent_list = btapp.get('torrent');
+torrent_list.get(info_hash).remove();
+```
+...or to remove them all...
+```javascript
+btapp.get('torrent').each(function(torrent) {
+  torrent.remove();
+});
+```
+
 #### Streaming
 ```javascript
 btapp.live('torrent * file * properties streaming_url', function(url) {
