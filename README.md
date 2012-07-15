@@ -59,6 +59,15 @@ btapp.on('add:torrent', function(torrent_list) {
   });
 });
 ```
+The files in the torrent file can be accessed via the *file* attribute of the torrent.
+To iterate over all files in all torrents:
+```javascript
+btapp.get('torrent').each(function(torrent) {
+  torrent.get('file').each(function(file) {
+    console.log(file.get('properties').get('name'));
+  });
+});
+```
 To add a torrent:
 ```javascript
 btapp.on('add:add', function(add) {
@@ -76,6 +85,10 @@ torrent_list.get(info_hash).remove();
 btapp.get('torrent').each(function(torrent) {
   torrent.remove();
 });
+```
+
+```javascript
+
 ```
 
 #### Streaming
