@@ -14,7 +14,7 @@
 		describe('Pairing', function() {
 			it('pairs', function() {
 				runs(function() {
-					this.pairing = new Pairing;
+					this.pairing = new Pairing({plugin:false});
 					this.paired = false;
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
@@ -36,7 +36,7 @@
 			it('pairs repeatedly to the same port', function() {
 				runs(function() {
 					this.port = undefined;
-					this.pairing = new Pairing;
+					this.pairing = new Pairing({plugin:false});
 					this.paired = false;
 					this.pairing.bind('pairing:found', _.bind(function(options) {
 						this.paired = true;
@@ -206,6 +206,84 @@
 				waitsFor(function() {
 					return this.works;
 				}, 'remote', 15000);
+			});
+		});
+		describe('Btapp Client supports all json types', function() {
+			it('sets settings to the same value individually using bt.set', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect({
+						queries: ['btapp/settings/all/','btapp/settings/set/']
+					});
+				});
+				waitsFor(function() {
+					return this.btapp.get('settings');
+				});
+
+				runs(function() {
+					this.deferreds = [];
+					var settings = this.btapp.get('settings');
+					_(settings.toJSON()).each(function(value, key) {
+						if(key === 'id') return;
+						var deferred = settings.bt.set(key, value);
+						deferred.done(function(result) {
+							console.log('resolved');
+							expect('btapp' in result);
+							expect('settings' in result.btapp);
+							expect('set' in result.btapp.settings);
+
+							var ret = result.btapp.settings.set;
+
+							if(ret === ('Type mismatch ' + key)) {
+								console.log(typeof value + ' - > ' + value + '    (' + key + ')');
+							}
+
+							expect(ret === 'Empty' || ret === ('Read only property ' + key));
+						}).fail(function(result) {
+							console.log('failed: ' + key);
+							expect(false);
+						});
+						this.deferreds.push(deferred);
+					}, this);
+				});
+				runs(function() {
+					jQuery.when.apply(jQuery, this.deferreds).done(_.bind(function(result) {
+						_.each(this.deferreds, function(r) { 
+							expect(r.isResolved()); 
+						});
+						console.log('all resolved');
+						this.success = true;
+					}, this));
+				});
+				waitsFor(function() {
+					return this.success;
+				});
+			});
+			it('sets settings to the same values as a batch using save', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect({
+						queries: ['btapp/settings/all/','btapp/settings/set/']
+					});
+				});
+				waitsFor(function() {
+					return this.btapp.get('settings');
+				});
+
+				runs(function() {
+					this.deferreds = [];
+					var settings = this.btapp.get('settings');
+					settings.save(settings.toJSON()).done(_.bind(function(result) {
+						_.each(this.deferreds, function(r) { 
+							expect(r.isResolved());
+						});
+						console.log('all resolved');
+						this.success = true;
+					}, this));
+				});
+				waitsFor(function() {
+					return this.success;
+				});
 			});
 		});
 		describe('Btapp Client Function Calls', function() {

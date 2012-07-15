@@ -346,9 +346,11 @@
             return Backbone.Model.prototype.set.apply(this, arguments);
         },
         save: function(attributes, options) {
+            var deferreds = [];
             _(attributes).each(function(value, key) {
-                this.bt.set(key, value);
+                deferreds.push(this.bt.set(key, value));
             }, this);
+            return jQuery.when.apply(jQuery, deferreds);
         }
     });
 
