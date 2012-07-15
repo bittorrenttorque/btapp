@@ -87,6 +87,7 @@ btapp.get('torrent').each(function(torrent) {
 });
 ```
 #### Streaming
+The *streaming_url* property is buried pretty deep in the tree of objects, so we'll take advantage of (backbone.js)[https://github.com/bittorrenttorque/backbrace] to listen for the attribute being added to objects that potentially don't exist yet.
 ```javascript
 btapp.live('torrent * file * properties streaming_url', function(url) {
   //if you give url to a video tag, it will stream the file directly 
