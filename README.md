@@ -147,3 +147,11 @@ btapp.connect({
 ```
 
 This case is very light weight. The end user doesn't need to install the plugin, and the executable is not run on connect. However depending on your app, this might be expected by the user. In the case of [uTorrentToolbox](https://github.com/bittorrenttorque/utorrenttoolbox.com), the expectation is set that the product is only useful when a uTorrent client is running.
+
+## Questions?
+torque at bittorrent.com 
+
+patrick at bittorrent.com
+
+[@pwmckenna](http://twitter.com/pwmckenna)
+
