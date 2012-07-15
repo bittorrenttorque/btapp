@@ -86,11 +86,6 @@ btapp.get('torrent').each(function(torrent) {
   torrent.remove();
 });
 ```
-
-```javascript
-
-```
-
 #### Streaming
 ```javascript
 btapp.live('torrent * file * properties streaming_url', function(url) {
