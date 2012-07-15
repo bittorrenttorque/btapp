@@ -23,7 +23,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 ######Fork the [btapp project template](https://github.com/bittorrenttorque/template "template") and just start coding
 #####OR
 ######Include btapp.js+ in your html file
-```  
+```html
 <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>  
 <script src="http://cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js"></script>  
 <script src="http://underscorejs.org/underscore-min.js"></script>  
