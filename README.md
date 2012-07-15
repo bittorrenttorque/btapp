@@ -91,7 +91,7 @@ The *streaming_url* property is buried pretty deep in the tree of objects, so we
 ```javascript
 btapp.live('torrent * file * properties streaming_url', function(url) {
   //if you give url to a video tag, it will stream the file directly 
-  //from the torrent client, even while the torrent dwonloads
+  //from the torrent client, even while the torrent downloads
 });
 ```
 #### Remote
