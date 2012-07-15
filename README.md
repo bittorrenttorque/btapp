@@ -45,6 +45,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 var btapp = new Btapp();  
 btapp.connect();  
 ```
+This will make sure you have the plugin/executable installed and will connect you to the torque executable. To see additional product/connection options, see [Product Support](#product-support).
 
 At this point you can open your browser console and start playing with the *btapp* object. If you'd like a cleaner way to explore the api take a look at the [Api Visualizer](http://bittorrenttorque.github.com/visualizer/ "api").
 
@@ -64,6 +65,19 @@ btapp.on('add:add', function(add) {
   add.torrent('http://featuredcontent.utorrent.com/torrents/Kumare-BitTorrent.torrent');
 });
 ```
+To remove a torrent:
+```javascript
+var info_hash = 'EDC368812EC54125DEFC17B2E21CBB76C9CB3A95';
+var torrent_list = btapp.get('torrent');
+torrent_list.get(info_hash).remove();
+```
+...or to remove them all...
+```javascript
+btapp.get('torrent').each(function(torrent) {
+  torrent.remove();
+});
+```
+
 #### Streaming
 ```javascript
 btapp.live('torrent * file * properties streaming_url', function(url) {
@@ -97,3 +111,39 @@ You can then continue to use that object the same way as the Btapp instance that
 #### Anti-Virus (Proposed)
 #### Folder Listener (Proposed)
 #### Transcoding (Proposed)
+
+## Product Support
+By default, btapp.js will use the torque plugin/executable.
+```javascript
+btapp.connect({
+  product: 'Torque'
+});
+```
+is the same as...
+```javascript
+btapp.connect();
+```
+
+However, btapp.js can also be used to control uTorrent/BitTorrent clients.
+
+```javascript
+btapp.connect({
+  product: 'uTorrent'
+});
+```
+```javascript
+btapp.connect({
+  product: 'BitTorrent'
+});
+```
+
+There are pros and cons here. For one, the plugin will still be installed. This means that you're assured that uTorrent will be installed and running. In some cases however, you're only interested in using uTorrent if it exists on the computer, and you don't feel the need to force the issue with the plugin. In that case you can do the following.
+
+```javascript
+btapp.connect({
+  product: 'uTorrent',
+  plugin: false
+});
+```
+
+This case is very light weight. The end user doesn't need to install the plugin, and the executable is not run on connect. However depending on your app, this might be expected by the user. In the case of [uTorrentToolbox](https://github.com/bittorrenttorque/utorrenttoolbox.com), the expectation is set that the product is only useful when a uTorrent client is running.
