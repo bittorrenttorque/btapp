@@ -83,6 +83,8 @@
             var childurl = url + v + '/';
             if(v === 'all') {
                 return this.updateState(this.session, added, removed, childurl);
+            } else if(typeof removed === 'object' && removed === null) {
+                return this.updateRemoveAttributeState(v, removed);
             } else if(typeof removed === 'object') {
                 return this.updateRemoveObjectState(session, added, removed, childurl, v);
             } else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
@@ -146,6 +148,8 @@
             // Special case all. It is a redundant layer that exists for the benefit of the torrent client
             if(v === 'all') {
                 return this.updateState(this.session, added, removed, childurl);
+            } else if(typeof added === 'object' && added === null) {
+                return this.updateAddAttributeState(session, added, removed, childurl, v);
             } else if(typeof added === 'object') {
                 return this.updateAddObjectState(session, added, removed, childurl, v);
             } else if(typeof added === 'string' && TorrentClient.prototype.isFunctionSignature(added)) {
@@ -278,7 +282,7 @@
             var clone = _.clone(this.attributes);
             delete clone['id'];
             _.each(clone, function(attribute) { 
-                attribute.clearState && attribute.clearState(); 
+                attribute && attribute.clearState && attribute.clearState(); 
             });
             Backbone.Model.prototype.set.call(this, clone, {internal: true, unset: true});
             this.destructor();
@@ -518,6 +522,7 @@
             'btapp/torrent/all/*/file/all/*/', 
             'btapp/torrent/all/*/properties/all/*/'
         ],
+        SETTINGS: ['btapp/settings/'],
         REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
     // These are the various state values that might be set in the object recieved in event callbacks
