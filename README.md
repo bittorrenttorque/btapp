@@ -23,7 +23,7 @@ Btapp.js builds off of Backbone.js to provide easy access to a torrent client, e
 ######Fork the [btapp project template](https://github.com/bittorrenttorque/template "template") and just start coding
 #####OR
 ######Include btapp.js+ in your html file
-```  
+```html
 <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>  
 <script src="http://cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js"></script>  
 <script src="http://underscorejs.org/underscore-min.js"></script>  
@@ -59,6 +59,15 @@ btapp.on('add:torrent', function(torrent_list) {
   });
 });
 ```
+The files in the torrent file can be accessed via the *file* attribute of the torrent.
+To iterate over all files in all torrents:
+```javascript
+btapp.get('torrent').each(function(torrent) {
+  torrent.get('file').each(function(file) {
+    console.log(file.get('properties').get('name'));
+  });
+});
+```
 To add a torrent:
 ```javascript
 btapp.on('add:add', function(add) {
@@ -77,12 +86,12 @@ btapp.get('torrent').each(function(torrent) {
   torrent.remove();
 });
 ```
-
 #### Streaming
+The *streaming_url* property is buried pretty deep in the tree of objects, so we'll take advantage of [backbrace.js](https://github.com/bittorrenttorque/backbrace) to listen for the attribute being added to objects that potentially don't exist yet.
 ```javascript
 btapp.live('torrent * file * properties streaming_url', function(url) {
   //if you give url to a video tag, it will stream the file directly 
-  //from the torrent client, even while the torrent dwonloads
+  //from the torrent client, even while the torrent downloads
 });
 ```
 #### Remote
@@ -147,3 +156,11 @@ btapp.connect({
 ```
 
 This case is very light weight. The end user doesn't need to install the plugin, and the executable is not run on connect. However depending on your app, this might be expected by the user. In the case of [uTorrentToolbox](https://github.com/bittorrenttorque/utorrenttoolbox.com), the expectation is set that the product is only useful when a uTorrent client is running.
+
+## Questions?
+torque at bittorrent.com 
+
+patrick at bittorrent.com
+
+[@pwmckenna](http://twitter.com/pwmckenna)
+
