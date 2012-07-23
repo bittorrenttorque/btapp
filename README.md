@@ -133,7 +133,7 @@ is the same as...
 btapp.connect();
 ```
 
-However, btapp.js can also be used to control uTorrent/BitTorrent clients.
+However, btapp.js can also be used to control uTorrent/BitTorrent clients. Currently only in the [3.3 alpha of uTorrent](http://download.utorrent.com/latest/uTorrent-alpha.exe). Use this for testing and before you know it, we'll have released a stable version with torque api support.
 
 ```javascript
 btapp.connect({
