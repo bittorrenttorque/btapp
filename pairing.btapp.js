@@ -176,7 +176,6 @@
         initialize: function() {
             _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success', 'authorize_port_callback');
             //assert that we know what we're getting into
-            assert(this.get('pairing_type') === 'native' || this.get('plugin'), 'cannot do iframe pairing without the plugin. specify pairing_type: \'native\' to pair without the plugin');
             assert(this.get('plugin') === false || this.get('plugin_manager'), 'pairing is not intentionally avoiding the plugin, nor is it providing a plugin manager');
             if(this.get('plugin_manager')) {
                 _.extend(this, PluginPairing);
