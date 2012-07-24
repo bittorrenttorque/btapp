@@ -209,6 +209,25 @@
 			});
 		});
 		describe('Btapp Client supports all json types', function() {
+			it('throws and exception setting a setting whos key does not exist', function() {
+				runs(function() {
+					this.type_number = false;
+					this.type_boolean = false;
+					this.type_string = false;
+					this.btapp = new Btapp;
+					this.btapp.connect({
+						queries: ['btapp/settings/all/','btapp/settings/set/']
+					});
+				});
+				waitsFor(function() {
+					return this.btapp.get('settings');
+				}, 15000);
+				runs(function() {
+					expect(_.bind(function() {
+						this.btapp.get('settings').save({idonotexist: 'neitherdoi'});
+					}, this)).toThrow('cannot save an attribute that has not been initialized by the client');
+				});
+			})
 			it('sets settings to the same value individually using bt.set', function() {
 				runs(function() {
 					this.type_number = false;
