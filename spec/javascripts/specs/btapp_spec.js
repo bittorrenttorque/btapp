@@ -227,7 +227,7 @@
 						this.btapp.get('settings').save({idonotexist: 'neitherdoi'});
 					}, this)).toThrow('cannot save an attribute that has not been initialized by the client');
 				});
-			})
+			});
 			it('sets settings to the same value individually using bt.set', function() {
 				runs(function() {
 					this.type_number = false;
