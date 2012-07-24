@@ -209,7 +209,7 @@
 			});
 		});
 		describe('Btapp Client supports all json types', function() {
-			it('throws and exception setting a setting whos key does not exist', function() {
+			it('throws an exception setting a setting whos key does not exist', function() {
 				runs(function() {
 					this.type_number = false;
 					this.type_boolean = false;
