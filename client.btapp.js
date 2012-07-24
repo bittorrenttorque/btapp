@@ -357,7 +357,7 @@
             var product = this.get('product');
             this.pairing.on('pairing:found', function(options) {
                 if(options && options.name === product) {
-                    var key = jQuery.jStorage.get('pairing_key');
+                    var key = jQuery.jStorage.get(product + '_pairing_key');
                     if(key) {
                         // Let whoever triggered the pairing:found event know that they don't need
                         // to continue scanning, nor do they need to handle aquiring a pairing key
@@ -379,7 +379,7 @@
             this.pairing.on('pairing:authorized', _.bind(function(options) {
                 // Holy smokes! We found a port, and the client that's listening likes our pairing key.
                 // Store the key off so that we don't have to bother the user again.
-                jQuery.jStorage.set('pairing_key', options.key);
+                jQuery.jStorage.set(product + '_pairing_key', options.key);
                 this.connect_to_authenticated_port(options.port, options.key);
             }, this));
 
@@ -431,7 +431,7 @@
             }, this);
             // Handle the case of an invalid pairing key. Flush it out and start over.
             var err = _.bind(function() {
-                jQuery.jStorage.deleteKey('pairing_key');
+                jQuery.jStorage.deleteKey(product + '_pairing_key');
                 this.reset();
             }, this);
         
