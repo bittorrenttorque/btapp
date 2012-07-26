@@ -108,7 +108,7 @@
             jQuery.facebox({ div: '#pairing' });
         }
     });
-
+    var _plugin_pairing_requests = {};
     PluginPairing = {
         ping_port: function(port) {
             //the plugin doesn't support binary data, which is what the image url returns...
@@ -133,13 +133,27 @@
             }, this));
         },
         authorize_basic: function(port) {
-            this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port), _.bind(function(response) {
-                if(!response.allowed || !response.success) {
-                    this.authorize_port_error(port);
-                } else {
-                    this.authorize_port_success(port, response.data);
-                }
-            }, this));
+            var deferred;
+            if(port in _plugin_pairing_requests) {
+                deferred = _plugin_pairing_requests[port];
+                console.log('recycling');
+            } else {
+                deferred = new jQuery.Deferred();
+                _plugin_pairing_requests[port] = deferred;
+                deferred.done(function() {
+                    delete _plugin_pairing_requests[port];
+                });
+                this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port), _.bind(function(response) {
+                    if(!response.allowed || !response.success) {
+                        deferred.reject();
+                    } else {
+                        deferred.resolve(response.data);
+                    }
+                }, this));
+            }   
+
+            deferred.then(_.bind(this.authorize_port_success, this, port));
+            deferred.fail(_.bind(this.authorize_port_error, this, port));
         }
     };
     var _image_pairing_requests = {};
