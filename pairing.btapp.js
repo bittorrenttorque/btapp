@@ -142,7 +142,7 @@
             }, this));
         }
     };
-
+    var _image_pairing_requests = {};
     ImagePairing = {
         ping_port: function(port) {
             var img = new Image();
@@ -160,12 +160,24 @@
             });
         },
         authorize_basic: function(port) {
-            jQuery.ajax({
-                url: get_dialog_pair_url(port),
-                dataType: 'jsonp',
-                success: _.bind(this.authorize_port_success, this, port),
-                error: _.bind(this.authorize_port_error, this, port)
-            });
+            var success = _.bind(this.authorize_port_success, this, port);
+            var failure = _.bind(this.authorize_port_error, this, port);
+            var promise;
+            if(port in _image_pairing_requests) {
+                promise = _image_pairing_requests[port];
+                console.log('recycling');
+            } else {
+                promise = jQuery.ajax({
+                    url: get_dialog_pair_url(port),
+                    dataType: 'jsonp'
+                });
+                _image_pairing_requests[port] = promise;
+                promise.done(function() {
+                    delete _image_pairing_requests[port];            
+                })
+            }
+            promise.then(success)
+            promise.fail(failure);
         }
     };
 
