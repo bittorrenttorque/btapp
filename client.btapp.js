@@ -366,7 +366,7 @@
                         this.connect_to_authenticated_port(options.port, key);
                     } else {
                         // We've found the port we want to work with, but we don't have a pairing key.
-                        // We'll set attemp_authorization to true so that a pairing dialog is presented 
+                        // We'll set authorize to true so that a pairing dialog is presented 
                         // to the user
                         options.abort = true;
                         options.authorize = true;
