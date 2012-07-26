@@ -334,7 +334,7 @@
         set: function(key, value, options) {
             var evaluate = function(value, key) {
                 if(options && 'internal' in options) return;
-                if(!this.has(key)) return;  
+                if(typeof this.get(key) === 'undefined') return;  
                 // We're trying to guide users towards using save
                 throw 'please use save to set attributes directly to the client';
             };
@@ -352,7 +352,7 @@
         save: function(attributes, options) {
             var deferreds = [];
             _(attributes).each(function(value, key) {
-                if(!this.has(key)) {
+                if(typeof this.get(key) === 'undefined') {
                     throw 'cannot save an attribute that has not been initialized by the client';
                 }
                 deferreds.push(this.bt.set(key, value));
