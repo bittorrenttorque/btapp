@@ -431,7 +431,7 @@
             }, this);
             // Handle the case of an invalid pairing key. Flush it out and start over.
             var err = _.bind(function() {
-                jQuery.jStorage.deleteKey(product + '_pairing_key');
+                jQuery.jStorage.deleteKey(this.get('product') + '_pairing_key');
                 this.reset();
             }, this);
         
