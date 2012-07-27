@@ -97,7 +97,16 @@
             jQuery(window).on('message', function(data) {
                 //we only want to listen for events that came from us
                 if(data.originalEvent.origin === domain) {
-                    options.callback(options.port, data);
+                    assert(data && data.originalEvent && data.originalEvent.data, 'no data was passed in the message from the iframe');
+
+                    if(data.originalEvent.data.length === 40) {
+                        options.deferred.resolve(data.originalEvent.data);
+                    } else if(data.originalEvent.data === 'denied') {
+                        options.deferred.reject();
+                    } else {
+                        throw 'the message data from the iframe was neither a pairing key, nor a denied message';
+                    }
+
                     jQuery(document).trigger('close.facebox');
                     jQuery('#pairing').remove();
                 }
@@ -108,7 +117,7 @@
             jQuery.facebox({ div: '#pairing' });
         }
     });
-    var _plugin_pairing_requests = {};
+    var _plugin_native_pairing_requests = {};
     PluginPairing = {
         ping_port: function(port) {
             //the plugin doesn't support binary data, which is what the image url returns...
@@ -134,14 +143,14 @@
         },
         authorize_basic: function(port) {
             var deferred;
-            if(port in _plugin_pairing_requests) {
-                deferred = _plugin_pairing_requests[port];
+            if(port in _plugin_native_pairing_requests) {
+                deferred = _plugin_native_pairing_requests[port];
                 console.log('recycling');
             } else {
                 deferred = new jQuery.Deferred();
-                _plugin_pairing_requests[port] = deferred;
+                _plugin_native_pairing_requests[port] = deferred;
                 deferred.done(function() {
-                    delete _plugin_pairing_requests[port];
+                    delete _plugin_native_pairing_requests[port];
                 });
                 this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port), _.bind(function(response) {
                     if(!response.allowed || !response.success) {
@@ -156,7 +165,7 @@
             deferred.fail(_.bind(this.authorize_port_error, this, port));
         }
     };
-    var _image_pairing_requests = {};
+    var _image_native_pairing_requests = {};
     ImagePairing = {
         ping_port: function(port) {
             var img = new Image();
@@ -177,17 +186,17 @@
             var success = _.bind(this.authorize_port_success, this, port);
             var failure = _.bind(this.authorize_port_error, this, port);
             var promise;
-            if(port in _image_pairing_requests) {
-                promise = _image_pairing_requests[port];
+            if(port in _image_native_pairing_requests) {
+                promise = _image_native_pairing_requests[port];
                 console.log('recycling');
             } else {
                 promise = jQuery.ajax({
                     url: get_dialog_pair_url(port),
                     dataType: 'jsonp'
                 });
-                _image_pairing_requests[port] = promise;
+                _image_native_pairing_requests[port] = promise;
                 promise.done(function() {
-                    delete _image_pairing_requests[port];            
+                    delete _image_native_pairing_requests[port];            
                 })
             }
             promise.then(success)
@@ -195,12 +204,13 @@
         }
     };
 
+    var _plugin_iframe_pairing_requests = {};
     Pairing = Backbone.Model.extend({
         defaults: {
             pairing_type: 'iframe'
         },
         initialize: function() {
-            _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success', 'authorize_port_callback');
+            _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success');
             //assert that we know what we're getting into
             assert(this.get('plugin') === false || this.get('plugin_manager'), 'pairing is not intentionally avoiding the plugin, nor is it providing a plugin manager');
             if(this.get('plugin_manager')) {
@@ -261,11 +271,25 @@
                 if(pairing_key.length === 40) {
                     this.authorize_port_success(port, pairing_key);
                 } else {
-                    //let someone build a view to do something with this info
-                    this.trigger('pairing:authorize', {
-                        'port': port,
-                        'callback': this.authorize_port_callback
-                    });
+                    var deferred;
+                    if(port in _plugin_iframe_pairing_requests) {
+                        deferred = _plugin_iframe_pairing_requests[port];
+                        console.log('recycling');
+                    } else {
+                        deferred = new jQuery.Deferred();
+                        _plugin_iframe_pairing_requests[port] = deferred;
+                        deferred.done(function() {
+                            delete _plugin_iframe_pairing_requests[port];
+                        })
+                        //let someone build a view to do something with this info
+                        this.trigger('pairing:authorize', {
+                            'port': port,
+                            'deferred': deferred
+                        });
+                    }
+
+                    deferred.then(_.bind(this.authorize_port_success, this, port));
+                    deferred.fail(_.bind(this.authorize_port_error, this, port));
                 }
             }
         },
@@ -274,17 +298,6 @@
         },
         authorize_port_error: function(port) {
             this.trigger('pairing:denied', port);
-        },
-        authorize_port_callback: function(port, data) {
-            assert(data && data.originalEvent && data.originalEvent.data, 'no data was passed in the message from the iframe');
-
-            if(data.originalEvent.data.length === 40) {
-                this.authorize_port_success(port, data.originalEvent.data);
-            } else if(data.originalEvent.data === 'denied') {
-                this.authorize_port_error(port);
-            } else {
-                throw 'the message data from the iframe was neither a pairing key, nor a denied message';
-            }
         }
     });
 }).call(this);
