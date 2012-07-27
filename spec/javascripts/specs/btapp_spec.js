@@ -70,6 +70,32 @@
 				});
 			});
 		});
+		describe('Btapp Concurrent Pairing', function() {
+			it('uses a single jquery ajax request for multiple native pairing requests to the same client', function() {
+				jQuery.jStorage.deleteKey('Torque_pairing_key');
+				for(var i = 0; i < 4; ++i) {
+					var btapp = new Btapp;
+					btapp.on('all', _.bind(console.log, console));
+					btapp.connect({product: 'Torque', pairing_type: 'native', plugin: false});
+				}
+			});
+			it('uses a single plugin ajax request for multiple native pairing requests to the same client', function() {
+				jQuery.jStorage.deleteKey('Torque_pairing_key');
+				for(var i = 0; i < 4; ++i) {
+					var btapp = new Btapp;
+					btapp.on('all', _.bind(console.log, console));
+					btapp.connect({product: 'Torque', pairing_type: 'native'});
+				}
+			});
+			it('uses a single plugin ajax request for multiple iframe pairing requests to the same client', function() {
+				jQuery.jStorage.deleteKey('Torque_pairing_key');
+				for(var i = 0; i < 4; ++i) {
+					var btapp = new Btapp;
+					btapp.on('all', _.bind(console.log, console));
+					btapp.connect({product: 'Torque', pairing_type: 'iframe'});
+				}
+			});
+		});
 		describe('Btapp Pairing', function() {
 			beforeEach(function() {
 				this.btapp = new Btapp;
