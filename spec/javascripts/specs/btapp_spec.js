@@ -75,7 +75,6 @@
 				jQuery.jStorage.deleteKey('Torque_pairing_key');
 				for(var i = 0; i < 4; ++i) {
 					var btapp = new Btapp;
-					btapp.on('all', _.bind(console.log, console));
 					btapp.connect({product: 'Torque', pairing_type: 'native', plugin: false});
 				}
 			});
@@ -83,7 +82,6 @@
 				jQuery.jStorage.deleteKey('Torque_pairing_key');
 				for(var i = 0; i < 4; ++i) {
 					var btapp = new Btapp;
-					btapp.on('all', _.bind(console.log, console));
 					btapp.connect({product: 'Torque', pairing_type: 'native'});
 				}
 			});
@@ -91,7 +89,6 @@
 				jQuery.jStorage.deleteKey('Torque_pairing_key');
 				for(var i = 0; i < 4; ++i) {
 					var btapp = new Btapp;
-					btapp.on('all', _.bind(console.log, console));
 					btapp.connect({product: 'Torque', pairing_type: 'iframe'});
 				}
 			});
@@ -108,21 +105,13 @@
 			});
 			it('pairs', function() {
 				runs(function() {
-					this.paired = false;
-					this.btapp.bind('pairing:found', _.bind(function(info) {
-						this.paired = true;
-						expect(info.name).toEqual('Torque');
-					}, this));
+					jQuery.jStorage.deleteKey('Torque_pairing_key');
 					this.btapp.connect();
 				});
 				
 				waitsFor(function() {
-					return this.paired;
+					return jQuery.jStorage.get('Torque_pairing_key');
 				}, "client pairing", 15000);
-				
-				runs(function() {
-					expect(this.paired).toBeTruthy();
-				});
 			});
 			it('connects', function() {
 				runs(function() {
@@ -235,7 +224,7 @@
 			});
 		});
 		describe('Btapp Client supports all json types', function() {
-			it('throws an exception setting a setting whos key does not exist', function() {
+			it('throws an exception setting a setting with a key that does not exist', function() {
 				runs(function() {
 					this.type_number = false;
 					this.type_boolean = false;
@@ -280,7 +269,6 @@
 							if(typeof value === 'boolean') this.type_boolean = true;
 							if(typeof value === 'string') this.type_string = true;
 
-							console.log(typeof value);
 							expect('btapp' in result).toBeTruthy();
 							expect('settings' in result.btapp).toBeTruthy();
 							expect('set' in result.btapp.settings).toBeTruthy();
@@ -288,7 +276,6 @@
 							var ret = result.btapp.settings.set;
 							expect(ret === 'Empty' || ret === ('Read only property ' + key)).toBeTruthy();
 						}, this)).fail(function(result) {
-							console.log('failed: ' + key);
 							expect(false).toBeTruthy();
 						});
 						this.deferreds.push(deferred);
@@ -327,10 +314,89 @@
 						_.each(this.deferreds, function(r) { 
 							expect(r.isResolved()).toBeTruthy();
 						});
-						console.log('all resolved');
 						this.success = true;
 					}, this));
 				});
+				waitsFor(function() {
+					return this.success;
+				}, 15000);
+			});
+			it('sets gui.show_av_icon to the opposite value using bt.set', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect({
+						queries: ['btapp/settings/all/gui.show_av_icon/','btapp/settings/set/']
+					});
+				});
+				waitsFor(function() {
+					return this.btapp.get('settings');
+				}, 15000);
+				runs(function() {
+					var settings = this.btapp.get('settings');
+					this.unchanged = {};
+					_(settings.toJSON()).each(function(value, key) {
+						if(typeof value !== 'boolean') {
+							return;
+						}
+						settings.on('change:' + key, function(v) {
+							expect(this.unchanged[key]).toBeDefined();
+							expect(settings.get(key)).toEqual(!this.unchanged[key]);
+							delete this.unchanged[key];
+							var num = _.keys(this.unchanged).length;
+							this.success = (_.keys(this.unchanged).length === 0);
+						}, this);
+
+						settings.bt.set(key, !value).done(_.bind(function(result) {
+							if(result.btapp.settings.set !== ('Read only property ' + key)) {
+								this.unchanged[key] = value;
+								this.ready = true;
+							}
+						}, this));
+					}, this);
+				});
+				waitsFor(function(){
+					return this.ready;
+				}, 5000);
+				waitsFor(function() {
+					return this.success;
+				}, 15000);
+			});
+			it('sets non-gui.show_av_icon bool settings to the opposite values individually using bt.set', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect({
+						queries: ['btapp/settings/all/','btapp/settings/set/']
+					});
+				});
+				waitsFor(function() {
+					return this.btapp.get('settings');
+				}, 15000);
+				runs(function() {
+					var settings = this.btapp.get('settings');
+					this.unchanged = {};
+					_(settings.toJSON()).each(function(value, key) {
+						if(key === 'gui.show_av_icon' || typeof value !== 'boolean') {
+							return;
+						}
+						settings.on('change:' + key, function(v) {
+							expect(this.unchanged[key]).toBeDefined();
+							expect(settings.get(key)).toEqual(!this.unchanged[key]);
+							delete this.unchanged[key];
+							var num = _.keys(this.unchanged).length;
+							this.success = (_.keys(this.unchanged).length === 0);
+						}, this);
+
+						settings.bt.set(key, !value).done(_.bind(function(result) {
+							if(result.btapp.settings.set !== ('Read only property ' + key)) {
+								this.unchanged[key] = value;
+								this.ready = true;
+							}
+						}, this));
+					}, this);
+				});
+				waitsFor(function(){
+					return this.ready;
+				}, 5000);
 				waitsFor(function() {
 					return this.success;
 				}, 15000);
