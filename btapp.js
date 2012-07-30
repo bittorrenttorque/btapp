@@ -529,7 +529,7 @@
         SETTINGS: ['btapp/settings/'],
         REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
-    // These are the various state values that might be set in the object recieved in event callbacks
+    // These are the various state values that might be set in the object received in event callbacks
     Btapp.STATUS = {
         TORRENT: {
             DELETED: -1,
