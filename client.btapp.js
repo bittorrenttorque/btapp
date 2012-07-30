@@ -356,7 +356,7 @@
             assert(this.has('product'), 'client does not know what product to connect to');
             var product = this.get('product');
             this.pairing.on('pairing:found', function(options) {
-                if(options && options.name === product) {
+                if(options && options.name.toLowerCase() === product.toLowerCase()) {
                     var key = jQuery.jStorage.get(product + '_pairing_key');
                     if(key) {
                         // Let whoever triggered the pairing:found event know that they don't need
