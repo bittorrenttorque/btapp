@@ -525,6 +525,7 @@
             'btapp/torrent/all/*/file/all/*/', 
             'btapp/torrent/all/*/properties/all/*/'
         ],
+        EVENTS: ['btapp/events/'],
         SETTINGS: ['btapp/settings/'],
         REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
