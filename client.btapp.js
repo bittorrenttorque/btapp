@@ -43,9 +43,18 @@
             return str;
         },
         // We expect function signatures that come from the client to have a specific syntax
-        isFunctionSignature: function(f) {
+        isRPCFunctionSignature: function(f) {
             return f.match(/\[native function\](\([^\)]*\))+/) ||
                     f.match(/\[nf\](\([^\)]*\))+/);
+        },
+        isJSFunctionSignature: function(f) {
+            return f.match(/\[nf\]bt_/);
+        },
+        getStoredFunction: function(f) {
+            assert(TorrentClient.prototype.isJSFunctionSignature(f), 'only store functions that match the pattern "[nf]bt_*"');
+            var key = f.substring(4);
+            assert(key in this.btappCallbacks, 'trying to get a function with a key that is not recognized');
+            return this.btappCallbacks[key];
         },
         // Seeing as we're interfacing with a strongly typed language c/c++ we need to
         // ensure that our types are at least close enough to coherse into the desired types

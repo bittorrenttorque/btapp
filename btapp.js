@@ -87,8 +87,10 @@
                 return this.updateRemoveAttributeState(v, removed);
             } else if(typeof removed === 'object') {
                 return this.updateRemoveObjectState(session, added, removed, childurl, v);
-            } else if(typeof removed === 'string' && TorrentClient.prototype.isFunctionSignature(removed)) {
+            } else if(typeof removed === 'string' && TorrentClient.prototype.isRPCFunctionSignature(removed)) {
                 return this.updateRemoveFunctionState(v);
+            } else if(typeof removed === 'string' && TorrentClient.prototype.isJSFunctionSignature(removed)) {
+                return this.updateRemoveAttributeState(v, this.client.getStoredFunction(removed));
             } else if(v != 'id') {
                 return this.updateRemoveAttributeState(v, removed);
             }
@@ -152,8 +154,10 @@
                 return this.updateAddAttributeState(session, added, removed, childurl, v);
             } else if(typeof added === 'object') {
                 return this.updateAddObjectState(session, added, removed, childurl, v);
-            } else if(typeof added === 'string' && TorrentClient.prototype.isFunctionSignature(added)) {
+            } else if(typeof added === 'string' && TorrentClient.prototype.isRPCFunctionSignature(added)) {
                 return this.updateAddFunctionState(session, added, url, v);
+            } else if(typeof added === 'string' && TorrentClient.prototype.isJSFunctionSignature(added)) {
+                return this.updateAddAttributeState(session, this.client.getStoredFunction(added), removed, url, v);
             } else {
                 return this.updateAddAttributeState(session, added, removed, childurl, v);
             }   
@@ -529,7 +533,7 @@
         SETTINGS: ['btapp/settings/'],
         REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
     };
-    // These are the various state values that might be set in the object received in event callbacks
+    // These are the various state values that might be set in the object recieved in event callbacks
     Btapp.STATUS = {
         TORRENT: {
             DELETED: -1,
