@@ -401,6 +401,34 @@
 					return this.success;
 				}, 15000);
 			});
+			it('sets torrentStatus event waits for it to match function, then sets to null and waits until null', function() {
+				runs(function() {
+					this.btapp = new Btapp;
+					this.btapp.connect({
+						queries: ['btapp/events/all/torrentStatus/', 'btapp/events/set/']
+					});
+					this.callback = jasmine.createSpy();
+				});
+				waitsFor(function() {
+					return this.btapp.get('events');
+				}, 'events', 10000);
+				runs(function() {
+					this.btapp.get('events').save({
+						torrentStatus: this.callback
+					});
+				});
+				waitsFor(function() {
+					return this.btapp.get('events').get('torrentStatus') === this.callback;
+				}, 'torrentStatus === this.callback', 10000);
+				runs(function() {
+					this.btapp.get('events').save({
+						torrentStatus: null
+					});
+				});
+				waitsFor(function() {
+					return this.btapp.get('events').get('torrentStatus') === null;
+				}, 'torrentStatus === null', 10000);
+			});
 		});
 		describe('Btapp Client Function Calls', function() {
 			beforeEach(function() {

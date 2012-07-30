@@ -151,6 +151,12 @@
             if(v === 'all') {
                 return this.updateState(this.session, added, removed, childurl);
             } else if(typeof added === 'object' && added === null) {
+                //make sure we transform the removed variable to the correct js function if
+                //removed is the string representation
+                if(typeof removed === 'string' && TorrentClient.prototype.isJSFunctionSignature(removed)) {
+                    removed = this.client.getStoredFunction(removed);
+                }
+
                 return this.updateAddAttributeState(session, added, removed, childurl, v);
             } else if(typeof added === 'object') {
                 return this.updateAddObjectState(session, added, removed, childurl, v);
