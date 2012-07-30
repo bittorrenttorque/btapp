@@ -362,9 +362,6 @@
         save: function(attributes, options) {
             var deferreds = [];
             _(attributes).each(function(value, key) {
-                if(typeof this.get(key) === 'undefined') {
-                    throw 'cannot save an attribute that has not been initialized by the client';
-                }
                 deferreds.push(this.bt.set(key, value));
             }, this);
             return jQuery.when.apply(jQuery, deferreds);
