@@ -45,7 +45,7 @@
             this.bt = {};
         },
         initializeValues: function() {
-            this.url = null;
+            this.path = null;
             this.session = null;
             this.clearRemoteProcedureCalls();
         },
@@ -67,26 +67,27 @@
             this.trigger('remove:' + v);
             delete this[v];
         },
-        updateRemoveObjectState: function(session, added, removed, childurl, v) {
+        updateRemoveObjectState: function(session, added, removed, childpath, v) {
             var ret = {};
             var model = this.get(v);
             assert(model, 'trying to remove a model that does not exist');
             assert('updateState' in model, 'trying to remove an object that does not extend BtappBase');
-            model.updateState(session, added, removed, childurl);
+            model.updateState(session, added, removed, childpath);
             if(model.isEmpty()) {
                 ret[v] = model;
                 model.trigger('destroy');
             }
             return ret;
         },
-        updateRemoveElementState: function(session, added, removed, v, url) {
-            var childurl = url + v + '/';
+        updateRemoveElementState: function(session, added, removed, v, path) {
+            var childpath = _.clone(path || []);
+            childpath.push(v);
             if(v === 'all') {
-                return this.updateState(this.session, added, removed, childurl);
+                return this.updateState(this.session, added, removed, childpath);
             } else if(typeof removed === 'object' && removed === null) {
                 return this.updateRemoveAttributeState(v, removed);
             } else if(typeof removed === 'object') {
-                return this.updateRemoveObjectState(session, added, removed, childurl, v);
+                return this.updateRemoveObjectState(session, added, removed, childpath, v);
             } else if(typeof removed === 'string' && TorrentClient.prototype.isRPCFunctionSignature(removed)) {
                 return this.updateRemoveFunctionState(v);
             } else if(typeof removed === 'string' && TorrentClient.prototype.isJSFunctionSignature(removed)) {
@@ -95,20 +96,22 @@
                 return this.updateRemoveAttributeState(v, removed);
             }
         },
-        updateRemoveState: function(session, add, remove, url) {
+        updateRemoveState: function(session, add, remove, path) {
             var ret = {};
             for(var uv in remove) {
                 if(add[uv] === undefined) {
-                    _.extend(ret, this.updateRemoveElementState(session, add[uv], remove[uv], escape(uv), url));
+                    _.extend(ret, this.updateRemoveElementState(session, add[uv], remove[uv], escape(uv), path));
                 }
             }
             return ret;
         },
-        updateAddFunctionState: function(session, added, url, v) {
+        updateAddFunctionState: function(session, added, path, v) {
             //we have a special case for get...we never want the server rpc version
             if(v === 'get') return {};
 
-            var func = this.client.createFunction(session, url + v, added);
+            var childpath = _.clone(path || []);
+            childpath.push(v);
+            var func = this.client.createFunction(session, childpath, added);
 
             //set the function in the bt object...this is where we store just our rpc client functions
             assert(!(v in this.bt), 'trying to add a function that already exists');
@@ -126,26 +129,27 @@
 
             return {};
         },
-        updateAddObjectState: function(session, added, removed, childurl, v) {
+        updateAddObjectState: function(session, added, removed, childpath, v) {
             var ret = {};
             var model = this.get(v);
             if(model === undefined) {
-                // Check if the url matches a valid collection url...if so that is the type that we should create
-                if(BtappCollection.prototype.verifyUrl(childurl)) {
+                // Check if the path matches a valid collection path...if so that is the type that we should create
+                if(BtappCollection.prototype.verifyPath(childpath)) {
                     model = new BtappCollection;
                 } else {
                     model = new BtappModel({'id':v});
                 }
-                model.url = childurl;
+                model.path = childpath;
                 model.client = this.client;
 
                 ret[v] = model;
             }
-            model.updateState(this.session, added, removed, childurl);
+            model.updateState(this.session, added, removed, childpath);
             return ret;
         },
-        updateAddElementState: function(session, added, removed, v, url) {
-            var childurl = url + v + '/';
+        updateAddElementState: function(session, added, removed, v, path) {
+            var childpath = _.clone(path || []);
+            childpath.push(v);
 
             //make sure we transform the removed variable to the correct js function if
             //removed is the string representation
@@ -156,41 +160,41 @@
 
             // Special case all. It is a redundant layer that exists for the benefit of the torrent client
             if(v === 'all') {
-                return this.updateState(this.session, added, removed, childurl);
+                return this.updateState(this.session, added, removed, childpath);
             } else if(typeof added === 'object' && added === null) {
-                return this.updateAddAttributeState(session, added, removed, childurl, v);
+                return this.updateAddAttributeState(session, added, removed, childpath, v);
             } else if(typeof added === 'object') {
-                return this.updateAddObjectState(session, added, removed, childurl, v);
+                return this.updateAddObjectState(session, added, removed, childpath, v);
             } else if(typeof added === 'string' && TorrentClient.prototype.isRPCFunctionSignature(added)) {
-                return this.updateAddFunctionState(session, added, url, v);
+                return this.updateAddFunctionState(session, added, path, v);
             } else if(typeof added === 'string' && TorrentClient.prototype.isJSFunctionSignature(added)) {
-                return this.updateAddAttributeState(session, this.client.getStoredFunction(added), removed, url, v);
+                return this.updateAddAttributeState(session, this.client.getStoredFunction(added), removed, path, v);
             } else {
-                return this.updateAddAttributeState(session, added, removed, childurl, v);
+                return this.updateAddAttributeState(session, added, removed, childpath, v);
             }   
         },
-        updateAddState: function(session, add, remove, url) {
+        updateAddState: function(session, add, remove, path) {
             var ret = {};
             for(var uv in add) {
-                _.extend(ret, this.updateAddElementState(session, add[uv], remove[uv], escape(uv), url));
+                _.extend(ret, this.updateAddElementState(session, add[uv], remove[uv], escape(uv), path));
             }
             return ret;
         },
-        updateState: function(session, add, remove, url) {
-            assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + url + '")...these should have been trimmed off');
+        updateState: function(session, add, remove, path) {
+            assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + path + '")...these should have been trimmed off');
             this.session = session;
-            if(!this.url) {
-                this.url = url;
-                //lets give our object the change to verify the url
-                assert(this.verifyUrl(this.url), 'cannot updateState with an invalid collection url');
+            if(!this.path) {
+                this.path = path;
+                //lets give our object the change to verify the path
+                assert(this.verifyPath(this.path), 'cannot updateState with an invalid collection path');
             }
 
             add = add || {};
             remove = remove || {};
 
             this.applyStateChanges(
-                this.updateAddState(session, add, remove, url),
-                this.updateRemoveState(session, add, remove, url)
+                this.updateAddState(session, add, remove, path),
+                this.updateRemoveState(session, add, remove, path)
             );
         },
         sync: function() {
@@ -242,22 +246,33 @@
             this.reset();
             this.destructor();
         },
-        verifyUrl: function(url) {
-            return url.match(/btapp\/torrent\/$/) ||
-                url.match(/btapp\/torrent\/all\/[^\/]+\/file\/$/) ||
-                url.match(/btapp\/torrent\/all\/[^\/]+\/peer\/$/) ||
-                url.match(/btapp\/label\/$/) ||
-                url.match(/btapp\/label\/all\/[^\/]+\/torrent\/$/) ||
-                url.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/file\/$/) ||
-                url.match(/btapp\/label\/all\/[^\/]+\/torrent\/all\/[^\/]+\/peer\/$/) ||
-                url.match(/btapp\/rss_feed\/$/) ||
-                url.match(/btapp\/rss_feed\/all\/[^\/]+\/item\/$/) ||
-                url.match(/btapp\/rss_filter\/$/);
+        verifyPath: function(path) {
+            var collections = [
+                ['btapp', 'torrent'],
+                ['btapp', 'torrent', 'all', '*', 'file'],
+                ['btapp', 'torrent', 'all', '*', 'peer'],
+                ['btapp', 'label'],
+                ['btapp', 'label', 'all', '*', 'torrent'],
+                ['btapp', 'label', 'all', '*', 'torrent', 'all', '*', 'file'],
+                ['btapp', 'label', 'all', '*', 'torrent', 'all', '*', 'peer'],
+                ['btapp', 'rss_feed'],
+                ['btapp', 'rss_feed', 'all', '*', 'item'],
+                ['btapp', 'rss_filter']
+            ];
+
+            return _.any(collections, function(collection) {
+                if(collection.length !== path.length) return false;
+                for(var i = 0; i < collection.length; i++) {
+                    if(collection[i] === '*') continue;
+                    if(collection[i] !== path[i]) return false;
+                }
+                return true;
+            });
         },
         updateRemoveAttributeState: function(v, removed) {
             throw 'trying to remove an invalid type from a BtappCollection';
         },
-        updateAddAttributeState: function(session, added, removed, childurl, v) {
+        updateAddAttributeState: function(session, added, removed, childpath, v) {
             throw 'trying to add an invalid type to a BtappCollection';
         },
         isEmpty: function() {
@@ -312,7 +327,7 @@
                 }
             }, this));
         },
-        verifyUrl: function(url) {
+        verifyPath: function(path) {
             return true;
         },
         updateRemoveAttributeState: function(v, removed) {
@@ -322,11 +337,11 @@
             ret[v] = this.get(v);
             return ret;
         },
-        updateAddAttributeState: function(session, added, removed, childurl, v) {
+        updateAddAttributeState: function(session, added, removed, childpath, v) {
             var ret = {};
             // Set non function/object variables as model attributes
             added = (typeof added === 'string') ? unescape(added) : added;
-            assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childurl + ' -> ' + JSON.stringify(added) + ']');
+            assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childpath + ' -> ' + JSON.stringify(added) + ']');
             if(!(removed === undefined)) {
                 removed = (typeof removed === 'string') ? unescape(removed) : removed;
                 assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
@@ -380,7 +395,7 @@
         initialize: function() {
             BtappModel.prototype.initialize.apply(this, arguments);
 
-            this.url = 'btapp/';
+            this.path = ['btapp'];
             this.connected_state = false;
             this.client = null;
             this.queries = null;
@@ -402,24 +417,16 @@
             // Initialize variables
             attributes = attributes || {};
             this.poll_frequency = attributes.poll_frequency || 3000;
-            //set the queries variable...we accept either a string or an array of strings
-            if(attributes.queries === undefined) {
-                this.queries = [Btapp.QUERIES.ALL];
-            } else if(typeof attributes.queries === 'string') {
-                this.queries = [attributes.queries];
-            } else {
-                assert(typeof attributes.queries === 'object' && 'length' in attributes.queries, 'the queries attribute must be an array');
-                this.queries = _(attributes.queries).flatten();
-            }
+            this.queries = attributes.queries || Btapp.QUERIES.ALL;
 
-            var error = 'the queries attribute must either be a string or an array of strings';
+
+            var error = 'the queries attribute must be an array of arrays of strings';
             assert(typeof this.queries === 'object', error);
-            assert(_.all(this.queries, function(query) {
-                return typeof query === 'string';
+            assert(this.queries && typeof this.queries === 'object' && _.all(this.queries, function(query) {
+                return typeof query === 'object' && _.all(query, function(segment) {
+                    return typeof segment === 'string';
+                });
             }), error);
-            assert(_.all(this.queries, function(query) {
-                return query.match(/\/$/);
-            }), 'the queries attribute must contain strings that end with a \'/\'');
 
             // At this point, if a username password combo is provided we assume that we're trying to
             // access a falcon client. If not, default to the client running on your local machine.
@@ -450,7 +457,7 @@
         },
         setEvents: function(events) {
             // For each client event, just set it to trigger an javascript side event
-            // using the same name. This way you can just bind to the base btapp object
+            // using the same name. This way you can just bind to the base btapp objects
             // instead of understanding the slightly unconventional save mechanics. 
             _.each(events.toJSON(), function(value, key) {
                 if(key !== 'id') {
@@ -487,7 +494,10 @@
         },
         fetch: function() {
             if(this.client) {
-                this.client.query('state', this.queries, null, this.onFetch, this.onConnectionError);
+                this.client.query({
+                    type: 'state', 
+                    queries: JSON.stringify(this.queries)
+                }, this.onFetch, this.onConnectionError);
             }
         },
         onEvent: function(session, data) {
@@ -497,7 +507,7 @@
             if('add' in data || 'remove' in data) {
                 data.add = data.add || {};
                 data.remove = data.remove || {};
-                this.updateState(session, data.add.btapp, data.remove.btapp, 'btapp/');
+                this.updateState(session, data.add.btapp, data.remove.btapp, ['btapp']);
             } else if('callback' in data && 'arguments' in data) {
                 this.client.btappCallbacks[data.callback](data.arguments);
             } else {
@@ -518,24 +528,30 @@
         },
         waitForEvents: function(session) {
             if(this.client) {
-                this.client.query('update', null, session, _.bind(this.onEvents, this, session), this.onConnectionError);
+                this.client.query({
+                    type: 'update', 
+                    session: session
+                }, _.bind(this.onEvents, this, session), this.onConnectionError);
             }
         }
     });
 
     Btapp.VERSION = '0.1.0';
     Btapp.QUERIES = {
-        ALL: 'btapp/',
-        DHT: ['btapp/dht/'],
+        ALL: [['btapp']],
+        DHT: [['btapp','dht']],
         TORRENTS_BASIC: [
-            'btapp/create/', 
-            'btapp/add/torrent/',
-            'btapp/torrent/all/*/file/all/*/', 
-            'btapp/torrent/all/*/properties/all/*/'
+            ['btapp','create'], 
+            ['btapp','add','torrent'],
+            ['btapp','torrent','all','*','file','all','*'], 
+            ['btapp','torrent','all','*','properties','all','*']
         ],
-        EVENTS: ['btapp/events/'],
-        SETTINGS: ['btapp/settings/'],
-        REMOTE: ['btapp/connect_remote/', 'btapp/settings/all/webui.uconnect_enable/']
+        EVENTS: [['btapp','events']],
+        SETTINGS: [['btapp','settings']],
+        REMOTE: [
+            ['btapp','connect_remote'], 
+            ['btapp','settings','all','webui.uconnect_enable']
+        ]
     };
     // These are the various state values that might be set in the object recieved in event callbacks
     Btapp.STATUS = {

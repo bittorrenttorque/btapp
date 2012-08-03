@@ -96,10 +96,9 @@
         },
         // Functions are simply urls that we make ajax request to. The cb is called with the
         // result of that ajax request.
-        createFunction: function(session, url, signatures) {
+        createFunction: function(session, path, signatures) {
             assert(session, 'cannot create a function without a session id');
             var func = _.bind(function() {
-                var path = url + '(';
                 var args = [];
 
                 // Lets do a bit of validation of the arguments that we're passing into the client
@@ -125,8 +124,6 @@
                         args.push(arguments[i]);
                     }
                 }
-                path += encodeURIComponent(JSON.stringify(args));
-                path += ')/';
                 var ret = new jQuery.Deferred();
                 var success = function(data) {
                     ret.resolve(data);
@@ -134,24 +131,23 @@
                 var error = function(data) {
                     ret.reject(data);
                 };
-                this.query('function', [path], session, success, error);
-                this.trigger('queries', url);
+                this.query({
+                    type: 'function', 
+                    path: JSON.stringify(path),
+                    args: JSON.stringify(args),
+                    session: session
+                }, success, error);
+                this.trigger('queries', path);
                 return ret;
             }, this);
             func.valueOf = function() { return signatures; };
             return func;
         },
-        query: function(type, queries, session, cb, err) {
-            assert(type == "update" || type == "state" || type == "function", 'the query type must be either "update", "state", or "function"');
+        query: function(args, cb, err) {
+            assert(args.type == "update" || args.type == "state" || args.type == "function", 'the query type must be either "update", "state", or "function"');
             cb = cb || function() {};
             err = err || function() {};
-            // Handle either an array of strings or just a single query.
-            if(typeof queries === 'string') queries = [queries];
 
-            var args = {};
-            args['type'] = type;
-            if(queries) args['queries'] = JSON.stringify(queries);
-            if(session) args['session'] = session;
             args['hostname'] = window.location.hostname || window.location.pathname;
             var success_callback = _.bind(function(data) {
                 if (data == 'invalid request') {
@@ -459,9 +455,10 @@
             this.pairing.scan();
         },
         send_query: function(args, cb, err) {
+            this.trigger('client:query', this.url, args);
             var url = this.url;
             _.each(args, function(value, key) {
-                url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+                url += '&' + encodeURI(key) + '=' + encodeURI(value);
             });
             this.ajax(url, cb, err);
         }
