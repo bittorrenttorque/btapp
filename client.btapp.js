@@ -126,7 +126,18 @@
                 }
                 var ret = new jQuery.Deferred();
                 var success = function(data) {
-                    ret.resolve(data);
+                    //lets strip down to the relevent path data
+                    _.each(path, function(segment) {
+                        var decoded = decodeURIComponent(segment);
+                        if(typeof data !== 'undefined') {
+                            data = data[decoded];
+                        }
+                    });
+                    if(typeof data === 'undefined') {
+                        ret.reject('return value parsing error ' + JSON.stringify(data));
+                    } else {
+                        ret.resolve(data);
+                    }
                 };
                 var error = function(data) {
                     ret.reject(data);
