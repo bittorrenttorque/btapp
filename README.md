@@ -164,7 +164,7 @@ patrick at bittorrent.com
 
 [@pwmckenna](http://twitter.com/pwmckenna)
 
-#License
+##License
 Copyright 2012 Patrick Williams, BitTorrent Inc.
 http://torque.bittorrent.com/
 
