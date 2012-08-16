@@ -94,6 +94,17 @@
                 });
             });
         },
+        convertCallbackFunctionArgs: function(args) {
+            _.each(args, function(value, key) {
+                // We are responsible for converting functions to variable names...
+                // this will be called later via a event with a callback and arguments variables
+                if(typeof value === 'function') {
+                   args[key] = this.storeCallbackFunction(value);
+                } else if(typeof value === 'object' && value) {
+                    this.convertCallbackFunctionArgs(value);
+                }
+            }, this);
+        },
         // Functions are simply urls that we make ajax request to. The cb is called with the
         // result of that ajax request.
         createFunction: function(session, path, signatures) {
@@ -104,26 +115,18 @@
                 // Lets do a bit of validation of the arguments that we're passing into the client
                 // unfortunately arguments isn't a completely authetic javascript array, so we'll have
                 // to "splice" by hand. All this just to validate the correct types! sheesh...
-                var native_args = [];
                 var i;
-                for(i = 0; i < arguments.length; i++) native_args.push(arguments[i]);
+                for(i = 0; i < arguments.length; i++) args.push(arguments[i]);
                 // This is as close to a static class function as you can get in javascript i guess
                 // we should be able to use verifySignaturesArguments to determine if the client will
                 // consider the arguments that we're passing to be valid
-                if(!TorrentClient.prototype.validateArguments.call(this, signatures, native_args)) {
+                if(!TorrentClient.prototype.validateArguments.call(this, signatures, args)) {
                     throw 'arguments do not match any of the function signatures exposed by the client';
                 }
 
-
-                for(i = 0; i < arguments.length; i++) {
-                    // We are responsible for converting functions to variable names...
-                    // this will be called later via a event with a callback and arguments variables
-                    if(typeof arguments[i] === 'function') {
-                        args.push(this.storeCallbackFunction(arguments[i]));
-                    } else {
-                        args.push(arguments[i]);
-                    }
-                }
+                console.log("BEFORE: " + JSON.stringify(args));
+                this.convertCallbackFunctionArgs(args);
+                console.log("AFTER: " + JSON.stringify(args));
                 var ret = new jQuery.Deferred();
                 var success = function(data) {
                     //lets strip down to the relevent path data
@@ -469,7 +472,7 @@
             this.trigger('client:query', this.url, args);
             var url = this.url;
             _.each(args, function(value, key) {
-                url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
+                url += '&' + encodeURI(key) + '=' + encodeURI(value);
             });
             this.ajax(url, cb, err);
         }
