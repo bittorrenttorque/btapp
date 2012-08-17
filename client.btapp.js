@@ -124,9 +124,7 @@
                     throw 'arguments do not match any of the function signatures exposed by the client';
                 }
 
-                console.log("BEFORE: " + JSON.stringify(args));
                 this.convertCallbackFunctionArgs(args);
-                console.log("AFTER: " + JSON.stringify(args));
                 var ret = new jQuery.Deferred();
                 var success = function(data) {
                     //lets strip down to the relevent path data
