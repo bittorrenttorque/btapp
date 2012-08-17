@@ -470,7 +470,7 @@
             this.trigger('client:query', this.url, args);
             var url = this.url;
             _.each(args, function(value, key) {
-                url += '&' + encodeURI(key) + '=' + encodeURI(value);
+                url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
             });
             this.ajax(url, cb, err);
         }
