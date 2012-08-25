@@ -1,23 +1,14 @@
 (function() {
 	describe('Btapp Unit Tests', function() {
 		describe('Btapp initialize parameter validation', function() {
-			it('defaults queries to \'btapp/\'', function() {
+			it('defaults queries to [[\'btapp\']]', function() {
 				var btapp = new Btapp;
 				btapp.connect();
-				expect(btapp.queries).toEqual(['btapp/']);
+				expect(btapp.queries).toEqual([['btapp']]);
 				btapp.disconnect();
 			});
-			it('accepts queries as a single string', function() {
-				var query = 'btapp/events/';
-				var btapp = new Btapp;
-				btapp.connect({
-					queries: query
-				});
-				expect(btapp.queries).toEqual([query]);
-				btapp.disconnect();
-			});
-			it('accepts queries as an array of strings', function() {
-				var queries = ['btapp/events/','btapp/create/'];
+			it('accepts queries as an array of arrays of strings', function() {
+				var queries = [['btapp','events'],['btapp','create']];
 				var btapp = new Btapp;
 				btapp.connect({
 					queries: queries
@@ -25,38 +16,8 @@
 				expect(btapp.queries).toEqual(queries);
 				btapp.disconnect();
 			});
-			it('throws an exception if a non string is provided', function() {
-				var exception = 'the queries attribute must be an array';
-				var queries = false;
-				var btapp = new Btapp;
-				expect(function() {
-					btapp.connect({
-						queries: queries
-					});
-				}).toThrow(exception);
-			});
-			it('throws an exception if an array with non-strings is provided', function() {
-				var exception = 'the queries attribute must either be a string or an array of strings';
-				var queries = [false, 0, undefined];
-				var btapp = new Btapp;
-				expect(function() {
-					btapp.connect({
-						queries: queries
-					});
-				}).toThrow(exception);
-			});
-			it('throws an exception if a query string does not end with a \'/\'', function() {
-				var exception = 'the queries attribute must contain strings that end with a \'/\'';
-				var queries = ['btapp/events/','btapp/create'];
-				var btapp = new Btapp;
-				expect(function() {
-					btapp.connect({
-						queries: queries
-					});
-				}).toThrow(exception);
-			});
 			it('expects queries to be cleared after disconnect', function() {
-				var queries = ['btapp/events/','btapp/create/'];
+				var queries = [['btapp','events'],['btapp','create']];
 				var btapp = new Btapp;
 				btapp.connect({
 					queries: queries
@@ -68,52 +29,52 @@
 		describe('BtappModel state updates', function() {
 			it('adds and removes an attribute', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				expect(model.get('testkey')).toEqual('testvalue');
-				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
+				model.updateState('testsession', null, {'testkey':'testvalue'}, ['testurl']);
 				expect(model.get('testkey')).toBeUndefined();
 			});
 			it('adds attributes and clears state', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				expect(model.get('testkey')).toEqual('testvalue');
 				model.clearState();
 				expect(model.get('testkey')).toBeUndefined();
 			});
 			it('throws an error if removing an attribute and providing the wrong previous value', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				var exception = 'trying to remove an attribute, but did not provide the correct previous value';
-				expect(function() { model.updateState('testsession', null, {'testkey':'testvalue1'}, 'testurl') }).toThrow(exception);
+				expect(function() { model.updateState('testsession', null, {'testkey':'testvalue1'}, ['testurl']) }).toThrow(exception);
 			});
 			it('throws an error if changing an attribute and providing the wrong previous value', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				var exception = 'trying to update an attribute, but did not provide the correct previous value';
-				expect(function() { model.updateState('testsession', {'testkey':'testvalue2'}, {'testkey':'testvalue1'}, 'testurl') }).toThrow(exception);
+				expect(function() { model.updateState('testsession', {'testkey':'testvalue2'}, {'testkey':'testvalue1'}, ['testurl']) }).toThrow(exception);
 			});
 			it('throws an error if changing an attribute to the same value', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl/');
-				var exception = 'trying to set a variable to the existing value [testurl/testkey/ -> "testvalue"]';
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
+				var exception = 'trying to set a variable to the existing value [testurl,testkey -> "testvalue"]';
 				expect(function() { 
-					model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, 'testurl/') 
+					model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, ['testurl']) 
 				}).toThrow(exception);
 			});
 			it('changes from url encoded strings', function() {
 				var value = "magnet:?xt=urn:btih:7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4&dn=trusted-computing&tr=http%3a//www.legaltorrents.com%3a7070/announce";
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':value}, null, 'testurl/');
-				model.updateState('testsession', {'testkey':'value'}, {'testkey':value}, 'testurl/');
+				model.updateState('testsession', {'testkey':value}, null, ['testurl']);
+				model.updateState('testsession', {'testkey':'value'}, {'testkey':value}, ['testurl']);
 			});
 			it('handles adding and removing attributes with value 0', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':0}, undefined, 'testurl/');
+				model.updateState('testsession', {'testkey':0}, undefined, ['testurl']);
 				expect(model.get('testkey')).toEqual(0);
 				expect(model.get('testkey')).not.toEqual(false);
 				expect(model.get('testkey')).not.toEqual('');
 				expect(model.get('testkey')).not.toEqual(null);
-				model.updateState('testsession', null, {'testkey':0}, 'testurl/');
+				model.updateState('testsession', null, {'testkey':0}, ['testurl']);
 				expect(model.get('testkey')).toEqual(null);
 				expect(model.get('testkey')).not.toEqual(false);
 				expect(model.get('testkey')).not.toEqual(0);
@@ -121,12 +82,12 @@
 			});
 			it('handles adding and removing attributes with value false', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':false}, undefined, 'testurl/');
+				model.updateState('testsession', {'testkey':false}, undefined, ['testurl']);
 				expect(model.get('testkey')).toEqual(false);
 				expect(model.get('testkey')).not.toEqual(0);
 				expect(model.get('testkey')).not.toEqual('');
 				expect(model.get('testkey')).not.toEqual(null);
-				model.updateState('testsession', null, {'testkey':false}, 'testurl/');
+				model.updateState('testsession', null, {'testkey':false}, ['testurl']);
 				expect(model.get('testkey')).toEqual(null);
 				expect(model.get('testkey')).not.toEqual(false);
 				expect(model.get('testkey')).not.toEqual(0);
@@ -134,12 +95,12 @@
 			});
 			it('handles adding and removing attributes with value \'\'', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':''}, undefined, 'testurl/');
+				model.updateState('testsession', {'testkey':''}, undefined, ['testurl']);
 				expect(model.get('testkey')).toEqual('');
 				expect(model.get('testkey')).not.toEqual(0);
 				expect(model.get('testkey')).not.toEqual(false);
 				expect(model.get('testkey')).not.toEqual(null);
-				model.updateState('testsession', null, {'testkey':''}, 'testurl/');
+				model.updateState('testsession', null, {'testkey':''}, ['testurl']);
 				expect(model.get('testkey')).toEqual(null);
 				expect(model.get('testkey')).not.toEqual(false);
 				expect(model.get('testkey')).not.toEqual(0);
@@ -148,7 +109,7 @@
 			it('adds multiple attributes and removes them one at a time', function() {
 				var model = new BtappModel({'id':'test'});
 				model.client = new LocalTorrentClient({'btapp':model});
-				model.updateState('testsession', {'a':{'a':3,'b':{'b':3,'c':3,'fn':'[nf]()'}}}, undefined, 'testurl/');
+				model.updateState('testsession', {'a':{'a':3,'b':{'b':3,'c':3,'fn':'[nf]()'}}}, undefined, ['testurl']);
 				expect(model.get('a')).toBeDefined();
 				expect(model.get('a').get('a')).toEqual(3);
 				expect(model.get('a').get('b')).toBeDefined();
@@ -157,7 +118,7 @@
 				expect(model.get('a').get('b').get('b')).toEqual(3);
 				expect(model.get('a').get('b').get('c')).toEqual(3);
 				
-				model.updateState('testsession', undefined, {'a':{'b':{'c':3}}}, 'testurl/');
+				model.updateState('testsession', undefined, {'a':{'b':{'c':3}}}, ['testurl']);
 				expect(model.get('a')).toBeDefined();
 				expect(model.get('a').get('a')).toEqual(3);
 				expect(model.get('a').get('b')).toBeDefined();
@@ -166,7 +127,7 @@
 				expect(model.get('a').get('b').get('c')).not.toBeDefined();
 				expect(model.get('a').get('b').bt.fn).toBeDefined();
 
-				model.updateState('testsession', undefined, {'a':{'b':{'b':3}}}, 'testurl/');
+				model.updateState('testsession', undefined, {'a':{'b':{'b':3}}}, ['testurl']);
 				expect(model.get('a')).toBeDefined();
 				expect(model.get('a').get('a')).toEqual(3);
 				expect(model.get('a').get('b')).toBeDefined();
@@ -174,7 +135,7 @@
 				expect(model.get('a').get('b').get('b')).not.toBeDefined();
 				expect(model.get('a').get('b').get('c')).not.toBeDefined();
 				
-				model.updateState('testsession', undefined, {'a':{'b':{'fn':'[nf]()'}}}, 'testurl/');
+				model.updateState('testsession', undefined, {'a':{'b':{'fn':'[nf]()'}}}, ['testurl']);
 				expect(model.get('a')).toBeDefined();
 				expect(model.get('a').get('a')).toEqual(3);
 				expect(model.get('a').get('b')).not.toBeDefined();
@@ -182,20 +143,20 @@
 			it('adds a function', function() {
 				var model = new BtappModel({'id':'test'});
 				model.client = new LocalTorrentClient({'btapp':model});
-				model.updateState('testsession', {'testfunc':'[nf]()'}, null, 'testurl');
+				model.updateState('testsession', {'testfunc':'[nf]()'}, null, ['testurl']);
 				expect(typeof model.bt.testfunc).toEqual('function');
 			});
 			it('adds and removes a BtappModel', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey1':{'testkey2':{'testkey3':'testvalue'}}}, null, 'testurl');
+				model.updateState('testsession', {'testkey1':{'testkey2':{'testkey3':'testvalue'}}}, null, ['testurl']);
 				expect(model.get('testkey1') instanceof BtappModel).toBeTruthy();
 				expect(model.get('testkey1').get('testkey2') instanceof BtappModel).toBeTruthy();
-				model.updateState('testsession', null, {'testkey1':{'testkey2':{'testkey3':'testvalue'}}}, 'testurl');
+				model.updateState('testsession', null, {'testkey1':{'testkey2':{'testkey3':'testvalue'}}}, ['testurl']);
 				expect(model.get('testkey1')).toBeUndefined();
 			});
 			it('adds a BtappModel and clears state', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey1':{'testkey2':{'testkey3':'testvalue'}}}, null, 'testurl');
+				model.updateState('testsession', {'testkey1':{'testkey2':{'testkey3':'testvalue'}}}, null, ['testurl']);
 				var testkey1 = model.get('testkey1');
 				expect(testkey1.get('testkey2')).toBeDefined();
 				model.clearState();
@@ -203,27 +164,27 @@
 			});
 			it('adds a BtappCollection', function() {
 				var model = new BtappModel({'id':'btapp'});
-				model.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, 'btapp/');
+				model.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, ['btapp']);
 				expect(model.get('torrent') instanceof BtappCollection).toBeTruthy();
 			});
 			it('adds a BtappCollection and ignores "all" when populating', function() {
 				var model = new BtappModel({'id':'btapp'});
-				model.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, 'testurl');
+				model.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, ['testurl']);
 				var torrent = model.get('torrent').get('01234');
 				expect(torrent instanceof BtappModel).toBeTruthy();
 			});
 		});
 		describe('BtappCollection state updates', function() {
-			it('throws an exception if not given a valid url', function() {
+			it('throws an exception if not given a valid path', function() {
 				var collection = new BtappCollection;
-				var exception = 'cannot updateState with an invalid collection url';
+				var exception = 'cannot updateState with an invalid collection path';
 				expect(function() { 
-					collection.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, 'testurl'); 
+					collection.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, ['testurl']); 
 				}).toThrow(exception);
 			});
 			it('adds models', function() {
 				var collection = new BtappCollection;
-				collection.updateState('testsession', {'key1':{'torrentname':'name1'},'key2':{'torrentname':'name1'}}, null, 'btapp/torrent/');
+				collection.updateState('testsession', {'key1':{'torrentname':'name1'},'key2':{'torrentname':'name1'}}, null, ['btapp','torrent']);
 				expect(collection.length).toEqual(2);
 				expect(collection.get('key1') instanceof BtappModel).toBeTruthy();
 				expect(collection.get('key2') instanceof BtappModel).toBeTruthy();
@@ -231,13 +192,13 @@
 			it('adds a function', function() {
 				var collection = new BtappCollection;
 				collection.client = new LocalTorrentClient({'btapp':new BtappModel});
-				collection.updateState('testsession', {'testfunc':'[nf]()'}, null, 'btapp/torrent/');
+				collection.updateState('testsession', {'testfunc':'[nf]()'}, null, ['btapp','torrent']);
 				expect(typeof collection.bt.testfunc).toEqual('function');
 			});
 			it('throws an exception if trying to add a non-BtappModel', function() {
 				var collection = new BtappCollection;
 				expect(function() { 
-					collection.updateState('testsession', {'key1':'value1','key2':{}}, null, 'btapp/torrent/');
+					collection.updateState('testsession', {'key1':'value1','key2':{}}, null, ['btapp','torrent']);
 				}).toThrow('trying to add an invalid type to a BtappCollection');
 			});
 		});
@@ -245,7 +206,7 @@
 			beforeEach(function() {
 				this.model = new BtappModel({'id':'test'});
 				this.model.client = new LocalTorrentClient({'btapp':this.model});
-				this.model.updateState('testsession', {'testfunc':'[nf](string,dispatch)'}, null, 'testurl');
+				this.model.updateState('testsession', {'testfunc':'[nf](string,dispatch)'}, null, ['testurl']);
 			});
 			it('throws error if too many arguments are provided', function() {
 				this.exception = 'arguments do not match any of the function signatures exposed by the client';
@@ -258,7 +219,7 @@
 				expect(this.func).toThrow(this.exception);
 			});
 			it('throws error if the function signature exposed by the client contains non recognized types', function() {
-				this.model.updateState('testsession', {'invalidfunc':'[nf](string,invalidtype)'}, null, 'testurl');
+				this.model.updateState('testsession', {'invalidfunc':'[nf](string,invalidtype)'}, null, ['testurl']);
 				this.exception = 'there is an invalid type in the function signature exposed by the client';
 				this.func = _.bind(this.model.bt.invalidfunc, this, 'arg1', 'arg2');
 				expect(this.func).toThrow(this.exception);
@@ -269,7 +230,7 @@
 				var collection = new BtappCollection;
 				var add_callback = jasmine.createSpy();
 				collection.bind('add', add_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
 				expect(add_callback).toHaveBeenCalled();
 				expect(add_callback.callCount).toEqual(1);
 			});
@@ -277,7 +238,7 @@
 				var collection = new BtappCollection;
 				var add_callback = jasmine.createSpy();
 				collection.bind('add:' + 'ABCD', add_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
 				expect(add_callback).toHaveBeenCalled();
 				expect(add_callback.callCount).toEqual(1);
 			});
@@ -285,8 +246,8 @@
 				var collection = new BtappCollection;
 				var remove_callback = jasmine.createSpy();
 				collection.bind('remove', remove_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
-				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
+				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, ['btapp','torrent']);
 				expect(remove_callback).toHaveBeenCalled();
 				expect(remove_callback.callCount).toEqual(1);
 			});
@@ -294,8 +255,8 @@
 				var collection = new BtappCollection;
 				var remove_callback = jasmine.createSpy();
 				collection.bind('remove:' + 'ABCD', remove_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, 'btapp/torrent/');
-				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
+				collection.updateState('testsession', null, {'all':{'ABCD':{'torrentname':'name'}}}, ['btapp','torrent']);
 				expect(remove_callback).toHaveBeenCalled();
 				expect(remove_callback.callCount).toEqual(1);
 			});
@@ -303,8 +264,8 @@
 				var collection = new BtappCollection;
 				var change_callback = jasmine.createSpy();
 				collection.bind('change', change_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, 'btapp/torrent/');
-				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, ['btapp','torrent']);
+				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, ['btapp','torrent']);
 				expect(change_callback).toHaveBeenCalled();
 				expect(change_callback.callCount).toEqual(1);
 			});
@@ -312,8 +273,8 @@
 				var collection = new BtappCollection;
 				var change_callback = jasmine.createSpy();
 				collection.bind('change:' + 'ABCD', change_callback);
-				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, 'btapp/torrent/');
-				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, 'btapp/torrent/');
+				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, ['btapp','torrent']);
+				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, ['btapp','torrent']);
 				expect(change_callback).toHaveBeenCalled();
 				expect(change_callback.callCount).toEqual(1);
 			});
@@ -323,7 +284,7 @@
 				var model = new BtappModel({'id':'test'});
 				var add_callback = jasmine.createSpy();
 				model.bind('add', add_callback);
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				expect(add_callback).toHaveBeenCalledWith('testvalue', 'testkey');
 				model.unbind('add', add_callback);
 				expect(add_callback.callCount).toEqual(1);
@@ -332,7 +293,7 @@
 				var model = new BtappModel({'id':'test'});
 				var add_callback = jasmine.createSpy();
 				model.bind('add:' + 'testkey', add_callback);
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				expect(add_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('add:' + 'testkey', add_callback);
 				expect(add_callback.callCount).toEqual(1);
@@ -345,7 +306,7 @@
 					expect(this.bt.fn).toBeDefined();
 					add_callback();
 				}, model));
-				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				model.updateState('testsession', {'fn':'[nf]()'}, null, ['testurl']);
 				expect(add_callback).toHaveBeenCalled();
 				model.unbind('add:bt:fn', add_callback);
 				expect(add_callback.callCount).toEqual(1);
@@ -358,27 +319,27 @@
 					expect(this.bt.fn).toBeDefined();
 					add_callback();
 				}, model));
-				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				model.updateState('testsession', {'fn':'[nf]()'}, null, ['testurl']);
 				expect(add_callback).toHaveBeenCalled();
 				model.unbind('add:bt', add_callback);
 				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers remove event', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				var remove_callback = jasmine.createSpy();
 				model.bind('remove', remove_callback);
-				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
+				model.updateState('testsession', null, {'testkey':'testvalue'}, ['testurl']);
 				expect(remove_callback).toHaveBeenCalledWith('testvalue', 'testkey');
 				model.unbind('remove', remove_callback);
 				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers remove:key event', function() {
 				var model = new BtappModel({'id':'test'});
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				var remove_callback = jasmine.createSpy();
 				model.bind('remove:' + 'testkey', remove_callback);
-				model.updateState('testsession', null, {'testkey':'testvalue'}, 'testurl');
+				model.updateState('testsession', null, {'testkey':'testvalue'}, ['testurl']);
 				expect(remove_callback).toHaveBeenCalledWith('testvalue');
 				model.unbind('remove:' + 'testkey', remove_callback);
 				expect(remove_callback.callCount).toEqual(1);
@@ -386,10 +347,10 @@
 			it('triggers remove:bt:func event', function() {
 				var model = new BtappModel({'id':'test'});
 				model.client = new LocalTorrentClient({'btapp':model});
-				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				model.updateState('testsession', {'fn':'[nf]()'}, null, ['testurl']);
 				var remove_callback = jasmine.createSpy();
 				model.bind('remove:bt:fn', remove_callback);
-				model.updateState('testsession', null, {'fn':'[nf]()'}, 'testurl');
+				model.updateState('testsession', null, {'fn':'[nf]()'}, ['testurl']);
 				expect(remove_callback).toHaveBeenCalled();
 				model.unbind('remove:bt:fn', remove_callback);
 				expect(remove_callback.callCount).toEqual(1);
@@ -397,10 +358,10 @@
 			it('triggers remove:bt event', function() {
 				var model = new BtappModel({'id':'test'});
 				model.client = new LocalTorrentClient({'btapp':model});
-				model.updateState('testsession', {'fn':'[nf]()'}, null, 'testurl');
+				model.updateState('testsession', {'fn':'[nf]()'}, null, ['testurl']);
 				var remove_callback = jasmine.createSpy();
 				model.bind('remove:bt', remove_callback);
-				model.updateState('testsession', null, {'fn':'[nf]()'}, 'testurl');
+				model.updateState('testsession', null, {'fn':'[nf]()'}, ['testurl']);
 				expect(remove_callback).toHaveBeenCalled();
 				model.unbind('remove:bt', remove_callback);
 				expect(remove_callback.callCount).toEqual(1);
@@ -409,11 +370,11 @@
 				var model = new BtappModel({'id':'test'});
 				var change_callback = jasmine.createSpy();
 				model.bind('change', change_callback);
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				expect(change_callback.callCount).toEqual(1);
-				model.updateState('testsession', {'testkey':'newtestvalue'}, {'testkey':'testvalue'}, 'testurl');
+				model.updateState('testsession', {'testkey':'newtestvalue'}, {'testkey':'testvalue'}, ['testurl']);
 				expect(change_callback.callCount).toEqual(2);
-				model.updateState('testsession', null, {'testkey':'newtestvalue'}, 'testurl');
+				model.updateState('testsession', null, {'testkey':'newtestvalue'}, ['testurl']);
 				expect(change_callback.callCount).toEqual(3);
 				model.unbind('change', change_callback);
 			});
@@ -421,11 +382,11 @@
 				var model = new BtappModel({'id':'test'});
 				var change_callback = jasmine.createSpy();
 				model.bind('change:' + 'testkey', change_callback);
-				model.updateState('testsession', {'testkey':'testvalue'}, null, 'testurl');
+				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				expect(change_callback.callCount).toEqual(1);
-				model.updateState('testsession', {'testkey':'newtestvalue'}, {'testkey':'testvalue'}, 'testurl');
+				model.updateState('testsession', {'testkey':'newtestvalue'}, {'testkey':'testvalue'}, ['testurl']);
 				expect(change_callback.callCount).toEqual(2);
-				model.updateState('testsession', null, {'testkey':'newtestvalue'}, 'testurl');
+				model.updateState('testsession', null, {'testkey':'newtestvalue'}, ['testurl']);
 				expect(change_callback.callCount).toEqual(3);
 				model.unbind('change:' + 'testkey', change_callback);
 			});
@@ -435,9 +396,9 @@
 				var model = new BtappModel({'id':'settings'});
 				var change_callback = jasmine.createSpy();
 				model.bind('change', change_callback);
-				model.updateState('testsession', settings1, null, 'testurl');
-				model.updateState('testsession', settings2, settings1, 'testurl');
-				model.updateState('testsession', null, settings2, 'testurl');
+				model.updateState('testsession', settings1, null, ['testurl']);
+				model.updateState('testsession', settings2, settings1, ['testurl']);
+				model.updateState('testsession', null, settings2, ['testurl']);
 				expect(change_callback.callCount).toEqual(4);
 			});
 			it('triggers a destroy event for each model/collection on a base object clearState', function() {
