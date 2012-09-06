@@ -584,6 +584,21 @@
             MEDIUM: 1,
             HIGH: 2,
             METADATA_ONLY: 3 //Means that once the metadata has been downloaded, the torrent stops
+        },
+        FILE: {
+            PRIORITY: {
+                NO_DOWNLOAD: 0,
+                LOW: 5,
+                MEDIUM: 10, 
+                HIGH: 15
+            }
+        },
+        //Arguments meant for use with the remove function dangling off of torrents
+        REMOVE: {
+            NO_DELETE: 0, //stops and removes the torrent from the client
+            DELETE_TORRENT: 1, // removes from client and deletes the .torrent file
+            DELETE_DATA: 2, // removes from client and deletes the torrent file data
+            DELETE_TORRENT_AND_DATA: 3 //removes from client and deletes the .torrent file and data
         }
     };
 }).call(this);
