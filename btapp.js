@@ -257,7 +257,9 @@
                 ['btapp', 'label', 'all', '*', 'torrent', 'all', '*', 'peer'],
                 ['btapp', 'rss_feed'],
                 ['btapp', 'rss_feed', 'all', '*', 'item'],
-                ['btapp', 'rss_filter']
+                ['btapp', 'rss_filter'],
+                ['btapp', 'stream'],
+                ['btapp', 'stream', 'all', '*', 'diskio']
             ];
 
             return _.any(collections, function(collection) {
