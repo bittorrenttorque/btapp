@@ -418,7 +418,7 @@
 
             // Initialize variables
             attributes = attributes || {};
-            this.poll_frequency = attributes.poll_frequency || 3000;
+            this.poll_frequency = attributes.poll_frequency || 1;
             this.queries = attributes.queries || Btapp.QUERIES.ALL;
 
 
