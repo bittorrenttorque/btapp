@@ -67,47 +67,33 @@
             this.trigger('remove:' + v);
             delete this[v];
         },
-        updateRemoveObjectState: function(session, added, removed, childpath, v) {
-            var ret = {};
-            var model = this.get(v);
-            assert(model, 'trying to remove a model that does not exist');
-            assert('updateState' in model, 'trying to remove an object that does not extend BtappBase');
-            model.updateState(session, added, removed, childpath);
-            if(model.isEmpty()) {
-                ret[v] = model;
-                model.trigger('destroy');
-            }
-            return ret;
-        },
         updateRemoveElementState: function(session, added, removed, v, path) {
             var childpath = _.clone(path || []);
             childpath.push(v);
             if(v === 'all') {
                 return this.updateState(this.session, added, removed, childpath);
             } else if(typeof removed === 'object' && removed === null) {
-                return this.updateRemoveAttributeState(v, removed);
+                this.updateRemoveAttributeState(v, removed);
             } else if(typeof removed === 'object') {
-                return this.updateRemoveObjectState(session, added, removed, childpath, v);
+                this.updateRemoveObjectState(session, added, removed, childpath, v);
             } else if(typeof removed === 'string' && TorrentClient.prototype.isRPCFunctionSignature(removed)) {
-                return this.updateRemoveFunctionState(v);
+                this.updateRemoveFunctionState(v);
             } else if(typeof removed === 'string' && TorrentClient.prototype.isJSFunctionSignature(removed)) {
-                return this.updateRemoveAttributeState(v, this.client.getStoredFunction(removed));
+                this.updateRemoveAttributeState(v, this.client.getStoredFunction(removed));
             } else if(v != 'id') {
-                return this.updateRemoveAttributeState(v, removed);
+                this.updateRemoveAttributeState(v, removed);
             }
         },
         updateRemoveState: function(session, add, remove, path) {
-            var ret = {};
             for(var uv in remove) {
                 if(add[uv] === undefined) {
-                    _.extend(ret, this.updateRemoveElementState(session, add[uv], remove[uv], escape(uv), path));
+                    this.updateRemoveElementState(session, add[uv], remove[uv], escape(uv), path);
                 }
             }
-            return ret;
         },
         updateAddFunctionState: function(session, added, path, v) {
             //we have a special case for get...we never want the server rpc version
-            if(v === 'get') return {};
+            if(v === 'get') return;
 
             var childpath = _.clone(path || []);
             childpath.push(v);
@@ -126,26 +112,6 @@
 
             this.trigger('add:bt:' + v);
             this.trigger('add:bt', this.bt[v], v);
-
-            return {};
-        },
-        updateAddObjectState: function(session, added, removed, childpath, v) {
-            var ret = {};
-            var model = this.get(v);
-            if(model === undefined) {
-                // Check if the path matches a valid collection path...if so that is the type that we should create
-                if(BtappCollection.prototype.verifyPath(childpath)) {
-                    model = new BtappCollection;
-                } else {
-                    model = new BtappModel({'id':v});
-                }
-                model.path = childpath;
-                model.client = this.client;
-
-                ret[v] = model;
-            }
-            model.updateState(this.session, added, removed, childpath);
-            return ret;
         },
         updateAddElementState: function(session, added, removed, v, path) {
             var childpath = _.clone(path || []);
@@ -160,25 +126,23 @@
 
             // Special case all. It is a redundant layer that exists for the benefit of the torrent client
             if(v === 'all') {
-                return this.updateState(this.session, added, removed, childpath);
+                this.updateState(this.session, added, removed, childpath);
             } else if(typeof added === 'object' && added === null) {
-                return this.updateAddAttributeState(session, added, removed, childpath, v);
+                this.updateAddAttributeState(session, added, removed, childpath, v);
             } else if(typeof added === 'object') {
-                return this.updateAddObjectState(session, added, removed, childpath, v);
+                this.updateAddObjectState(session, added, removed, childpath, v);
             } else if(typeof added === 'string' && TorrentClient.prototype.isRPCFunctionSignature(added)) {
-                return this.updateAddFunctionState(session, added, path, v);
+                this.updateAddFunctionState(session, added, path, v);
             } else if(typeof added === 'string' && TorrentClient.prototype.isJSFunctionSignature(added)) {
-                return this.updateAddAttributeState(session, this.client.getStoredFunction(added), removed, path, v);
+                this.updateAddAttributeState(session, this.client.getStoredFunction(added), removed, path, v);
             } else {
-                return this.updateAddAttributeState(session, added, removed, childpath, v);
+                this.updateAddAttributeState(session, added, removed, childpath, v);
             }   
         },
         updateAddState: function(session, add, remove, path) {
-            var ret = {};
             for(var uv in add) {
-                _.extend(ret, this.updateAddElementState(session, add[uv], remove[uv], escape(uv), path));
+                this.updateAddElementState(session, add[uv], remove[uv], escape(uv), path);
             }
-            return ret;
         },
         updateState: function(session, add, remove, path) {
             assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + path + '")...these should have been trimmed off');
@@ -192,10 +156,9 @@
             add = add || {};
             remove = remove || {};
 
-            this.applyStateChanges(
-                this.updateAddState(session, add, remove, path),
-                this.updateRemoveState(session, add, remove, path)
-            );
+            this.updateAddState(session, add, remove, path);
+            this.updateRemoveState(session, add, remove, path);
+            this.change && this.change();
         },
         sync: function() {
             //no sync for you
@@ -280,9 +243,31 @@
         isEmpty: function() {
             return jQuery.isEmptyObject(this.bt) && this.length === 0;
         },
-        applyStateChanges: function(add, remove) {
-            this.add(_.values(add));
-            this.remove(_.values(remove));
+        updateAddObjectState: function(session, added, removed, childpath, v) {
+            var model = this.get(v);
+            if(model === undefined) {
+                // Check if the path matches a valid collection path...if so that is the type that we should create
+                if(BtappCollection.prototype.verifyPath(childpath)) {
+                    model = new BtappCollection;
+                } else {
+                    model = new BtappModel({'id':v});
+                }
+                model.path = childpath;
+                model.client = this.client;
+
+                this.add(model);
+            }
+            model.updateState(this.session, added, removed, childpath);
+        },
+        updateRemoveObjectState: function(session, added, removed, childpath, v) {
+            var model = this.get(v);
+            assert(model, 'trying to remove a model that does not exist');
+            assert('updateState' in model, 'trying to remove an object that does not extend BtappBase');
+            model.updateState(session, added, removed, childpath);
+            if(model.isEmpty()) {
+                this.remove(model);
+                model.trigger('destroy');
+            }
         }
     });
 
@@ -333,14 +318,13 @@
             return true;
         },
         updateRemoveAttributeState: function(v, removed) {
-            var ret = {};
             removed = typeof removed === 'string' ? unescape(removed) : removed;
             assert(this.get(v) === removed, 'trying to remove an attribute, but did not provide the correct previous value');
-            ret[v] = this.get(v);
-            return ret;
+            var attr = {};
+            attr[v] = this.get(v);
+            this.set(attr, {silent: true, internal: true, unset: true})
         },
         updateAddAttributeState: function(session, added, removed, childpath, v) {
-            var ret = {};
             // Set non function/object variables as model attributes
             added = (typeof added === 'string') ? unescape(added) : added;
             assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childpath + ' -> ' + JSON.stringify(added) + ']');
@@ -348,21 +332,48 @@
                 removed = (typeof removed === 'string') ? unescape(removed) : removed;
                 assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
             }
-            ret[v] = added;
-            return ret;
+            var attr = {};
+            attr[v] = added;
+            this.set(attr, {silent: true, internal: true});
+        },
+        updateAddObjectState: function(session, added, removed, childpath, v) {
+            var model = this.get(v);
+            if(model === undefined) {
+                // Check if the path matches a valid collection path...if so that is the type that we should create
+                if(BtappCollection.prototype.verifyPath(childpath)) {
+                    model = new BtappCollection;
+                } else {
+                    model = new BtappModel({'id':v});
+                }
+                model.path = childpath;
+                model.client = this.client;
+
+                var attr = {};
+                attr[v] = model;
+                this.set(attr, {silent: true, internal: true})
+            }
+            model.updateState(this.session, added, removed, childpath);
+        },
+        updateRemoveObjectState: function(session, added, removed, childpath, v) {
+            var model = this.get(v);
+            assert(model, 'trying to remove a model that does not exist');
+            assert('updateState' in model, 'trying to remove an object that does not extend BtappBase');
+            model.updateState(session, added, removed, childpath);
+            if(model.isEmpty()) {
+                var attr = {};
+                attr[v] = model;
+                this.set(attr, {silent: true, internal: true, unset: true});
+                model.trigger('destroy');
+            }
         },
         isEmpty: function() {
             var keys = _.keys(this.toJSON());
             return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
         },
-        applyStateChanges: function(add, remove) {
-            Backbone.Model.prototype.set.call(this, add, {internal: true});
-            Backbone.Model.prototype.set.call(this, remove, {internal: true, unset: true});
-        },
         set: function(key, value, options) {
-            var evaluate = function(value, key) {
-                if(options && 'internal' in options) return;
-                if(typeof this.get(key) === 'undefined') return;  
+            var evaluate = function(k, v, opts) {
+                if(opts && 'internal' in opts) return;
+                if(typeof this.get(k) === 'undefined') return;  
                 // We're trying to guide users towards using save
                 throw 'please use save to set attributes directly to the client';
             };
@@ -370,9 +381,11 @@
             // This code is basically right out of the Backbone.Model set code.
             // Have to handle a variety of function signatures
             if (_.isObject(key) || key == null) {
-               _(key).each(evaluate, this);
+                for(k in key) {
+                    evaluate.call(this, k, key[k], value);
+                }
             } else {
-                evaluate.call(this, value, key);
+                evaluate.call(this, key, value, options );
             }
 
             return Backbone.Model.prototype.set.apply(this, arguments);
