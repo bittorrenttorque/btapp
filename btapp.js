@@ -140,25 +140,27 @@
             }   
         },
         updateAddState: function(session, add, remove, path) {
-            for(var uv in add) {
-                this.updateAddElementState(session, add[uv], remove[uv], escape(uv), path);
-            }
+            _.each(add, function(v, k) {
+                this.updateAddElementState(session, add[k], remove[k], escape(k), path);
+            }, this);
         },
-        updateState: function(session, add, remove, path) {
-            assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + path + '")...these should have been trimmed off');
-            this.session = session;
-            if(!this.path) {
-                this.path = path;
-                //lets give our object the change to verify the path
-                assert(this.verifyPath(this.path), 'cannot updateState with an invalid collection path');
-            }
+        updateState: function(s, a, r, p) {
+            _.defer(_.bind(function(session, add, remove, path) {
+                assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + path + '")...these should have been trimmed off');
+                this.session = session;
+                if(!this.path) {
+                    this.path = path;
+                    //lets give our object the change to verify the path
+                    assert(this.verifyPath(this.path), 'cannot updateState with an invalid collection path');
+                }
 
-            add = add || {};
-            remove = remove || {};
+                add = add || {};
+                remove = remove || {};
 
-            this.updateAddState(session, add, remove, path);
-            this.updateRemoveState(session, add, remove, path);
-            this.change && this.change();
+                this.updateAddState(session, add, remove, path);
+                this.updateRemoveState(session, add, remove, path);
+                this.change && this.change();
+            }, this, s, a, r, p));
         },
         sync: function() {
             //no sync for you
