@@ -506,7 +506,6 @@
         onConnectionError: function() {
             //something terrible happened...back off abruptly
             this.poll_frequency = MAX_POLL_FREQUENCY;
-            console.log('connection error!');
             this.clearState();
             if(this.client) {
                 _.delay(_.bind(this.client.reset, this.client), 500);
