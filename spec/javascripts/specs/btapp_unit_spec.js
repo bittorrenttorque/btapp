@@ -267,7 +267,7 @@
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, ['btapp','torrent']);
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, ['btapp','torrent']);
 				expect(change_callback).toHaveBeenCalled();
-				expect(change_callback.callCount).toEqual(2);
+				expect(change_callback.callCount).toEqual(1);
 			});
 			it('triggers change:key event when a model changes in the collection', function() {
 				var collection = new BtappCollection;
@@ -276,7 +276,7 @@
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, ['btapp','torrent']);
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value2'} } }, {'all':{'ABCD':{'key':'value'} } }, ['btapp','torrent']);
 				expect(change_callback).toHaveBeenCalled();
-				expect(change_callback.callCount).toEqual(2);
+				expect(change_callback.callCount).toEqual(1);
 			});
 		});
 		describe('BtappModel events', function() {
@@ -399,7 +399,7 @@
 				model.updateState('testsession', settings1, null, ['testurl']);
 				model.updateState('testsession', settings2, settings1, ['testurl']);
 				model.updateState('testsession', null, settings2, ['testurl']);
-				expect(change_callback.callCount).toEqual(3);
+				expect(change_callback.callCount).toEqual(4);
 			});
 			it('triggers a destroy event for each model/collection on a base object clearState', function() {
 				var m1 = new BtappModel({id:'model1'});
