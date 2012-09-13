@@ -23,6 +23,10 @@
     // lets give ourselves an easy way to blow the world up if we're not happy about something
     function assert(b, err) { if(!b) { debugger; throw err; } }
     
+    var MAX_POLL_FREQUENCY = 3000;
+    var MIN_POLL_FREQUENCY = 0;
+    var POLL_FREQUENCY_BACKOFF_INCREMENT = 100;
+
     // BtappBase
     // -------------
 
@@ -433,7 +437,7 @@
 
             // Initialize variables
             attributes = attributes || {};
-            this.poll_frequency = attributes.poll_frequency || 500;
+            this.poll_frequency = MIN_POLL_FREQUENCY;
             this.queries = attributes.queries || Btapp.QUERIES.ALL;
 
 
@@ -500,6 +504,9 @@
             return this.connected_state;
         },
         onConnectionError: function() {
+            //something terrible happened...back off abruptly
+            this.poll_frequency = MAX_POLL_FREQUENCY;
+            console.log('connection error!');
             this.clearState();
             if(this.client) {
                 _.delay(_.bind(this.client.reset, this.client), 500);
@@ -537,6 +544,13 @@
         // the client has wasted energy creating seperate diff trees.
         onEvents: function(session, data) {
             if(this.connected_state) {
+                //do a little bit of backoff if these requests are empty
+                if(data.length == 0) {
+                    this.poll_frequency = Math.min(MAX_POLL_FREQUENCY, 
+                        this.poll_frequency + POLL_FREQUENCY_BACKOFF_INCREMENT);
+                } else {
+                    this.poll_frequency = MIN_POLL_FREQUENCY;
+                }
                 for(var i = 0; i < data.length; i++) {
                     this.onEvent(session, data[i]);
                 }
