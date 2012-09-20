@@ -1,4 +1,4 @@
-// Btapp.js 0.1.0
+// Btapp.js 0.2.0
 
 // (c) 2012 Patrick Williams, BitTorrent Inc.
 // Btapp may be freely distributed under the MIT license.
@@ -21,7 +21,7 @@
 (function() {
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
-    function assert(b, err) { if(!b) { debugger; throw err; } }
+    function assert(b, err) { if(!b) { debugger; } }
     
     var MAX_POLL_FREQUENCY = 3000;
     var MIN_POLL_FREQUENCY = 0;
@@ -63,7 +63,7 @@
             delete this.bt[v];
 
             //for set and unset, we don't want to set them directly on the objects
-            if(v === 'set' || v === 'unset') {
+            if(v === 'set' || v === 'unset' || v === 'length') {
                 return;
             }
                  
@@ -122,7 +122,7 @@
             this.bt[v] = func;
 
             //also set it on the object directly...this ends up being how people expect to use the objects
-            if(v !== 'set' && v !== 'unset') {
+            if(v !== 'set' && v !== 'unset' && v !== 'length') {
                 assert(!(v in this), 'trying to add the function "' + v + '", which already exists in the prototype of this object');
                 this[v] = func;
                 this.trigger('add:' + v);
