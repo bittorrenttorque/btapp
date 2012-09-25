@@ -21,7 +21,7 @@
 (function() {
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
-    function assert(b, err) { if(!b) { throw err; } }
+    function assert(b, err) { if(!b) { debugger; throw err; } }
     
     var MAX_POLL_FREQUENCY = 3000;
     var MIN_POLL_FREQUENCY = 0;
