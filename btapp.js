@@ -546,7 +546,7 @@
         waitForEvents: function(session) {
             if(this.client) {
                 this.client.query({
-                    type: 'update', 
+                    type: 'update',
                     session: session
                 }).done(_.bind(this.onEvents, this, session)).fail(this.onConnectionError);
             }

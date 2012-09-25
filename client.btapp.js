@@ -173,7 +173,7 @@
                     ret.resolve(data);
                 }
             }, this);
-            this.send_query(args, success_callback, function() {
+            this.send_query(args).done(success_callback).fail(function() {
                 ret.reject();
             });
             return ret;
@@ -278,7 +278,8 @@
         },
         // This is the Btapp object's gateway to the actual client requests. These requests look slightly
         // different than those headed to a local client because they are encrypted.
-        send_query: function(args, cb, err) {
+        send_query: function(args) {
+            var ret = new jQuery.Deferred;
             assert(this.falcon, 'cannot send a query to the client without falcon properly connected');
 
             this.falcon.request(
@@ -288,14 +289,15 @@
                 function(data) {
                     assert('build' in data, 'expected build information in the falcon response');
                     assert('result' in data, 'expected result information in the falcon response');
-                    cb(data.result);
+                    ret.resolve(data.result);
                 },
                 _.bind(function() {
-                    err();
+                    ret.reject();
                     this.reset();
                 }, this),
                 {}
             );
+            return ret;
         },
         reset: function() {
             this.falcon = null;
@@ -470,13 +472,22 @@
             // same port when it is relaunched.
             this.pairing.scan();
         },
-        send_query: function(args, cb, err) {
+        send_query: function(args) {
+            var ret = new jQuery.Deferred;
             this.trigger('client:query', this.url, args);
             var url = this.url;
             _.each(args, function(value, key) {
                 url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
             });
-            this.ajax(url, cb, err);
+            this.ajax(url, 
+                function(data) {
+                    ret.resolve(data);
+                },
+                function() {
+                    ret.reject();
+                }
+            );
+            return ret;
         }
     }); 
 }).call(this);
