@@ -150,17 +150,16 @@
                     path: JSON.stringify(path),
                     args: JSON.stringify(args),
                     session: session
-                }, success, error);
+                }).done(success).fail(error);
                 this.trigger('queries', path);
                 return ret;
             }, this);
             func.valueOf = function() { return signatures; };
             return func;
         },
-        query: function(args, cb, err) {
+        query: function(args) {
+            var ret = new jQuery.Deferred;
             assert(args.type == "update" || args.type == "state" || args.type == "function", 'the query type must be either "update", "state", or "function"');
-            cb = cb || function() {};
-            err = err || function() {};
 
             args['hostname'] = window.location.hostname || window.location.pathname;
             var success_callback = _.bind(function(data) {
@@ -168,13 +167,16 @@
                     setTimeout(_.bind(this.reset, this), 1000);
                     throw 'pairing occured with a torrent client that does not support the btapp api';
                 } else if(!(typeof data === 'object') || 'error' in data) {
-                    err();
+                    ret.reject();
                     this.trigger('client:error', data);
                 } else {
-                    cb(data);
+                    ret.resolve(data);
                 }
             }, this);
-            this.send_query(args, success_callback, err);
+            this.send_query(args, success_callback, function() {
+                ret.reject();
+            });
+            return ret;
         }
     });
 

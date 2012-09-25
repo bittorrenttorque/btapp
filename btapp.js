@@ -507,7 +507,7 @@
                 this.client.query({
                     type: 'state', 
                     queries: JSON.stringify(this.queries)
-                }, this.onFetch, this.onConnectionError);
+                }).done(this.onFetch).fail(this.onConnectionError);
             }
         },
         onEvent: function(session, data) {
@@ -548,7 +548,7 @@
                 this.client.query({
                     type: 'update', 
                     session: session
-                }, _.bind(this.onEvents, this, session), this.onConnectionError);
+                }).done(_.bind(this.onEvents, this, session)).fail(this.onConnectionError);
             }
         }
     });
