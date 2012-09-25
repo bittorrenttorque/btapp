@@ -419,43 +419,96 @@
 			afterEach(function() {
 				this.btapp.disconnect();
 			});
-			it('scrapes a udp tracker via info hash', function() {
-				var responded = false;
-				waitsFor(function() {
-					return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
-				});
-				runs(function() {
-					this.btapp.get('tracker').scrape({
-						url: 'http://archive.org/download/jj2008-06-14.mk4/jj2008-06-14.mk4_archive.torrent',
-						callback: function(info) {
-							debugger;
-							responded = true;
-						}
+			describe('Tracker Scrape Function Calls', function() {
+				it('scrapes a udp tracker via info hash', function() {
+					var responded = false;
+					waitsFor(function() {
+						return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
 					});
-				});
-				waitsFor(function() { return responded; });
-			});
-			it('scrapes a http tracker via info hash', function() {
-				expect(false).toBeTruthy();
-			});
-			it('scrapes a tracker via torrent file url', function() {
-				var responded = false;
-				waitsFor(function() {
-					return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
-				});
-				runs(function() {
-					this.btapp.get('tracker').scrape({
-					  //replace with any info hash
-						hash: '0D8A72B221176784856673D6C9E2FD193FCD5978',
-						//replace with any other tracker announce url
-						tracker: 'http://tracker001.legaltorrents.com:7070/announce',
-						callback: function(info) {
-							debugger;
-							responded = true;
-						}
+					runs(function() {
+						var hash = '0D8A72B221176784856673D6C9E2FD193FCD5978';
+						this.btapp.get('tracker').scrape({
+						  //replace with any info hash
+							hash: hash,
+							//replace with any other tracker announce url
+							tracker: 'udp://tracker.openbittorrent.com:80/announce',
+							callback: function(info) {
+								expect(info.hash).toEqual(hash);
+								expect(info.downloaded).toBeDefined();
+								expect(info.complete).toBeDefined();
+								expect(info.incomplete).toBeDefined();
+								responded = true;
+							}
+						});
 					});
+					waitsFor(function() { return responded; });
 				});
-				waitsFor(function() { return responded; });
+				it('scrapes a http tracker via info hash', function() {
+					var responded = false;
+					waitsFor(function() {
+						return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
+					});
+					runs(function() {
+						var hash = '0D8A72B221176784856673D6C9E2FD193FCD5978';
+						this.btapp.get('tracker').scrape({
+						  //replace with any info hash
+							hash: hash,
+							//replace with any other tracker announce url
+							tracker: 'http://tracker001.legaltorrents.com:7070/announce',
+							callback: function(info) {
+								expect(info.hash).toEqual(hash);
+								expect(info.downloaded).toBeDefined();
+								expect(info.complete).toBeDefined();
+								expect(info.incomplete).toBeDefined();
+								responded = true;
+							}
+						});
+					});
+					waitsFor(function() { return responded; });
+				});
+				it('scrapes a tracker via torrent file url', function() {
+					var responded = false;
+					waitsFor(function() {
+						return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
+					});
+					runs(function() {
+						var hash = 'D9C70109CB05C181F9EC9373BE876A0D40C4D7B0';
+						var url = 'http://vodo.net/media/torrents/Deadside.Pilot.2012.720p.x264-VODO.torrent';
+						this.btapp.get('tracker').scrape({
+						  //replace with any info hash
+							url: url,
+							//replace with any other tracker announce url
+							callback: function(info) {
+								expect(info.hash).toEqual(hash);
+								expect(info.downloaded).toBeDefined();
+								expect(info.complete).toBeDefined();
+								expect(info.incomplete).toBeDefined();
+								responded = true;
+							}
+						});
+					});
+					waitsFor(function() { return responded; }, 10000);
+				});
+				it('scrapes a tracker for torrent file with an unknown info hash', function() {
+					var responded = false;
+					waitsFor(function() {
+						return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
+					});
+					runs(function() {
+						var url = 'http://archive.org/download/jj2008-06-14.mk4/jj2008-06-14.mk4_archive.torrent';
+						this.btapp.get('tracker').scrape({
+						  //replace with any info hash
+							url: url,
+							//replace with any other tracker announce url
+							callback: function(info) {
+								expect(info.error).toBeDefined();
+								expect(info.error).toEqual("unknown info hash");
+								responded = true;
+							}
+						});
+					});
+					waitsFor(function() { return responded; }, 10000);
+				});
 			});
 			it('returns btapp.bt functions from torque', function() {
 				waitsFor(function() {
