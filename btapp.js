@@ -479,7 +479,7 @@
             assert(this.connected_state, 'trying to disconnect when not connected');
             this.connected_state = false;
 
-            //make sure that the last request never resolves and fucks up our state
+            //make sure that the last request never resolves and messes up our state
             if(this.last_query) {
                 this.last_query.abort();
                 this.last_query = null;
@@ -501,6 +501,12 @@
             //something terrible happened...back off abruptly
             this.poll_frequency = MAX_POLL_FREQUENCY;
             this.clearState();
+            this.session = null;
+            if(this.last_query) {
+                this.last_query.abort();
+                this.last_query = null;
+            }
+            
             if(this.client) {
                 _.delay(_.bind(this.client.reset, this.client), 500);
             }
