@@ -126,7 +126,7 @@
 
                 this.convertCallbackFunctionArgs(args);
                 var ret = new jQuery.Deferred();
-                var success = function(data) {
+                var success = _.bind(function(data) {
                     //lets strip down to the relevent path data
                     _.each(path, function(segment) {
                         var decoded = decodeURIComponent(segment);
@@ -136,10 +136,12 @@
                     });
                     if(typeof data === 'undefined') {
                         ret.reject('return value parsing error ' + JSON.stringify(data));
+                    } else if(this.isJSFunctionSignature(data)) {
+                        ret.resolve(this.getStoredFunction(data))
                     } else {
                         ret.resolve(data);
                     }
-                };
+                }, this);
                 var error = function(data) {
                     ret.reject(data);
                 };
