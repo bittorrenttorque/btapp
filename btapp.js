@@ -55,21 +55,20 @@
         },
         updateRemoveFunctionState: function(v) {
             //we have a special case for get...we never want the server rpc version
-            if(v === 'get') return;
-
             assert(v in this.bt, 'trying to remove a function that does not exist');
             this.trigger('remove:bt:' + v);
             this.trigger('remove:bt', this.bt[v], v);
             delete this.bt[v];
 
             //for set and unset, we don't want to set them directly on the objects
-            if(v === 'set' || v === 'unset' || v === 'length') {
+            if(v === 'get' || v === 'set' || v === 'unset' || v === 'length') {
                 return;
             }
                  
             assert(v in this, 'trying to remove the function "' + v + '", which does not exist in the prototype of this object');
             this.trigger('remove:' + v);
             delete this[v];
+            return {};
         },
         updateRemoveObjectState: function(session, added, removed, childpath, v) {
             var ret = {};
@@ -111,8 +110,6 @@
         },
         updateAddFunctionState: function(session, added, path, v) {
             //we have a special case for get...we never want the server rpc version
-            if(v === 'get') return {};
-
             var childpath = _.clone(path || []);
             childpath.push(v);
             var func = this.client.createFunction(session, childpath, added);
@@ -122,7 +119,7 @@
             this.bt[v] = func;
 
             //also set it on the object directly...this ends up being how people expect to use the objects
-            if(v !== 'set' && v !== 'unset' && v !== 'length') {
+            if(v !== 'get' && v !== 'set' && v !== 'unset' && v !== 'length') {
                 assert(!(v in this), 'trying to add the function "' + v + '", which already exists in the prototype of this object');
                 this[v] = func;
                 this.trigger('add:' + v);
