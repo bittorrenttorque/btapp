@@ -137,7 +137,9 @@
                     if(typeof data === 'undefined') {
                         ret.reject('return value parsing error ' + JSON.stringify(data));
                     } else if(this.isJSFunctionSignature(data)) {
-                        ret.resolve(this.getStoredFunction(data))
+                        var func = this.getStoredFunction(data);
+                        assert(func, 'the client is returning a function name that does not exist');
+                        ret.resolve(func);
                     } else {
                         ret.resolve(data);
                     }
