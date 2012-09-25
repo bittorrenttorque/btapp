@@ -21,7 +21,7 @@
 (function() {
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
-    function assert(b, err) { if(!b) { debugger; } }
+    function assert(b, err) { if(!b) { throw err; } }
     
     var MAX_POLL_FREQUENCY = 3000;
     var MIN_POLL_FREQUENCY = 0;
@@ -509,7 +509,6 @@
             }
         },
         onEvent: function(session, data) {
-            this.trigger('sync', data);
             // There are two types of events...state updates and callbacks
             // Handle state updates the same way we handle the initial tree building
             if('add' in data || 'remove' in data) {
@@ -528,6 +527,7 @@
         // the client has wasted energy creating seperate diff trees.
         onEvents: function(session, data) {
             if(this.connected_state) {
+                this.trigger('sync', data);
                 //do a little bit of backoff if these requests are empty
                 if(data.length == 0) {
                     this.poll_frequency = Math.min(MAX_POLL_FREQUENCY, 
