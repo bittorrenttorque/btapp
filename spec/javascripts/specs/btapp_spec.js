@@ -419,6 +419,44 @@
 			afterEach(function() {
 				this.btapp.disconnect();
 			});
+			it('scrapes a udp tracker via info hash', function() {
+				var responded = false;
+				waitsFor(function() {
+					return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
+				});
+				runs(function() {
+					this.btapp.get('tracker').scrape({
+						url: 'http://archive.org/download/jj2008-06-14.mk4/jj2008-06-14.mk4_archive.torrent',
+						callback: function(info) {
+							debugger;
+							responded = true;
+						}
+					});
+				});
+				waitsFor(function() { return responded; });
+			});
+			it('scrapes a http tracker via info hash', function() {
+				expect(false).toBeTruthy();
+			});
+			it('scrapes a tracker via torrent file url', function() {
+				var responded = false;
+				waitsFor(function() {
+					return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
+				});
+				runs(function() {
+					this.btapp.get('tracker').scrape({
+					  //replace with any info hash
+						hash: '0D8A72B221176784856673D6C9E2FD193FCD5978',
+						//replace with any other tracker announce url
+						tracker: 'http://tracker001.legaltorrents.com:7070/announce',
+						callback: function(info) {
+							debugger;
+							responded = true;
+						}
+					});
+				});
+				waitsFor(function() { return responded; });
+			});
 			it('returns btapp.bt functions from torque', function() {
 				waitsFor(function() {
 					return 'create' in this.btapp.bt;
@@ -427,12 +465,8 @@
 				runs(function() {
 					expect(this.btapp.bt.browseforfiles).toBeDefined();
 					expect(this.btapp.bt.browseforfolder).toBeDefined();
-					expect(this.btapp.bt.clear_incoming_messages).toBeDefined();
 					expect(this.btapp.bt.connect_remote).toBeDefined();
 					expect(this.btapp.bt.create).toBeDefined();
-					expect(this.btapp.bt.ready_for_events).toBeDefined();
-					expect(this.btapp.bt.resolve_country).toBeDefined();
-					expect(this.btapp.bt.sendtopeer).toBeDefined();
 				});
 			});
 			it('returns a deferred object on function calls', function() {
