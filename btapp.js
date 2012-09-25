@@ -403,6 +403,7 @@
             this.client = null;
             this.queries = null;
             this.session = null;
+            this.last_query = null;
 
             //bind stuff
             _.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
@@ -471,12 +472,19 @@
                     tmp[key] = _.bind(this.trigger, this, key);
                     events.save(tmp);
                 }
-            }, this);            
+            }, this);       
         },
         disconnect: function() {
             assert(this.client, 'trying to disconnect from an undefined client');
             assert(this.connected_state, 'trying to disconnect when not connected');
             this.connected_state = false;
+
+            //make sure that the last request never resolves and fucks up our state
+            if(this.last_query) {
+                this.last_query.abort();
+                this.last_query = null;
+            }
+
             this.session = null;
             if (this.next_timeout) {
                 clearTimeout( this.next_timeout );
@@ -504,7 +512,7 @@
         },
         fetch: function() {
             if(this.client) {
-                this.client.query({
+                this.last_query = this.client.query({
                     type: 'state', 
                     queries: JSON.stringify(this.queries)
                 }).done(this.onFetch).fail(this.onConnectionError);
@@ -528,7 +536,8 @@
         // it is generating a large diff tree. We should generally on get one element in data array. Anything more and
         // the client has wasted energy creating seperate diff trees.
         onEvents: function(session, data) {
-            if(this.connected_state && this.session === session) {
+            assert(this.session === session, 'should not receive data for a different session after creating a new one. do not forget to abort the last call of your old session.');
+            if(this.connected_state) {
                 this.trigger('sync', data);
                 //do a little bit of backoff if these requests are empty
                 if(data.length == 0) {
@@ -545,7 +554,7 @@
         },
         waitForEvents: function(session) {
             if(this.client) {
-                this.client.query({
+                this.last_query = this.client.query({
                     type: 'update',
                     session: session
                 }).done(_.bind(this.onEvents, this, session)).fail(this.onConnectionError);

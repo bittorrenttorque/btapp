@@ -158,6 +158,7 @@
             return func;
         },
         query: function(args) {
+            var abort = false;
             var ret = new jQuery.Deferred;
             assert(args.type == "update" || args.type == "state" || args.type == "function", 'the query type must be either "update", "state", or "function"');
 
@@ -173,9 +174,15 @@
                     ret.resolve(data);
                 }
             }, this);
-            this.send_query(args).done(success_callback).fail(function() {
-                ret.reject();
-            });
+            this.send_query(args)
+                .done(function() {
+                    if(!abort) success_callback.apply(this, arguments);
+                }).fail(function() {
+                    if(!abort) ret.reject.apply(this, arguments);
+                });
+            ret.abort = function() {
+                abort = true;
+            }
             return ret;
         }
     });
