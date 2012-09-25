@@ -402,6 +402,7 @@
             this.connected_state = false;
             this.client = null;
             this.queries = null;
+            this.session = null;
 
             //bind stuff
             _.bindAll(this, 'connect', 'disconnect', 'connected', 'fetch', 'onEvents', 'onFetch', 'onConnectionError');
@@ -416,6 +417,8 @@
             assert(!this.client, 'trying to connect to an undefined client');
             assert(!this.connected_state, 'trying to connect when already connected');
             this.connected_state = true;
+            assert(!this.session, 'trying to create another session while one is active');
+
 
             // Initialize variables
             attributes = attributes || {};
@@ -474,6 +477,7 @@
             assert(this.client, 'trying to disconnect from an undefined client');
             assert(this.connected_state, 'trying to disconnect when not connected');
             this.connected_state = false;
+            this.session = null;
             if (this.next_timeout) {
                 clearTimeout( this.next_timeout );
             }
@@ -495,6 +499,7 @@
         },
         onFetch: function(data) {
             assert('session' in data, 'did not recieve a session id from the client');
+            this.session = data.session;
             this.waitForEvents(data.session);
         },
         fetch: function() {
@@ -523,7 +528,7 @@
         // it is generating a large diff tree. We should generally on get one element in data array. Anything more and
         // the client has wasted energy creating seperate diff trees.
         onEvents: function(session, data) {
-            if(this.connected_state) {
+            if(this.connected_state && this.session === session) {
                 this.trigger('sync', data);
                 //do a little bit of backoff if these requests are empty
                 if(data.length == 0) {
