@@ -334,10 +334,14 @@
             TorrentClient.prototype.initialize.call(this, attributes);
             this.btapp = attributes.btapp;
             this.initialize_objects(attributes);
+            this.reset_timeout = null;
         },
         disconnect: function() {
             if(this.pairing) {
                 this.pairing.disconnect();
+            }
+            if(this.reset_timeout) {
+                clearTimeout(this.reset_timeout);
             }
         },
         initialize_objects: function(attributes) {
@@ -481,7 +485,10 @@
             this.ajax(url, cb, err);
         },
         delayed_reset: function() {
-            setTimeout(_.bind(function() { this.reset(); }, this), 1000 );
+            this.reset_timeout = setTimeout(_.bind(function() { 
+                this.reset();
+                this.reset_timeout = null;
+            }, this), 1000 );
         },
         reset: function() {
             // Reset is called upon initialization (or when we load pairing.btapp.js)
