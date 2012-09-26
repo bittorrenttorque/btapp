@@ -5,7 +5,8 @@
 
 (function() {
 
-    var MAX_PORT = 11000;
+    var NUM_PORTS_SCANNED = 5;
+    var AJAX_TIMEOUT = 3000;
     
     function assert(b, err) { if(!b) throw err; }
 
@@ -119,27 +120,23 @@
     });
     var _plugin_native_pairing_requests = {};
     PluginPairing = {
-        ping_port: function(port) {
-            //the plugin doesn't support binary data, which is what the image url returns...
-            //so lets just skip straight to the version query
-            this.on_ping_success(port);
-        },
         check_version: function(port) {
+            var ret = new jQuery.Deferred;
             this.trigger('pairing:check_version', {'port': port});
             this.get('plugin_manager').get_plugin().ajax(get_version_url(port), _.bind(function(response) {
                 if(!response.allowed || !response.success) {
-                    this.on_check_version_error(port);
+                    ret.reject();
                 } else {
                     var obj;
                     try {
-                        obj = JSON.parse(response.data);
+                        ret.resolve(JSON.parse(response.data));
                     } catch(e) {
-                        this.on_check_version_error(port);
+                        ret.reject();
                         return;
                     }
-                    this.on_check_version_success(port, obj); 
                 }
             }, this));
+            return ret;
         },
         authorize_basic: function(port) {
             var deferred;
@@ -166,20 +163,13 @@
         }
     };
     var _image_native_pairing_requests = {};
-    ImagePairing = {
-        ping_port: function(port) {
-            var img = new Image();
-            img.onerror = _.bind(this.on_ping_error, this, port);
-            img.onload = _.bind(this.on_ping_success, this, port);
-            img.src = get_ping_img_url(port);
-        },
+    JQueryPairing = {
         check_version: function(port) {
             this.trigger('pairing:check_version', {'port': port});
-            jQuery.ajax({
+            return jQuery.ajax({
                 url: get_version_url(port),
                 dataType: 'jsonp',
-                success: _.bind(this.on_check_version_success, this, port),
-                error: this.on_check_version_error
+                timeout: AJAX_TIMEOUT
             });
         },
         authorize_basic: function(port) {
@@ -192,7 +182,8 @@
             } else {
                 promise = jQuery.ajax({
                     url: get_dialog_pair_url(port),
-                    dataType: 'jsonp'
+                    dataType: 'jsonp',
+                    timeout: AJAX_TIMEOUT
                 });
                 _image_native_pairing_requests[port] = promise;
                 promise.done(function() {
@@ -203,50 +194,49 @@
             promise.fail(failure);
         }
     };
-
     var _plugin_iframe_pairing_requests = {};
     Pairing = Backbone.Model.extend({
         defaults: {
             pairing_type: 'iframe'
         },
         initialize: function() {
-            _.bindAll(this, 'on_ping_error', 'on_ping_success', 'on_check_version_error', 'on_check_version_success');
+            _.bindAll(this, 'on_check_version_success');
             //assert that we know what we're getting into
             assert(this.get('plugin') === false || this.get('plugin_manager'), 'pairing is not intentionally avoiding the plugin, nor is it providing a plugin manager');
             if(this.get('plugin_manager')) {
                 _.extend(this, PluginPairing);
             } else {
-                _.extend(this, ImagePairing);
+                _.extend(this, JQueryPairing);
             }
         },
         scan: function() {
-            this.ping(get_port(0));
-        },
-        ping: function(port) {
-            if(port > MAX_PORT) {
-                this.trigger('pairing:stop', {'reason': 'max port reached'});
-                return;
-            }
+            var ret = new jQuery.Deferred;
+            var versionchecks = [];
+            var complete = _.after(NUM_PORTS_SCANNED, _.bind(function() {
+                //lets take a peek at versionchecks
+                var successes = _.reduce(versionchecks, function(memo, c) {
+                    return memo + (c.isResolved() ? 1 : 0);
+                }, 0);
+                if(successes === 0) {
+                    this.trigger('pairing:stop');
+                }
+            }, this));
+            _.times(NUM_PORTS_SCANNED, function(i) {
+                var port = get_port(i);
+                var versioncheck = this.check_version(port);
+                versioncheck.done(_.bind(this.on_check_version_success, this, port));
+                versionchecks.push(versioncheck);
 
-            this.trigger('pairing:attempt', {'port': port});
-            this.ping_port(port);
-        },
-        on_ping_error: function(port) {
-            this.ping(get_next_port(port));
-        },
-        on_ping_success: function(port) {
-            this.check_version(port);
-        },
-        on_check_version_error: function(port, data) {
-            this.ping(get_next_port(port));
+                versioncheck.always(complete);
+            }, this);
+            return ret;
         },
         on_check_version_success: function(port, data) {
             var options = { 
                 'version':(typeof data === 'object' ? data.version : 'unknown'),
                 'name':(typeof data === 'object' ? data.name : 'unknown'), 
                 'port':port,
-                'authorize':true,
-                'abort':false
+                'authorize':true
             };
             
             if(data == 'invalid request' || (data && data.version)) {
@@ -254,10 +244,6 @@
 
                 if(options.authorize) {
                     this.authorize(port);
-                }
-
-                if(!options.abort) {
-                    this.ping(get_next_port(port));
                 }
             }
         },
