@@ -209,13 +209,20 @@
                 _.extend(this, JQueryPairing);
             }
         },
-        scan: function() {
-            var ret = new jQuery.Deferred;
+        connect: function() {
+            assert(!this.session, 'trying to port scan while one is already in progress');
+            var session = {
+                abort: false
+            };
             var versionchecks = [];
-            var complete = _.after(NUM_PORTS_SCANNED, _.bind(function() {
+            var complete = _.after(NUM_PORTS_SCANNED, _.bind(function() { 
+                if(session.abort === true) return;
+                this.disconnect();
                 //lets take a peek at versionchecks
                 var successes = _.reduce(versionchecks, function(memo, c) {
-                    return memo + (c.isResolved() ? 1 : 0);
+                    assert(c.state() !== 'pending', 'executing pairing complete functionality while some queries are in flight');
+                    var success = c.state() === 'resolved';
+                    return memo + (success ? 1 : 0);
                 }, 0);
                 if(successes === 0) {
                     this.trigger('pairing:stop');
@@ -224,12 +231,21 @@
             _.times(NUM_PORTS_SCANNED, function(i) {
                 var port = get_port(i);
                 var versioncheck = this.check_version(port);
-                versioncheck.done(_.bind(this.on_check_version_success, this, port));
+                versioncheck.done(_.bind(function() {
+                    if(session.abort) return;
+                    this.on_check_version_success.apply(this, arguments);
+                }, this, port));
                 versionchecks.push(versioncheck);
 
                 versioncheck.always(complete);
             }, this);
-            return ret;
+            this.session = session;
+        },
+        disconnect: function() {
+            if(this.session) {
+                this.session.abort = true;
+                this.session = null;
+            }
         },
         on_check_version_success: function(port, data) {
             var options = { 

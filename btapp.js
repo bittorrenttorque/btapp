@@ -489,6 +489,7 @@
             if (this.next_timeout) {
                 clearTimeout( this.next_timeout );
             }
+            this.client.disconnect();
             this.client.btapp = null;
             this.client = null;
             this.queries = null;

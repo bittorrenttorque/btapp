@@ -44,10 +44,12 @@
         },
         // We expect function signatures that come from the client to have a specific syntax
         isRPCFunctionSignature: function(f) {
+            assert(typeof f === 'string', 'do not check function signature of non-strings');
             return f.match(/\[native function\](\([^\)]*\))+/) ||
                     f.match(/\[nf\](\([^\)]*\))+/);
         },
         isJSFunctionSignature: function(f) {
+            assert(typeof f === 'string', 'do not check function signature of non-strings');
             return f.match(/\[nf\]bt_/);
         },
         getStoredFunction: function(f) {
@@ -136,7 +138,7 @@
                     });
                     if(typeof data === 'undefined') {
                         ret.reject('return value parsing error ' + JSON.stringify(data));
-                    } else if(this.isJSFunctionSignature(data)) {
+                    } else if(typeof data === 'string' && this.isJSFunctionSignature(data)) {
                         var func = this.getStoredFunction(data);
                         assert(func, 'the client is returning a function name that does not exist');
                         ret.resolve(func);
@@ -285,6 +287,9 @@
             this.session = new falcon.session;
             this.session.negotiate(this.username, this.password, { success: opts.success, error: opts.error, progress: this.login_progress } );
         },
+        disconnect: function() {
+            //TODO...how do we disconnect from a remote connection?
+        },
         // This is the Btapp object's gateway to the actual client requests. These requests look slightly
         // different than those headed to a local client because they are encrypted.
         send_query: function(args) {
@@ -329,6 +334,11 @@
             TorrentClient.prototype.initialize.call(this, attributes);
             this.btapp = attributes.btapp;
             this.initialize_objects(attributes);
+        },
+        disconnect: function() {
+            if(this.pairing) {
+                this.pairing.disconnect();
+            }
         },
         initialize_objects: function(attributes) {
             //if we don't have what we need, fetch it and try again
@@ -479,7 +489,7 @@
             // torrent client. In both cases we probably need to scan through the ports
             // again as the torrent client won't necessarily be able to connect to the
             // same port when it is relaunched.
-            this.pairing.scan();
+            this.pairing.connect();
         },
         send_query: function(args) {
             var ret = new jQuery.Deferred;
