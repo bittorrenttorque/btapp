@@ -489,26 +489,6 @@
 					});
 					waitsFor(function() { return responded; }, 10000);
 				});
-				it('scrapes a tracker for torrent file with an unknown info hash', function() {
-					var responded = false;
-					waitsFor(function() {
-						return this.btapp.get('tracker') && 'scrape' in this.btapp.get('tracker');
-					});
-					runs(function() {
-						var url = 'http://archive.org/download/jj2008-06-14.mk4/jj2008-06-14.mk4_archive.torrent';
-						this.btapp.get('tracker').scrape({
-						  //replace with any info hash
-							url: url,
-							//replace with any other tracker announce url
-							callback: function(info) {
-								expect(info.error).toBeDefined();
-								expect(info.error).toEqual("unknown info hash");
-								responded = true;
-							}
-						});
-					});
-					waitsFor(function() { return responded; }, 10000);
-				});
 			});
 			it('returns btapp.bt functions from torque', function() {
 				waitsFor(function() {
