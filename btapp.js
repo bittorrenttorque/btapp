@@ -103,7 +103,7 @@
             var ret = {};
             for(var uv in remove) {
                 if(add[uv] === undefined) {
-                    _.extend(ret, this.updateRemoveElementState(session, add[uv], remove[uv], escape(uv), path));
+                    _.extend(ret, this.updateRemoveElementState(session, add[uv], remove[uv], uv, path));
                 }
             }
             return ret;
@@ -177,7 +177,7 @@
         updateAddState: function(session, add, remove, path) {
             var ret = {};
             for(var uv in add) {
-                _.extend(ret, this.updateAddElementState(session, add[uv], remove[uv], escape(uv), path));
+                _.extend(ret, this.updateAddElementState(session, add[uv], remove[uv], uv, path));
             }
             return ret;
         },
@@ -335,7 +335,6 @@
         },
         updateRemoveAttributeState: function(v, removed) {
             var ret = {};
-            removed = typeof removed === 'string' ? unescape(removed) : removed;
             assert(this.get(v) === removed, 'trying to remove an attribute, but did not provide the correct previous value');
             ret[v] = this.get(v);
             return ret;
@@ -343,10 +342,8 @@
         updateAddAttributeState: function(session, added, removed, childpath, v) {
             var ret = {};
             // Set non function/object variables as model attributes
-            added = (typeof added === 'string') ? unescape(added) : added;
             assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childpath + ' -> ' + JSON.stringify(added) + ']');
             if(!(removed === undefined)) {
-                removed = (typeof removed === 'string') ? unescape(removed) : removed;
                 assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
             }
             ret[v] = added;
