@@ -27,6 +27,10 @@
     var MIN_POLL_FREQUENCY = 0;
     var POLL_FREQUENCY_BACKOFF_INCREMENT = 100;
 
+    var isEmptyObject = function(obj) {
+        return _.isObject(obj) && !_.isArray(obj) &&  jQuery.isEmptyObject(obj);
+    };
+
     // BtappBase
     // -------------
 
@@ -87,13 +91,13 @@
             childpath.push(v);
             if(v === 'all') {
                 return this.updateState(this.session, added, removed, childpath);
-            } else if(typeof removed === 'object' && removed === null) {
+            } else if(_.isNull(removed)) {
                 return this.updateRemoveAttributeState(v, removed);
-            } else if(typeof removed === 'object') {
+            } else if(_.isObject(removed) && !_.isArray(removed)) {
                 return this.updateRemoveObjectState(session, added, removed, childpath, v);
-            } else if(typeof removed === 'string' && TorrentClient.prototype.isRPCFunctionSignature(removed)) {
+            } else if(_.isString(removed) && TorrentClient.prototype.isRPCFunctionSignature(removed)) {
                 return this.updateRemoveFunctionState(v);
-            } else if(typeof removed === 'string' && TorrentClient.prototype.isJSFunctionSignature(removed)) {
+            } else if(_.isString(removed) && TorrentClient.prototype.isJSFunctionSignature(removed)) {
                 return this.updateRemoveAttributeState(v, this.client.getStoredFunction(removed));
             } else if(v != 'id') {
                 return this.updateRemoveAttributeState(v, removed);
@@ -154,7 +158,7 @@
 
             //make sure we transform the removed variable to the correct js function if
             //removed is the string representation
-            if(typeof removed === 'string' && TorrentClient.prototype.isJSFunctionSignature(removed)) {
+            if(_.isString(removed) && TorrentClient.prototype.isJSFunctionSignature(removed)) {
                 removed = this.client.getStoredFunction(removed);
             }
 
@@ -162,13 +166,13 @@
             // Special case all. It is a redundant layer that exists for the benefit of the torrent client
             if(v === 'all') {
                 return this.updateState(this.session, added, removed, childpath);
-            } else if(typeof added === 'object' && added === null) {
+            } else if(_.isNull(added)) {
                 return this.updateAddAttributeState(session, added, removed, childpath, v);
-            } else if(typeof added === 'object') {
+            } else if(_.isObject(added) && !_.isArray(added)) {
                 return this.updateAddObjectState(session, added, removed, childpath, v);
-            } else if(typeof added === 'string' && TorrentClient.prototype.isRPCFunctionSignature(added)) {
+            } else if(_.isString(added) && TorrentClient.prototype.isRPCFunctionSignature(added)) {
                 return this.updateAddFunctionState(session, added, path, v);
-            } else if(typeof added === 'string' && TorrentClient.prototype.isJSFunctionSignature(added)) {
+            } else if(_.isString(added) && TorrentClient.prototype.isJSFunctionSignature(added)) {
                 return this.updateAddAttributeState(session, this.client.getStoredFunction(added), removed, path, v);
             } else {
                 return this.updateAddAttributeState(session, added, removed, childpath, v);
@@ -182,7 +186,7 @@
             return ret;
         },
         updateState: function(session, add, remove, path) {
-            assert(!jQuery.isEmptyObject(add) || !jQuery.isEmptyObject(remove), 'the client is outputing empty objects("' + path + '")...these should have been trimmed off');
+            assert(!isEmptyObject(add) || !isEmptyObject(remove), 'the client is outputing empty objects("' + path + '")...these should have been trimmed off');
             this.session = session;
             if(!this.path) {
                 this.path = path;
@@ -221,7 +225,7 @@
         },
         customEvent: function(event, model) {
             //we want to ignore our internal add/remove events for our client rpc functions
-            if(typeof model === 'function') return;
+            if(_.isFunction(model)) return;
 
             assert(model && model.id, 'called a custom ' + event + ' event without a valid attribute');
             this.trigger(event + ':' + model.id, model);
@@ -279,7 +283,7 @@
             throw 'trying to add an invalid type to a BtappCollection';
         },
         isEmpty: function() {
-            return jQuery.isEmptyObject(this.bt) && this.length === 0;
+            return isEmptyObject(this.bt) && this.length === 0;
         },
         applyStateChanges: function(add, remove) {
             this.add(_.values(add));
@@ -351,7 +355,7 @@
         },
         isEmpty: function() {
             var keys = _.keys(this.toJSON());
-            return jQuery.isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
+            return isEmptyObject(this.bt) && (keys.length === 0 || (keys.length === 1 && keys[0] === 'id'));
         },
         applyStateChanges: function(add, remove) {
             Backbone.Model.prototype.set.call(this, add, {internal: true});
@@ -360,7 +364,7 @@
         set: function(key, value, options) {
             var evaluate = function(value, key) {
                 if(options && 'internal' in options) return;
-                if(typeof this.get(key) === 'undefined') return;  
+                if(_.isUndefined(this.get(key))) return;  
                 // We're trying to guide users towards using save
                 throw 'please use save to set attributes directly to the client';
             };
@@ -425,10 +429,10 @@
 
 
             var error = 'the queries attribute must be an array of arrays of strings';
-            assert(typeof this.queries === 'object', error);
-            assert(this.queries && typeof this.queries === 'object' && _.all(this.queries, function(query) {
-                return typeof query === 'object' && _.all(query, function(segment) {
-                    return typeof segment === 'string';
+            assert(_.isArray(this.queries), error);
+            assert(_.all(this.queries, function(query) {
+                return _.isArray(query) && _.all(query, function(segment) {
+                    return _.isString(segment);
                 });
             }), error);
 
@@ -439,7 +443,7 @@
 
             // We'll check for TorrentClient and assume that FalconTorrentClient and LocalTorrentClient
             // come along for the ride.
-            if(typeof TorrentClient === 'undefined') {
+            if(_.isUndefined(TorrentClient)) {
                 jQuery.getScript(
                     'https://torque.bittorrent.com/btapp/client.btapp.js',
                     _.bind(this.setClient, this, attributes)
