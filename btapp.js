@@ -260,9 +260,8 @@
                 ['btapp', 'label', 'all', '*', 'torrent'],
                 ['btapp', 'label', 'all', '*', 'torrent', 'all', '*', 'file'],
                 ['btapp', 'label', 'all', '*', 'torrent', 'all', '*', 'peer'],
-                ['btapp', 'rss_feed'],
-                ['btapp', 'rss_feed', 'all', '*', 'item'],
-                ['btapp', 'rss_filter'],
+                ['btapp', 'rss'],
+                ['btapp', 'rss', 'all', '*', 'item'],
                 ['btapp', 'stream'],
                 ['btapp', 'stream', 'all', '*', 'diskio']
             ];
