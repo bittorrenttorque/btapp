@@ -450,6 +450,13 @@
             } else {
                 this.setClient(attributes);
             }
+            var ret = new jQuery.Deferred;
+            var connected = function() {
+                this.off('client:connected', connected, this);
+                ret.resolve();
+            }
+            this.on('client:connected', connected, this);
+            return ret;
         },
         setClient: function(attributes) {
             if(('username' in attributes && 'password' in attributes) || 'remote_data' in attributes) {
