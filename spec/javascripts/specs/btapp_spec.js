@@ -22,7 +22,7 @@
 						options.authorize = false;
 						options.abort = true;
 					}, this));
-					this.pairing.scan();
+					this.pairing.connect();
 				});
 				
 				waitsFor(function() {
@@ -30,6 +30,7 @@
 				}, "client pairing", 15000);
 				
 				runs(function() {
+					this.pairing.disconnect();
 					expect(this.paired).toBeTruthy();
 				});
 			});
@@ -48,7 +49,7 @@
 						options.authorize = false;
 						options.abort = true;
 					}, this));
-					this.pairing.scan();
+					this.pairing.connect();
 				});
 				
 				waitsFor(function() {
@@ -56,9 +57,10 @@
 				}, "client pairing", 15000);
 				
 				runs(function() {
+					this.pairing.disconnect();
 					expect(this.paired).toBeTruthy();
 					this.paired = false;
-					this.pairing.scan();
+					this.pairing.connect();
 				});
 				
 				waitsFor(function() {
@@ -66,6 +68,7 @@
 				}, "client pairing again", 15000);
 				
 				runs(function() {
+					this.pairing.disconnect();
 					expect(this.paired).toBeTruthy();
 				});
 			});
@@ -155,7 +158,7 @@
 				runs(function() {
 					this.success = false;
 					this.btapp = new Btapp;
-					this.btapp.connect({pairing_type: 'native', queries: ['btapp/stash/']});
+					this.btapp.connect({pairing_type: 'native', queries: [['btapp','stash']]});
 
 					this.btapp.on('add:stash', function(stash) {
 						this.btapp.off('add:stash');
@@ -193,7 +196,14 @@
 				runs(function() {
 					this.works = false;
 					this.btapp = new Btapp;
-					this.btapp.connect({pairing_type: 'native', queries: ['btapp/stash/','btapp/events/','btapp/connect_remote/']});
+					this.btapp.connect({
+						pairing_type: 'native', 
+						queries: [
+							['btapp','stash'],
+							['btapp','events'],
+							['btapp','connect_remote']
+						]
+					});
 					this.btapp.on('add:bt:connect_remote', function() {
 						var username = randomString();
 						var password = randomString();
@@ -231,7 +241,7 @@
 					this.type_string = false;
 					this.btapp = new Btapp;
 					this.btapp.connect({
-						queries: ['btapp/settings/all/','btapp/settings/set/']
+						queries: [['btapp','settings','all'],['btapp','settings','set']]
 					});
 				});
 				waitsFor(function() {
@@ -281,7 +291,7 @@
 				runs(function() {
 					this.btapp = new Btapp;
 					this.btapp.connect({
-						queries: ['btapp/settings/all/','btapp/settings/set/']
+						queries: [['btapp','settings','all'],['btapp','settings','set']]
 					});
 				});
 				waitsFor(function() {
@@ -306,7 +316,7 @@
 				runs(function() {
 					this.btapp = new Btapp;
 					this.btapp.connect({
-						queries: ['btapp/settings/all/gui.show_av_icon/','btapp/settings/set/']
+						queries: [['btapp','settings','all','gui.show_av_icon'],['btapp','settings','set']]
 					});
 				});
 				waitsFor(function() {
@@ -346,7 +356,7 @@
 				runs(function() {
 					this.btapp = new Btapp;
 					this.btapp.connect({
-						queries: ['btapp/settings/all/','btapp/settings/set/']
+						queries: [['btapp','settings','all'],['btapp','settings','set']]
 					});
 				});
 				waitsFor(function() {
@@ -386,7 +396,7 @@
 				runs(function() {
 					this.btapp = new Btapp;
 					this.btapp.connect({
-						queries: ['btapp/events/all/torrentStatus/', 'btapp/events/set/']
+						queries: [['btapp','events','all','torrentStatus'], ['btapp','events','set']]
 					});
 					this.callback = jasmine.createSpy();
 				});
