@@ -25,7 +25,7 @@
     function assert(b, err) { if(!b) throw err; }
 
     //we will sadly need to fiddle with some globals for falcon one offs.
-    root = this; 
+    root = this;
 
     TorrentClient = Backbone.Model.extend({
         initialize: function(attributes) {
@@ -339,6 +339,9 @@
         disconnect: function() {
             if(this.pairing) {
                 this.pairing.disconnect();
+            }
+            if(this.plugin_manager) {
+                this.plugin_manager.disconnect();
             }
             if(this.reset_timeout) {
                 clearTimeout(this.reset_timeout);

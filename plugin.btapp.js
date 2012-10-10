@@ -155,6 +155,9 @@
             //when we load jquery, we should defer a call to mime_type_check
             jQuery(_.bind(_.defer, this, this.mime_type_check));
         },
+        disconnect: function() {
+            this.remove_plugin();
+        },
         //we know nothing. we want:
         //the plugin installed
         //the plugin up to date
