@@ -75,25 +75,64 @@
 		});
 		describe('Btapp Concurrent Pairing', function() {
 			it('uses a single jquery ajax request for multiple native pairing requests to the same client', function() {
-				jQuery.jStorage.deleteKey('Torque_pairing_key');
-				for(var i = 0; i < 4; ++i) {
-					var btapp = new Btapp;
-					btapp.connect({product: 'Torque', pairing_type: 'native', plugin: false});
-				}
+				runs(function() {
+					this.success = false;
+					this.btapps = [];
+					var connections = [];
+					jQuery.jStorage.deleteKey('Torque_pairing_key');
+					for(var i = 0; i < 4; ++i) {
+						var btapp = new Btapp;
+						this.btapps.push(btapp);
+						connections.push(btapp.connect({product: 'Torque', pairing_type: 'native', plugin: false}));
+					}
+					jQuery.when.apply(this, connections).done(_.bind(function() {
+						this.success = true;
+					}, this));
+				});
+				waitsFor(function() { return this.success; }, 10000);
+				runs(function() {
+					_.each(this.btapps, function(btapp) { btapp.disconnect(); });
+				});
 			});
 			it('uses a single plugin ajax request for multiple native pairing requests to the same client', function() {
-				jQuery.jStorage.deleteKey('Torque_pairing_key');
-				for(var i = 0; i < 4; ++i) {
-					var btapp = new Btapp;
-					btapp.connect({product: 'Torque', pairing_type: 'native'});
-				}
+				runs(function() {
+					this.success = false;
+					this.btapps = [];
+					var connections = [];
+					jQuery.jStorage.deleteKey('Torque_pairing_key');
+					for(var i = 0; i < 4; ++i) {
+						var btapp = new Btapp;
+						this.btapps.push(btapp);
+						connections.push(btapp.connect({product: 'Torque', pairing_type: 'native'}));
+					}
+					jQuery.when.apply(this, connections).done(_.bind(function() {
+						this.success = true;
+					}, this));
+				});
+				waitsFor(function() { return this.success; }, 10000);
+				runs(function() {
+					_.each(this.btapps, function(btapp) { btapp.disconnect(); });
+				});
 			});
 			it('uses a single plugin ajax request for multiple iframe pairing requests to the same client', function() {
-				jQuery.jStorage.deleteKey('Torque_pairing_key');
-				for(var i = 0; i < 4; ++i) {
-					var btapp = new Btapp;
-					btapp.connect({product: 'Torque', pairing_type: 'iframe'});
-				}
+				runs(function() {
+					this.success = false;
+					this.btapps = [];
+					var connections = [];
+					jQuery.jStorage.deleteKey('Torque_pairing_key');
+					for(var i = 0; i < 4; ++i) {
+						var btapp = new Btapp;
+						this.btapps.push(btapp);
+						connections.push(btapp.connect({product: 'Torque', pairing_type: 'iframe'}));
+					}
+					jQuery.when.apply(this, connections).done(_.bind(function() {
+						this.success = true;
+					}, this));
+				});
+				waitsFor(function() { return this.success; }, 10000);
+				runs(function() {
+					_.each(this.btapps, function(btapp) { btapp.disconnect(); });
+				});
 			});
 		});
 		describe('Btapp Pairing', function() {
@@ -131,6 +170,22 @@
 				
 				runs(function() {
 					expect(this.connected).toBeTruthy();
+				});
+			});
+			it('connects and the returned deferred object resolves', function() {
+				var connected = { val: false };
+				runs(function() {
+					this.btapp.connect().done(function() {
+						connected.val = true;
+					});
+				});
+				
+				waitsFor(function() {
+					return connected.val;
+				}, "client connection", 15000);
+				
+				runs(function() {
+					expect(connected.val).toBeTruthy();
 				});
 			});
 			it('throws error when connecting to non-existent remote connection', function() {
@@ -260,12 +315,8 @@
 							if(typeof value === 'boolean') this.type_boolean = true;
 							if(typeof value === 'string') this.type_string = true;
 
-							expect('btapp' in result).toBeTruthy();
-							expect('settings' in result.btapp).toBeTruthy();
-							expect('set' in result.btapp.settings).toBeTruthy();
-
-							var ret = result.btapp.settings.set;
-							expect(ret === 'Empty' || ret === ('Read only property ' + key)).toBeTruthy();
+							var success = (result === 'success' || result === ('Read only property ' + key) || result === 'data type not supported');
+							expect(success).toBeTruthy();
 						}, this)).fail(function(result) {
 							expect(false).toBeTruthy();
 						});
@@ -285,6 +336,7 @@
 				}, 15000);
 				runs(function() {
 					expect(this.type_number && this.type_boolean && this.type_string).toBeTruthy();
+					this.btapp.disconnect();
 				});
 			});
 			it('sets settings to the same values as a batch using save', function() {
@@ -311,6 +363,9 @@
 				waitsFor(function() {
 					return this.success;
 				}, 15000);
+				runs(function() {
+					this.btapp.disconnect();
+				});
 			});
 			it('sets gui.show_av_icon to the opposite value using bt.set', function() {
 				runs(function() {
@@ -338,7 +393,8 @@
 						}, this);
 
 						settings.bt.set(key, !value).done(_.bind(function(result) {
-							if(result.btapp.settings.set !== ('Read only property ' + key)) {
+							if(result !== ('Read only property ' + key) &&
+								result !== ('data type not supported')) {
 								this.unchanged[key] = value;
 								this.ready = true;
 							}
@@ -351,6 +407,9 @@
 				waitsFor(function() {
 					return this.success;
 				}, 15000);
+				runs(function() {
+					this.btapp.disconnect();
+				});
 			});
 			it('sets non-gui.show_av_icon bool settings to the opposite values individually using bt.set', function() {
 				runs(function() {
@@ -378,7 +437,7 @@
 						}, this);
 
 						settings.bt.set(key, !value).done(_.bind(function(result) {
-							if(result.btapp.settings.set !== ('Read only property ' + key)) {
+							if(result !== ('Read only property ' + key)) {
 								this.unchanged[key] = value;
 								this.ready = true;
 							}
@@ -391,13 +450,14 @@
 				waitsFor(function() {
 					return this.success;
 				}, 15000);
+				runs(function() {
+					this.btapp.disconnect();
+				});
 			});
 			it('sets torrentStatus event waits for it to match function, then sets to null and waits until null', function() {
 				runs(function() {
 					this.btapp = new Btapp;
-					this.btapp.connect({
-						queries: [['btapp','events','all','torrentStatus'], ['btapp','events','set']]
-					});
+					this.btapp.connect();
 					this.callback = jasmine.createSpy();
 				});
 				waitsFor(function() {
@@ -419,15 +479,15 @@
 				waitsFor(function() {
 					return this.btapp.get('events').get('torrentStatus') === null;
 				}, 'torrentStatus === null', 10000);
+				runs(function() {
+					this.btapp.disconnect();
+				});
 			});
 		});
 		describe('Btapp Client Function Calls', function() {
 			beforeEach(function() {
 				this.btapp = new Btapp;
 				this.btapp.connect();
-			});
-			afterEach(function() {
-				this.btapp.disconnect();
 			});
 			describe('Tracker Scrape Function Calls', function() {
 				it('scrapes a udp tracker via info hash', function() {
@@ -443,6 +503,7 @@
 							//replace with any other tracker announce url
 							tracker: 'udp://tracker.openbittorrent.com:80/announce',
 							callback: function(info) {
+								debugger;
 								expect(info.hash).toEqual(hash);
 								expect(info.downloaded).toBeDefined();
 								expect(info.complete).toBeDefined();
@@ -452,6 +513,7 @@
 						});
 					});
 					waitsFor(function() { return responded; });
+					runs(function() { this.btapp.disconnect(); });
 				});
 				it('scrapes a http tracker via info hash', function() {
 					var responded = false;
@@ -475,6 +537,7 @@
 						});
 					});
 					waitsFor(function() { return responded; });
+					runs(function() { this.btapp.disconnect(); });
 				});
 				it('scrapes a tracker via torrent file url', function() {
 					var responded = false;
@@ -498,6 +561,7 @@
 						});
 					});
 					waitsFor(function() { return responded; }, 10000);
+					runs(function() { this.btapp.disconnect(); });
 				});
 			});
 			it('returns btapp.bt functions from torque', function() {
@@ -511,6 +575,7 @@
 					expect(this.btapp.bt.connect_remote).toBeDefined();
 					expect(this.btapp.bt.create).toBeDefined();
 				});
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('returns a deferred object on function calls', function() {
 				waitsFor(function() {
@@ -526,6 +591,7 @@
 					expect('fail' in ret).toBeTruthy();
 					expect('always' in ret).toBeTruthy();
 				});
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('adds a torrent to torque', function() {
 				waitsFor(function() {
@@ -539,6 +605,7 @@
 				waitsFor(function() {
 					return this.btapp.get('torrent') && this.btapp.get('torrent').get('C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A');
 				}, "torrent added", 5000);
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('removes all torrents from torque', function() {
 				waitsFor(function() {
@@ -553,6 +620,7 @@
 				waitsFor(function() {
 					return this.btapp.get('torrent').length === 0;
 				}, "all torrents to be removed", 5000); 
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('connects and disconnects to the client over and over', function() {
 				runs(function() {
@@ -560,12 +628,15 @@
 						this.connected = true;
 					}, this));
 				});
-				for(var i = 0; i < 5; i++) {
-					waitsFor(function() { return this.connected; });
-					runs(function() { this.btapp.disconnect(); this.connected = false; });
-					waits(1000);
-					runs(function() { this.btapp.connect(); });
-				}				
+				runs(function() {
+					for(var i = 0; i < 5; i++) {
+						waitsFor(function() { return this.connected; });
+						runs(function() { this.btapp.disconnect(); this.connected = false; });
+						waits(1000);
+						runs(function() { this.btapp.connect(); });
+					}				
+				});
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('adds several popular torrents', function() {
 				waitsFor(function() {
@@ -577,6 +648,7 @@
 				waitsFor(function() {
 					return this.btapp.get('torrent') && this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
 				}, 'torrent to appear after being added', 5000);
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('deletes those popular torrents', function() {
 				waitsFor(function() {
@@ -588,6 +660,7 @@
 				waitsFor(function() {
 					return !this.btapp.get('torrent') || !this.btapp.get('torrent').get('7EA94C240691311DC0916A2A91EB7C3DB2C6F3E4');
 				}, 'torrent to be deleted', 5000);
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('adds first torrent that causes problems with encoding', function() {
 				var hash = '929AC6FA58F74D40DA23ECAEA53145488679BFAB';
@@ -610,6 +683,7 @@
 					}
 					return false;
 				}, 'metadata to resolve', 20000);
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('adds second torrent that causes problems with encoding', function() {
 				var hash = 'F1CD5318D3D4F716017AB8401453A4A798227EF5';
@@ -633,6 +707,7 @@
 					}
 					return false;
 				}, 'metadata to resolve', 20000);
+				runs(function() { this.btapp.disconnect(); });
 			});
 			it('adds a torrent that causes problems with 64 bit int wrapping', function() {
 				var hash = 'D5B5A1D27F19E5E28A156EF17869D7B8BE8E4CF3';
@@ -654,363 +729,7 @@
 					}
 					return false;
 				}, 'metadata to resolve', 20000);
-			});
-		});
-		describe('Btapp Interactive Client Function Calls', function() {
-			it('OPERATOR: SELECT ANY FILE', function() {});
-			it('shows a file selection dialog and creates a torrent with a empty name', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) {
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							this.btapp.bt.create(
-								'', 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
-			});
-			it('shows a file selection dialog and creates a torrent with a null name', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) {
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							this.btapp.bt.create(
-								null, 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
-			});
-			it('shows a file selection dialog and throws an error creating a torrent with an undefined name', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) {
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							expect(_.bind(function() {
-								this.btapp.bt.create(
-									undefined, 
-									_.values(this.files), 
-									_.bind(function(hash) { this.hash = hash; }, this)
-								);
-							}, this)).toThrow('client functions do not support undefined arguments');
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-			});		
-			it('shows a file selection dialog and creates a torrent with a predefined name', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) {
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							this.btapp.bt.create(
-								'patrick', 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
-			});
-			it('shows a file selection dialog and creates a torrent', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) {
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							this.btapp.bt.create(
-								'', 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
-			});
-			it('OPERATOR: SELECT A FILE WITH A SPACE IN THE NAME', function() {});
-			it('it creates a torrent from a file with a space in the name', function() {
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) { 
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							expect(_.values(this.files)[0].indexOf(' ')).not.toEqual(-1);
-							this.btapp.bt.create(
-								'', 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
-			});
-			it('OPERATOR: SELECT A FILE WITH A UNICODE CHARACTER IN THE NAME', function() {});
-			it('it creates a torrent from a file with a unicode character in the name', function() {
-				function isDoubleByte(str) {
-				    for (var i = 0, n = str.length; i < n; i++) {
-				        if (str.charCodeAt( i ) > 255) { return true; }
-				    }
-				    return false;
-				}
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) { 
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							expect(isDoubleByte(_.values(this.files)[0])).toBeTruthy();
-							this.btapp.bt.create(
-								'', 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
-			});
-			it('OPERATOR: SELECT A FILE WITH A \'(\' CHARACTER IN THE NAME', function() {});
-			it('it creates a torrent from a file with a \'(\' character in the name', function() {
-				function isDoubleByte(str) {
-				    for (var i = 0, n = str.length; i < n; i++) {
-				        if (str.charCodeAt( i ) > 255) { return true; }
-				    }
-				    return false;
-				}
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) { 
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							expect(_.values(this.files)[0].indexOf('(')).not.toEqual(-1);
-							this.btapp.bt.create(
-								function() {}, 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
-			});
-			it('OPERATOR: SELECT A FILE WITH A \')\' CHARACTER IN THE NAME', function() {});
-			it('it creates a torrent from a file with a \')\' character in the name', function() {
-				function isDoubleByte(str) {
-				    for (var i = 0, n = str.length; i < n; i++) {
-				        if (str.charCodeAt( i ) > 255) { return true; }
-				    }
-				    return false;
-				}
-				runs(function() {
-					this.btapp = new Btapp;
-					this.btapp.connect();	
-					this.hash = null;
-				});
-				
-				waitsFor(function() {
-					return this.btapp.bt.browseforfiles;
-				});
-				
-				runs(function() {
-					this.btapp.bt.browseforfiles(
-						_.bind(function(files) { 
-							this.files = files;
-							expect(_.values(this.files).length).toEqual(1);
-							expect(_.values(this.files)[0].indexOf(')')).not.toEqual(-1);
-							this.btapp.bt.create(
-								function() {}, 
-								'', 
-								_.values(this.files), 
-								_.bind(function(hash) { this.hash = hash; }, this)
-							); 
-						}, this)
-					);
-				});
-				
-				waitsFor(function() {
-					return this.files;
-				}, 20000, 'file selection');
-
-				waitsFor(function() {
-					return this.hash;
-				}, 20000, 'torrent creation');
-
-				waitsFor(function() {
-					return this.btapp.get('torrent') && this.btapp.get('torrent').get(this.hash);
-				}, 5000, 'torrent to show up in the diffs');
+				runs(function() { this.btapp.disconnect(); });
 			});
 		});
 	});
