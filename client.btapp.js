@@ -164,7 +164,7 @@
         query: function(args) {
             var abort = false;
             var ret = new jQuery.Deferred;
-            assert(args.type == "update" || args.type == "state" || args.type == "function", 'the query type must be either "update", "state", or "function"');
+            assert(args.type === 'update' || args.type === 'state' || args.type === 'function' || args.type === 'disconnect', 'the query type must be either "update", "state", or "function"');
 
             args['hostname'] = window.location.hostname || window.location.pathname;
             var success_callback = _.bind(function(data) {

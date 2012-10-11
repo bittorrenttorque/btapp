@@ -482,8 +482,19 @@
             }, this);       
         },
         disconnect: function() {
+            this.trigger('disconnect', 'manual');
             assert(this.client, 'trying to disconnect from an undefined client');
             assert(this.connected_state, 'trying to disconnect when not connected');
+
+            //as a courtesy to the client maintaining state for all connections,
+            //let notify it that we no longer require its services.
+            if(this.session) {
+                this.client.query({
+                    type: 'disconnect',
+                    session: this.session
+                });
+            }
+
             this.connected_state = false;
 
             //make sure that the last request never resolves and messes up our state
@@ -506,6 +517,7 @@
             return this.connected_state;
         },
         onConnectionError: function() {
+            this.trigger('disconnect', 'error');
             //something terrible happened...back off abruptly
             this.poll_frequency = MAX_POLL_FREQUENCY;
             this.clearState();
