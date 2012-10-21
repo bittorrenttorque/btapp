@@ -25,7 +25,7 @@
     function assert(b, err) { if(!b) throw err; }
 
     //we will sadly need to fiddle with some globals for falcon one offs.
-    root = this; 
+    root = this;
 
     TorrentClient = Backbone.Model.extend({
         initialize: function(attributes) {
@@ -44,10 +44,12 @@
         },
         // We expect function signatures that come from the client to have a specific syntax
         isRPCFunctionSignature: function(f) {
+            assert(typeof f === 'string', 'do not check function signature of non-strings');
             return f.match(/\[native function\](\([^\)]*\))+/) ||
                     f.match(/\[nf\](\([^\)]*\))+/);
         },
         isJSFunctionSignature: function(f) {
+            assert(typeof f === 'string', 'do not check function signature of non-strings');
             return f.match(/\[nf\]bt_/);
         },
         getStoredFunction: function(f) {
@@ -126,7 +128,7 @@
 
                 this.convertCallbackFunctionArgs(args);
                 var ret = new jQuery.Deferred();
-                var success = function(data) {
+                var success = _.bind(function(data) {
                     //lets strip down to the relevent path data
                     _.each(path, function(segment) {
                         var decoded = decodeURIComponent(segment);
@@ -136,10 +138,14 @@
                     });
                     if(typeof data === 'undefined') {
                         ret.reject('return value parsing error ' + JSON.stringify(data));
+                    } else if(typeof data === 'string' && this.isJSFunctionSignature(data)) {
+                        var func = this.getStoredFunction(data);
+                        assert(func, 'the client is returning a function name that does not exist');
+                        ret.resolve(func);
                     } else {
                         ret.resolve(data);
                     }
-                };
+                }, this);
                 var error = function(data) {
                     ret.reject(data);
                 };
@@ -148,17 +154,17 @@
                     path: JSON.stringify(path),
                     args: JSON.stringify(args),
                     session: session
-                }, success, error);
+                }).done(success).fail(error);
                 this.trigger('queries', path);
                 return ret;
             }, this);
             func.valueOf = function() { return signatures; };
             return func;
         },
-        query: function(args, cb, err) {
-            assert(args.type == "update" || args.type == "state" || args.type == "function", 'the query type must be either "update", "state", or "function"');
-            cb = cb || function() {};
-            err = err || function() {};
+        query: function(args) {
+            var abort = false;
+            var ret = new jQuery.Deferred;
+            assert(args.type === 'update' || args.type === 'state' || args.type === 'function' || args.type === 'disconnect', 'the query type must be either "update", "state", or "function"');
 
             args['hostname'] = window.location.hostname || window.location.pathname;
             var success_callback = _.bind(function(data) {
@@ -166,13 +172,22 @@
                     setTimeout(_.bind(this.reset, this), 1000);
                     throw 'pairing occured with a torrent client that does not support the btapp api';
                 } else if(!(typeof data === 'object') || 'error' in data) {
-                    err();
+                    ret.reject();
                     this.trigger('client:error', data);
                 } else {
-                    cb(data);
+                    ret.resolve(data);
                 }
             }, this);
-            this.send_query(args, success_callback, err);
+            this.send_query(args)
+                .done(function() {
+                    if(!abort) success_callback.apply(this, arguments);
+                }).fail(function() {
+                    if(!abort) ret.reject.apply(this, arguments);
+                });
+            ret.abort = function() {
+                abort = true;
+            }
+            return ret;
         }
     });
 
@@ -272,9 +287,13 @@
             this.session = new falcon.session;
             this.session.negotiate(this.username, this.password, { success: opts.success, error: opts.error, progress: this.login_progress } );
         },
+        disconnect: function() {
+            //TODO...how do we disconnect from a remote connection?
+        },
         // This is the Btapp object's gateway to the actual client requests. These requests look slightly
         // different than those headed to a local client because they are encrypted.
-        send_query: function(args, cb, err) {
+        send_query: function(args) {
+            var ret = new jQuery.Deferred;
             assert(this.falcon, 'cannot send a query to the client without falcon properly connected');
 
             this.falcon.request(
@@ -284,14 +303,15 @@
                 function(data) {
                     assert('build' in data, 'expected build information in the falcon response');
                     assert('result' in data, 'expected result information in the falcon response');
-                    cb(data.result);
+                    ret.resolve(data.result);
                 },
                 _.bind(function() {
-                    err();
+                    ret.reject();
                     this.reset();
                 }, this),
                 {}
             );
+            return ret;
         },
         reset: function() {
             this.falcon = null;
@@ -314,6 +334,18 @@
             TorrentClient.prototype.initialize.call(this, attributes);
             this.btapp = attributes.btapp;
             this.initialize_objects(attributes);
+            this.reset_timeout = null;
+        },
+        disconnect: function() {
+            if(this.pairing) {
+                this.pairing.disconnect();
+            }
+            if(this.plugin_manager) {
+                this.plugin_manager.disconnect();
+            }
+            if(this.reset_timeout) {
+                clearTimeout(this.reset_timeout);
+            }
         },
         initialize_objects: function(attributes) {
             //if we don't have what we need, fetch it and try again
@@ -456,7 +488,10 @@
             this.ajax(url, cb, err);
         },
         delayed_reset: function() {
-            setTimeout(_.bind(function() { this.reset(); }, this), 1000 );
+            this.reset_timeout = setTimeout(_.bind(function() { 
+                this.reset();
+                this.reset_timeout = null;
+            }, this), 1000 );
         },
         reset: function() {
             // Reset is called upon initialization (or when we load pairing.btapp.js)
@@ -464,15 +499,24 @@
             // torrent client. In both cases we probably need to scan through the ports
             // again as the torrent client won't necessarily be able to connect to the
             // same port when it is relaunched.
-            this.pairing.scan();
+            this.pairing.connect();
         },
-        send_query: function(args, cb, err) {
+        send_query: function(args) {
+            var ret = new jQuery.Deferred;
             this.trigger('client:query', this.url, args);
             var url = this.url;
             _.each(args, function(value, key) {
                 url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
             });
-            this.ajax(url, cb, err);
+            this.ajax(url, 
+                function(data) {
+                    ret.resolve(data);
+                },
+                function() {
+                    ret.reject();
+                }
+            );
+            return ret;
         }
     }); 
 }).call(this);
