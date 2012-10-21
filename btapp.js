@@ -523,7 +523,7 @@
                 data.add = data.add || {};
                 data.remove = data.remove || {};
                 this.updateState(session, data.add.btapp, data.remove.btapp, ['btapp']);
-            } else if('callback' in data && 'arguments' in data) {
+            } else if('callback' in data) {
                 this.client.btappCallbacks[data.callback](data.arguments);
             } else {
                 throw 'received invalid data from the client';
