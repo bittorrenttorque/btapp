@@ -281,6 +281,7 @@
                 }, this),
                 error: _.bind(function(xhr, status, data) {
                     if (this.login_error) { this.login_error(xhr, status, data); }
+                    this.trigger('client:error_connecting', data);
                     this.trigger('client:error', data);
                 }, this)
             };
