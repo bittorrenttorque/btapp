@@ -461,6 +461,7 @@
         setClient: function(attributes) {
             if(('username' in attributes && 'password' in attributes) || 'remote_data' in attributes) {
                 this.client = new FalconTorrentClient(attributes);
+                this.client.bind('client:error_connecting', this.disconnect, this);
             } else {
                 this.client = new LocalTorrentClient(attributes);
             }
