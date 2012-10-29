@@ -314,7 +314,7 @@
             var clone = _.clone(this.attributes);
             delete clone.id;
             _.each(clone, function(attribute) { 
-                if(attribute && 'clearState' in attribute) {
+                if(attribute && _.isObject(attribute) && attribute.hasOwnProperty('clearState')) {
                     attribute.clearState();
                 }
             });
