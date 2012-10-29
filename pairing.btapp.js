@@ -10,6 +10,21 @@
     
     function assert(b, err) { if(!b) throw err; }
 
+    //validate dependencies
+    (function() {
+        var i, dependencies;
+        dependencies = [
+            { type: JSON, msg: 'JSON is a hard dependency' },
+            { type: _, msg: 'underscore/lodash is a hard dependency' },
+            { type: jQuery, msg: 'jQuery is a hard dependency' }
+        ];
+        for(i = 0; i < dependencies.length; i++) {
+            if(typeof dependencies[i].type === undefined) {
+                throw dependencies[i].msg;
+            }
+        }
+    }());
+
     function getCSS(url) {
         jQuery(document.createElement('link') ).attr({
             href: url,

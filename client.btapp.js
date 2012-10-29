@@ -24,6 +24,25 @@
 (function() {
     function assert(b, err) { if(!b) throw err; }
 
+    //validate dependencies
+    (function() {
+        var i, dependencies;
+        dependencies = [
+            { type: JSON, msg: 'JSON is a hard dependency' },
+            { type: _, msg: 'underscore/lodash is a hard dependency' },
+            { type: PluginManager, msg: 'plugin.btapp.js is a hard dependency' },
+            { type: Pairing, msg: 'pairing.btapp.js is a hard dependency' },
+            { type: jQuery, msg: 'jQuery is a hard dependency' },
+            { type: jQuery.jStorage, msg: 'jQuery.jStorage is a hard dependency' }
+        ];
+        for(i = 0; i < dependencies.length; i++) {
+            if(typeof dependencies[i].type === undefined) {
+                throw dependencies[i].msg;
+            }
+        }
+    }());
+
+
     //we will sadly need to fiddle with some globals for falcon one offs.
     root = this;
 
@@ -349,33 +368,6 @@
             }
         },
         initialize_objects: function(attributes) {
-            //if we don't have what we need, fetch it and try again
-            if(this.get('plugin') !== false && typeof PluginManager === 'undefined') {
-                jQuery.getScript(
-                    'https://torque.bittorrent.com/btapp/plugin.btapp.js',
-                    _.bind(this.initialize_objects, this, attributes)
-                );
-                return;
-            }
-
-            //if we don't have what we need, fetch it and try again
-            if(typeof Pairing === 'undefined') {
-                jQuery.getScript(
-                    'https://torque.bittorrent.com/btapp/pairing.btapp.js',
-                    _.bind(this.initialize_objects, this, attributes)
-                );
-                return;
-            }
-
-            //if we don't have what we need, fetch it and try again
-            if(typeof jQuery.jStorage === 'undefined') {
-                jQuery.getScript(
-                    'https://torque.bittorrent.com/jStorage/jstorage.min.js',
-                    _.bind(this.initialize_objects, this, attributes)
-                );
-                return;
-            }
-
             this.initialize_plugin(attributes);
             this.initialize_pairing(attributes);
         },
@@ -386,7 +378,6 @@
             if(this.get('plugin') === false) {
                 return;
             }
-            assert(typeof PluginManager !== 'undefined', 'expected plugin.btapp.js to be loaded by now');
             this.plugin_manager = new PluginManager(attributes);
             new PluginManagerView({'model': this.plugin_manager});
             this.plugin_manager.on('all', this.trigger, this);
@@ -395,7 +386,6 @@
         // port the torrent client is bound to.
         initialize_pairing: function(attributes) {
             assert(this.get('plugin') === false || typeof this.plugin_manager !== 'undefined', 'you must initialize the plugin manager before the pairing object');
-            assert(typeof Pairing !== 'undefined', 'expected pairing.btapp.js to be loaded by now');
             //all right...ready to roll.
             this.pairing = new Pairing(_.extend(attributes, {'plugin_manager': this.plugin_manager}));
             if(this.pairing.get('pairing_type') !== 'native') {

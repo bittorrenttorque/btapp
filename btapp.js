@@ -22,6 +22,23 @@
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
     function assert(b, err) { if(!b) { throw err; } }
+
+    //validate dependencies
+    (function() {
+        var i, dependencies;
+        dependencies = [
+            { type: JSON, msg: 'JSON is a hard dependency' },
+            { type: _, msg: 'underscore/lodash is a hard dependency' },
+            { type: TorrentClient, msg: 'client.btapp.js is a hard dependency' },
+            { type: jQuery, msg: 'jQuery is a hard dependency' },
+            { type: jQuery.jStorage, msg: 'jQuery.jStorage is a hard dependency' }
+        ];
+        for(i = 0; i < dependencies.length; i++) {
+            if(typeof dependencies[i].type === undefined) {
+                throw dependencies[i].msg;
+            }
+        }
+    }());
     
     var MAX_POLL_FREQUENCY = 3000;
     var MIN_POLL_FREQUENCY = 0;
@@ -444,14 +461,8 @@
 
             // We'll check for TorrentClient and assume that FalconTorrentClient and LocalTorrentClient
             // come along for the ride.
-            if(_.isUndefined(TorrentClient)) {
-                jQuery.getScript(
-                    'https://torque.bittorrent.com/btapp/client.btapp.js',
-                    _.bind(this.setClient, this, attributes)
-                );
-            } else {
-                this.setClient(attributes);
-            }
+            assert(!_.isUndefined(TorrentClient), 'client.btapp.js is a hard dependency');
+            this.setClient(attributes);
             var ret = new jQuery.Deferred();
             var connected = function() {
                 this.off('client:connected', connected, this);
