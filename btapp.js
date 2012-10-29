@@ -46,7 +46,7 @@
         clearRemoteProcedureCalls: function() {
             var keys = _.keys(this.bt || {});
             for(var i = 0; i < keys.length; i++) {
-                var key = keys[i]
+                var key = keys[i];
                 delete this.bt[key];
                 delete this[key];
             }
