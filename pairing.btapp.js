@@ -28,7 +28,7 @@
     }
 
     function isMac() {
-        return navigator.userAgent.match(/Macintosh/) != undefined;
+        return navigator.userAgent.match(/Macintosh/) !== undefined;
     }
 
     function get_domain(port) {
@@ -85,11 +85,11 @@
 
             var frame = jQuery('<iframe></iframe>');
             var domain = 'https://torque.bittorrent.com';
-            var src = domain + '/pairing/index.html'
-                        + '?product=' + this.model.get('product')
-                        + '&mime=' + this.model.get('plugin_manager').get('mime_type')
-                        + '&name=' + encodeURIComponent(document.title) 
-                        + '&permissions=download,create,remote';
+            var src = domain + '/pairing/index.html' + 
+                        '?product=' + this.model.get('product') +
+                        '&mime=' + this.model.get('plugin_manager').get('mime_type') +
+                        '&name=' + encodeURIComponent(document.title) +
+                        '&permissions=download,create,remote';
             frame.attr('src', src);
             frame.css('padding', '0px');
             frame.css('margin', '0px');
@@ -121,7 +121,7 @@
     var _plugin_native_pairing_requests = {};
     PluginPairing = {
         check_version: function(port) {
-            var ret = new jQuery.Deferred;
+            var ret = new jQuery.Deferred();
             this.trigger('pairing:check_version', {'port': port});
             this.get('plugin_manager').get_plugin().ajax(get_version_url(port), _.bind(function(response) {
                 if(!response.allowed || !response.success) {
@@ -188,9 +188,9 @@
                 _image_native_pairing_requests[port] = promise;
                 promise.done(function() {
                     delete _image_native_pairing_requests[port];            
-                })
+                });
             }
-            promise.then(success)
+            promise.then(success);
             promise.fail(failure);
         }
     };
@@ -282,7 +282,7 @@
                         _plugin_iframe_pairing_requests[port] = deferred;
                         deferred.done(function() {
                             delete _plugin_iframe_pairing_requests[port];
-                        })
+                        });
                         //let someone build a view to do something with this info
                         this.trigger('pairing:authorize', {
                             'port': port,
