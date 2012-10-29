@@ -21,7 +21,7 @@
 (function() {
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
-    function assert(b, err) { if(!b) { debugger; throw err; } }
+    function assert(b, err) { if(!b) { throw err; } }
     
     var MAX_POLL_FREQUENCY = 3000;
     var MIN_POLL_FREQUENCY = 0;
@@ -140,7 +140,7 @@
             if(model === undefined) {
                 // Check if the path matches a valid collection path...if so that is the type that we should create
                 if(BtappCollection.prototype.verifyPath(childpath)) {
-                    model = new BtappCollection;
+                    model = new BtappCollection();
                 } else {
                     model = new BtappModel({'id':v});
                 }
@@ -312,9 +312,11 @@
         clearState: function() {
             this.initializeValues();
             var clone = _.clone(this.attributes);
-            delete clone['id'];
+            delete clone.id;
             _.each(clone, function(attribute) { 
-                attribute && attribute.clearState && attribute.clearState(); 
+                if(attribute && 'clearState' in attribute) {
+                    attribute.clearState();
+                }
             });
             Backbone.Model.prototype.set.call(this, clone, {internal: true, unset: true});
             this.destructor();
@@ -345,8 +347,8 @@
         updateAddAttributeState: function(session, added, removed, childpath, v) {
             var ret = {};
             // Set non function/object variables as model attributes
-            assert(!(this.get(v) === added), 'trying to set a variable to the existing value [' + childpath + ' -> ' + JSON.stringify(added) + ']');
-            if(!(removed === undefined)) {
+            assert(this.get(v) !== added, 'trying to set a variable to the existing value [' + childpath + ' -> ' + JSON.stringify(added) + ']');
+            if(removed !== undefined) {
                 assert(this.get(v) === removed, 'trying to update an attribute, but did not provide the correct previous value');
             }
             ret[v] = added;
@@ -370,7 +372,7 @@
 
             // This code is basically right out of the Backbone.Model set code.
             // Have to handle a variety of function signatures
-            if (_.isObject(key) || key == null) {
+            if (_.isObject(key) || key === null) {
                _(key).each(evaluate, this);
             } else {
                 evaluate.call(this, value, key);
@@ -450,11 +452,11 @@
             } else {
                 this.setClient(attributes);
             }
-            var ret = new jQuery.Deferred;
+            var ret = new jQuery.Deferred();
             var connected = function() {
                 this.off('client:connected', connected, this);
                 ret.resolve();
-            }
+            };
             this.on('client:connected', connected, this);
             return ret;
         },
@@ -553,7 +555,7 @@
                 data.remove = data.remove || {};
                 this.updateState(session, data.add.btapp, data.remove.btapp, ['btapp']);
             } else if('callback' in data) {
-                this.client.btappCallbacks[data.callback](data.arguments);
+                this.client.btappCallbacks[data.callback](data['arguments']);
             } else {
                 throw 'received invalid data from the client';
             }
@@ -567,7 +569,7 @@
             if(this.connected_state) {
                 this.trigger('sync', data);
                 //do a little bit of backoff if these requests are empty
-                if(data.length == 0) {
+                if(data.length === 0) {
                     this.poll_frequency = Math.min(MAX_POLL_FREQUENCY, 
                         this.poll_frequency + POLL_FREQUENCY_BACKOFF_INCREMENT);
                 } else {
