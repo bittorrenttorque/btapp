@@ -163,15 +163,15 @@
         },
         query: function(args) {
             var abort = false;
-            var ret = new jQuery.Deferred;
+            var ret = new jQuery.Deferred();
             assert(args.type === 'update' || args.type === 'state' || args.type === 'function' || args.type === 'disconnect', 'the query type must be either "update", "state", or "function"');
 
-            args['hostname'] = window.location.hostname || window.location.pathname;
+            args.hostname = window.location.hostname || window.location.pathname;
             var success_callback = _.bind(function(data) {
                 if (data == 'invalid request') {
                     setTimeout(_.bind(this.reset, this), 1000);
                     throw 'pairing occured with a torrent client that does not support the btapp api';
-                } else if(!(typeof data === 'object') || 'error' in data) {
+                } else if(typeof data !== 'object' || 'error' in data) {
                     ret.reject();
                     this.trigger('client:error', data);
                 } else {
@@ -186,7 +186,7 @@
                 });
             ret.abort = function() {
                 abort = true;
-            }
+            };
             return ret;
         }
     });
@@ -285,7 +285,7 @@
                     this.trigger('client:error', data);
                 }, this)
             };
-            this.session = new falcon.session;
+            this.session = new falcon.session();
             this.session.negotiate(this.username, this.password, { success: opts.success, error: opts.error, progress: this.login_progress } );
         },
         disconnect: function() {
@@ -294,7 +294,7 @@
         // This is the Btapp object's gateway to the actual client requests. These requests look slightly
         // different than those headed to a local client because they are encrypted.
         send_query: function(args) {
-            var ret = new jQuery.Deferred;
+            var ret = new jQuery.Deferred();
             assert(this.falcon, 'cannot send a query to the client without falcon properly connected');
 
             this.falcon.request(
@@ -503,7 +503,7 @@
             this.pairing.connect();
         },
         send_query: function(args) {
-            var ret = new jQuery.Deferred;
+            var ret = new jQuery.Deferred();
             this.trigger('client:query', this.url, args);
             var url = this.url;
             _.each(args, function(value, key) {
