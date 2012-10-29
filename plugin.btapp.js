@@ -9,7 +9,7 @@
     function assert(b, err) { if(!b) throw err; }
 
     function isMac() {
-        return navigator.userAgent.match(/Macintosh/) != undefined;
+        return navigator.userAgent.match(/Macintosh/) !== undefined;
     }
 
     //utility function to wait for some condition
@@ -283,8 +283,8 @@
         },
         plugin_up_to_date: function() {
             var version = this.get_plugin().version;
-            var version_arr = _.map(version.split('.'), function(i) { return parseInt(i); });
-            var required_version_arr = _.map(LATEST_PLUGIN_VERSION.split('.'), function(i) { return parseInt(i); });
+            var version_arr = _.map(version.split('.'), function(i) { return parseInt(i, 10); });
+            var required_version_arr = _.map(LATEST_PLUGIN_VERSION.split('.'), function(i) { return parseInt(i, 10); });
             for (var i=0; i<version_arr.length; i++) {
                 if (version_arr[i] < required_version_arr[i]) {
                     return false;
@@ -298,12 +298,12 @@
             return ret;
         },
         plugin_loaded: function() {
-            assert(this.supports_mime_type(), 'you have not installed the plugin yet')
+            assert(this.supports_mime_type(), 'you have not installed the plugin yet');
             assert(jQuery('#' + this.get('pid')).length !== 0, 'you have not yet added the plugin');
             return get_plugin().version;
         },
         add_plugin: function(cb) {
-            assert(this.supports_mime_type(), 'you have not installed the plugin yet')
+            assert(this.supports_mime_type(), 'you have not installed the plugin yet');
             assert(jQuery('#' + this.get('pid')).length === 0);
             var obj = document.createElement('object');
             var onload = this.get('pid') + 'onload';
