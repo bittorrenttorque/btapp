@@ -304,6 +304,40 @@
 				}, 15000);
 
 				runs(function() {
+					this.success = false;
+					this.deferreds = [];
+					var settings = this.btapp.get('settings');
+					_(settings.toJSON()).each(function(value, key) {
+						if(key === 'id') return;
+						var deferred = settings.bt.set(key, value);
+						deferred.done(_.bind(function(result) {
+
+							if(typeof value === 'number') this.type_number = true;
+							if(typeof value === 'boolean') this.type_boolean = true;
+							if(typeof value === 'string') this.type_string = true;
+
+							var success = (result === 'success' || result === ('Access denied ' + key) || result === ('Read only property ' + key) || result === 'data type not supported');
+							if(!success) debugger;
+							expect(success).toBeTruthy();
+						}, this)).fail(function(result) {
+							expect(false).toBeTruthy();
+						});
+						this.deferreds.push(deferred);
+					}, this);
+				});
+				runs(function() {
+					jQuery.when.apply(jQuery, this.deferreds).done(_.bind(function(result) {
+						_.each(this.deferreds, function(r) { 
+							expect(r.isResolved()).toBeTruthy();
+						});
+						this.success = true;
+					}, this));
+				});
+				waitsFor(function() {
+					return this.success;
+				}, 15000);
+				runs(function() {
+					this.success = false;
 					this.deferreds = [];
 					var settings = this.btapp.get('settings');
 					_(settings.toJSON()).each(function(value, key) {
@@ -330,7 +364,7 @@
 						});
 						this.success = true;
 					}, this));
-				});
+				});				
 				waitsFor(function() {
 					return this.success;
 				}, 15000);
@@ -351,6 +385,21 @@
 				}, 15000);
 
 				runs(function() {
+					this.success = false;
+					this.deferreds = [];
+					var settings = this.btapp.get('settings');
+					settings.save(settings.toJSON()).done(_.bind(function(result) {
+						_.each(this.deferreds, function(r) { 
+							expect(r.isResolved()).toBeTruthy();
+						});
+						this.success = true;
+					}, this));
+				});
+				waitsFor(function() {
+					return this.success;
+				}, 15000);
+				runs(function() {
+					this.success = false;
 					this.deferreds = [];
 					var settings = this.btapp.get('settings');
 					settings.save(settings.toJSON()).done(_.bind(function(result) {
