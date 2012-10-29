@@ -34,7 +34,7 @@
             { type: jQuery.jStorage, msg: 'jQuery.jStorage is a hard dependency' }
         ];
         for(i = 0; i < dependencies.length; i++) {
-            if(typeof dependencies[i].type === undefined) {
+            if(typeof dependencies[i].type === 'undefined') {
                 throw dependencies[i].msg;
             }
         }
