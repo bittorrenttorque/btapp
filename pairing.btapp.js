@@ -42,7 +42,8 @@
     }
 
     function isMac() {
-        return navigator.userAgent.match(/Macintosh/) !== undefined;
+        var match = navigator.userAgent.match(/Macintosh/)
+        return match !== undefined && match !== null;
     }
 
     function get_domain(port) {
