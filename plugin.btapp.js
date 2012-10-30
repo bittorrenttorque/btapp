@@ -24,7 +24,7 @@
     }());
 
     function isMac() {
-        var match = navigator.userAgent.match(/Macintosh/)
+        var match = navigator.userAgent.match(/Macintosh/);
         return match !== undefined && match !== null;
     }
 
