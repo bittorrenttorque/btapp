@@ -8,7 +8,7 @@
     var NUM_PORTS_SCANNED = 5;
     var AJAX_TIMEOUT = 3000;
     
-    function assert(b, err) { if(!b) throw err; }
+    function assert(b, err) { if(!b) { throw err; } 
 
     //validate dependencies
     (function() {
@@ -157,7 +157,6 @@
             var deferred;
             if(port in _plugin_native_pairing_requests) {
                 deferred = _plugin_native_pairing_requests[port];
-                console.log('recycling');
             } else {
                 deferred = new jQuery.Deferred();
                 _plugin_native_pairing_requests[port] = deferred;

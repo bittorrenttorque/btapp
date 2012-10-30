@@ -22,7 +22,7 @@
 // timeouts...this can lead to some less than desirable code :(
 
 (function() {
-    function assert(b, err) { if(!b) throw err; }
+    function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
     (function() {

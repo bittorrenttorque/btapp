@@ -116,7 +116,7 @@
                 return this.updateRemoveFunctionState(v);
             } else if(_.isString(removed) && TorrentClient.prototype.isJSFunctionSignature(removed)) {
                 return this.updateRemoveAttributeState(v, this.client.getStoredFunction(removed));
-            } else if(v != 'id') {
+            } else if(v !== 'id') {
                 return this.updateRemoveAttributeState(v, removed);
             }
         },

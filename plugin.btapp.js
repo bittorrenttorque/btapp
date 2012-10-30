@@ -6,7 +6,7 @@
 (function() {
     var LATEST_PLUGIN_VERSION = '4.3.7';
 
-    function assert(b, err) { if(!b) throw err; }
+    function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
     (function() {
