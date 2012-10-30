@@ -4,11 +4,10 @@
 // http://pwmckenna.github.com/btapp
 
 (function() {
-
     var NUM_PORTS_SCANNED = 5;
     var AJAX_TIMEOUT = 3000;
     
-    function assert(b, err) { if(!b) { throw err; } 
+    function assert(b, err) { if(!b) { throw err; } } 
 
     //validate dependencies
     (function() {
@@ -133,7 +132,7 @@
             jQuery.facebox({ div: '#pairing' });
         }
     });
-    var _plugin_native_pairing_requests = {};
+    var plugin_native_pairing_requests = {};
     PluginPairing = {
         check_version: function(port) {
             var ret = new jQuery.Deferred();
@@ -155,13 +154,13 @@
         },
         authorize_basic: function(port) {
             var deferred;
-            if(port in _plugin_native_pairing_requests) {
-                deferred = _plugin_native_pairing_requests[port];
+            if(port in plugin_native_pairing_requests) {
+                deferred = plugin_native_pairing_requests[port];
             } else {
                 deferred = new jQuery.Deferred();
-                _plugin_native_pairing_requests[port] = deferred;
+                plugin_native_pairing_requests[port] = deferred;
                 deferred.done(function() {
-                    delete _plugin_native_pairing_requests[port];
+                    delete plugin_native_pairing_requests[port];
                 });
                 this.get('plugin_manager').get_plugin().ajax(get_dialog_pair_url(port), _.bind(function(response) {
                     if(!response.allowed || !response.success) {
@@ -176,7 +175,7 @@
             deferred.fail(_.bind(this.authorize_port_error, this, port));
         }
     };
-    var _image_native_pairing_requests = {};
+    var image_native_pairing_requests = {};
     JQueryPairing = {
         check_version: function(port) {
             this.trigger('pairing:check_version', {'port': port});
@@ -190,25 +189,24 @@
             var success = _.bind(this.authorize_port_success, this, port);
             var failure = _.bind(this.authorize_port_error, this, port);
             var promise;
-            if(port in _image_native_pairing_requests) {
-                promise = _image_native_pairing_requests[port];
-                console.log('recycling');
+            if(port in image_native_pairing_requests) {
+                promise = image_native_pairing_requests[port];
             } else {
                 promise = jQuery.ajax({
                     url: get_dialog_pair_url(port),
                     dataType: 'jsonp',
                     timeout: AJAX_TIMEOUT
                 });
-                _image_native_pairing_requests[port] = promise;
+                image_native_pairing_requests[port] = promise;
                 promise.done(function() {
-                    delete _image_native_pairing_requests[port];            
+                    delete image_native_pairing_requests[port];            
                 });
             }
             promise.then(success);
             promise.fail(failure);
         }
     };
-    var _plugin_iframe_pairing_requests = {};
+    var plugin_iframe_pairing_requests = {};
     Pairing = Backbone.Model.extend({
         defaults: {
             pairing_type: 'iframe'
@@ -230,7 +228,9 @@
             };
             var versionchecks = [];
             var complete = _.after(NUM_PORTS_SCANNED, _.bind(function() { 
-                if(session.abort === true) return;
+                if(session.abort === true) {
+                    return;
+                }
                 this.disconnect();
                 //lets take a peek at versionchecks
                 var successes = _.reduce(versionchecks, function(memo, c) {
@@ -246,7 +246,9 @@
                 var port = get_port(i);
                 var versioncheck = this.check_version(port);
                 versioncheck.done(_.bind(function() {
-                    if(session.abort) return;
+                    if(session.abort) {
+                        return;
+                    }
                     this.on_check_version_success.apply(this, arguments);
                 }, this, port));
                 versionchecks.push(versioncheck);
@@ -269,7 +271,7 @@
                 'authorize':true
             };
             
-            if(data == 'invalid request' || (data && data.version)) {
+            if(data === 'invalid request' || (data && data.version)) {
                 this.trigger('pairing:found', options);
 
                 if(options.authorize) {
@@ -288,14 +290,13 @@
                     this.authorize_port_success(port, pairing_key);
                 } else {
                     var deferred;
-                    if(port in _plugin_iframe_pairing_requests) {
-                        deferred = _plugin_iframe_pairing_requests[port];
-                        console.log('recycling');
+                    if(port in plugin_iframe_pairing_requests) {
+                        deferred = plugin_iframe_pairing_requests[port];
                     } else {
                         deferred = new jQuery.Deferred();
-                        _plugin_iframe_pairing_requests[port] = deferred;
+                        plugin_iframe_pairing_requests[port] = deferred;
                         deferred.done(function() {
-                            delete _plugin_iframe_pairing_requests[port];
+                            delete plugin_iframe_pairing_requests[port];
                         });
                         //let someone build a view to do something with this info
                         this.trigger('pairing:authorize', {

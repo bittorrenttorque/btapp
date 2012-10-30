@@ -277,7 +277,7 @@
                 //if we're in a chrome extension, assume we have the mime type available
                 return true;
             }
-            var isIE  = (navigator.appVersion.indexOf('MSIE') != -1) ? true : false;
+            var isIE  = (navigator.appVersion.indexOf('MSIE') !== -1) ? true : false;
             if(isIE) {
                 try {
                     var tq = new ActiveXObject(this.get('activex_progid'));
@@ -289,7 +289,7 @@
                 navigator.plugins.refresh();
                 for (var i = 0; i < navigator.plugins.length; i++) {
                     var plugin = navigator.plugins[i][0];
-                    if (plugin.type == this.get('mime_type')) {
+                    if (plugin.type === this.get('mime_type')) {
                         return true;
                     }
                 }
@@ -315,7 +315,7 @@
         plugin_loaded: function() {
             assert(this.supports_mime_type(), 'you have not installed the plugin yet');
             assert(jQuery('#' + this.get('pid')).length !== 0, 'you have not yet added the plugin');
-            return get_plugin().version;
+            return this.get_plugin().version;
         },
         add_plugin: function(cb) {
             assert(this.supports_mime_type(), 'you have not installed the plugin yet');
@@ -342,7 +342,7 @@
         // ---------------------------
         // Lets ask the plugin if the specific client is running.
         get_window_name: function(product) {
-            if (product == 'uTorrent') {
+            if (product === 'uTorrent') {
                 return 'Torrent4823';
             } else {
                 return product;

@@ -44,7 +44,7 @@
 
 
     //we will sadly need to fiddle with some globals for falcon one offs.
-    root = this;
+    var root = this;
 
     TorrentClient = Backbone.Model.extend({
         initialize: function(attributes) {
@@ -86,7 +86,7 @@
             var signatures = functionValue.match(/\(.*?\)/g);
             return _.any(signatures, function(signature) {
                 signature = signature.match(/\w+/g) || []; //["string","unknown"]
-                return signature.length == variables.length && _.all(signature, function(type,index) {
+                return signature.length === variables.length && _.all(signature, function(type,index) {
                     if(typeof variables[index] === 'undefined') {
                         throw 'client functions do not support undefined arguments';
                     } else if(typeof variables[index] === 'null') {
@@ -137,7 +137,9 @@
                 // unfortunately arguments isn't a completely authetic javascript array, so we'll have
                 // to "splice" by hand. All this just to validate the correct types! sheesh...
                 var i;
-                for(i = 0; i < arguments.length; i++) args.push(arguments[i]);
+                for(i = 0; i < arguments.length; i++) {
+                    args.push(arguments[i]);
+                }
                 // This is as close to a static class function as you can get in javascript i guess
                 // we should be able to use verifySignaturesArguments to determine if the client will
                 // consider the arguments that we're passing to be valid
@@ -187,7 +189,7 @@
 
             args.hostname = window.location.hostname || window.location.pathname;
             var success_callback = _.bind(function(data) {
-                if (data == 'invalid request') {
+                if (data === 'invalid request') {
                     setTimeout(_.bind(this.reset, this), 1000);
                     throw 'pairing occured with a torrent client that does not support the btapp api';
                 } else if(typeof data !== 'object' || 'error' in data) {
@@ -199,9 +201,13 @@
             }, this);
             this.send_query(args)
                 .done(function() {
-                    if(!abort) success_callback.apply(this, arguments);
+                    if(!abort) {
+                        success_callback.apply(this, arguments);
+                    }
                 }).fail(function() {
-                    if(!abort) ret.reject.apply(this, arguments);
+                    if(!abort) {
+                        ret.reject.apply(this, arguments);
+                    }
                 });
             ret.abort = function() {
                 abort = true;
@@ -267,7 +273,7 @@
                     requires: deps } );
                     return tags;
                 }
-                dependencies = [
+                var dependencies = [
                     'falcon/deps/SHA-1.js',
                     'falcon/deps/jsbn.js',
                     'falcon/deps/jsbn2.js',

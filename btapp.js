@@ -242,7 +242,9 @@
         },
         customEvent: function(event, model) {
             //we want to ignore our internal add/remove events for our client rpc functions
-            if(_.isFunction(model)) return;
+            if(_.isFunction(model)) {
+                return;
+            }
 
             assert(model && model.id, 'called a custom ' + event + ' event without a valid attribute');
             this.trigger(event + ':' + model.id, model);
@@ -284,10 +286,16 @@
             ];
 
             return _.any(collections, function(collection) {
-                if(collection.length !== path.length) return false;
+                if(collection.length !== path.length) {
+                    return false;
+                }
                 for(var i = 0; i < collection.length; i++) {
-                    if(collection[i] === '*') continue;
-                    if(collection[i] !== path[i]) return false;
+                    if(collection[i] === '*') {
+                        continue;
+                    }
+                    if(collection[i] !== path[i]) {
+                        return false;
+                    }
                 }
                 return true;
             });
@@ -381,8 +389,12 @@
         },
         set: function(key, value, options) {
             var evaluate = function(value, key) {
-                if(options && 'internal' in options) return;
-                if(_.isUndefined(this.get(key))) return;  
+                if(options && 'internal' in options) {
+                    return;
+                }
+                if(_.isUndefined(this.get(key))) {
+                    return;
+                }
                 // We're trying to guide users towards using save
                 throw 'please use save to set attributes directly to the client';
             };
