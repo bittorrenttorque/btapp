@@ -3,7 +3,7 @@
 // (c) 2012 Patrick Williams, BitTorrent Inc.
 // Btapp may be freely distributed under the MIT license.
 // For all details and documentation:
-// http://pwmckenna.github.com/btapp
+// http://btappjs.com
 
 // Welcome to Btapp!
 
