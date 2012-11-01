@@ -10,6 +10,41 @@
 		return randomstring;
 	}
 
+	describe('Torrent Metadata Resolution', function() {
+		it('resolves promise', function() {
+			runs(function() {
+				this.hash = '5E60858AA93FBB5CE4D77CBC7B8FB7428517D8B8';
+				this.btapp = new Btapp();
+				this.btapp.on('all', _.bind(console.log, console));
+				this.btapp.connect();
+				this.resolved = false;
+				var cleanup = function() {
+					var torrents = this.btapp.get('torrent');
+					if(torrents) {
+						var torrent = torrents.get(this.hash);
+						if(torrent) {
+							torrent.remove(1);
+						}
+					}
+					this.btapp.disconnect();
+				};
+				var magnet = 'magnet:?xt=urn:btih:' + this.hash;
+				this.btapp.resolve_torrent_metadata(magnet).then(_.bind(function(torrent) {
+					expect(torrent.get('file').length).toEqual(20);
+					cleanup.call(this);
+					this.resolved = true;
+				}, this), _.bind(function() {
+					cleanup.call(this);
+					expect(false).toBeTruthy();
+				}, this));
+				
+			});
+			waitsFor(function() {
+				return this.resolved;
+			}, 'metadata to resolve', 20000);
+		});
+	});
+
 	describe('Functional Tests', function() {
 		describe('Pairing', function() {
 			it('pairs', function() {
