@@ -9,19 +9,9 @@
     function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
-    (function() {
-        var i, dependencies;
-        dependencies = [
-            { type: JSON, msg: 'JSON is a hard dependency' },
-            { type: _, msg: 'underscore/lodash is a hard dependency' },
-            { type: jQuery, msg: 'jQuery is a hard dependency' }
-        ];
-        for(i = 0; i < dependencies.length; i++) {
-            if(typeof dependencies[i].type === 'undefined') {
-                throw dependencies[i].msg;
-            }
-        }
-    }());
+    assert(typeof JSON !== 'undefined', 'JSON is a hard dependency');
+    assert(typeof _ !== 'undefined', 'underscore/lodash is a hard dependency');
+    assert(typeof jQuery !== 'undefined', 'jQuery is a hard dependency');
 
     function isMac() {
         var match = navigator.userAgent.match(/Macintosh/);

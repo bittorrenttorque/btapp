@@ -25,22 +25,12 @@
     function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
-    (function() {
-        var i, dependencies;
-        dependencies = [
-            { type: JSON, msg: 'JSON is a hard dependency' },
-            { type: _, msg: 'underscore/lodash is a hard dependency' },
-            { type: PluginManager, msg: 'plugin.btapp.js is a hard dependency' },
-            { type: Pairing, msg: 'pairing.btapp.js is a hard dependency' },
-            { type: jQuery, msg: 'jQuery is a hard dependency' },
-            { type: jQuery.jStorage, msg: 'jQuery.jStorage is a hard dependency' }
-        ];
-        for(i = 0; i < dependencies.length; i++) {
-            if(typeof dependencies[i].type === 'undefined') {
-                throw dependencies[i].msg;
-            }
-        }
-    }());
+    assert(typeof JSON !== 'undefined', 'JSON is a hard dependency');
+    assert(typeof _ !== 'undefined', 'underscore/lodash is a hard dependency');
+    assert(typeof PluginManager !== 'undefined', 'plugin.btapp.js is a hard dependency');
+    assert(typeof Pairing !== 'undefined', 'pairing.btapp.js is a hard dependency');
+    assert(typeof jQuery !== 'undefined', 'jQuery is a hard dependency');
+    assert(typeof jQuery.jStorage !== 'undefined', 'jQuery.jStorage is a hard dependency');
 
 
     //we will sadly need to fiddle with some globals for falcon one offs.

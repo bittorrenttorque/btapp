@@ -24,21 +24,11 @@
     function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
-    (function() {
-        var i, dependencies;
-        dependencies = [
-            { type: JSON, msg: 'JSON is a hard dependency' },
-            { type: _, msg: 'underscore/lodash is a hard dependency' },
-            { type: TorrentClient, msg: 'client.btapp.js is a hard dependency' },
-            { type: jQuery, msg: 'jQuery is a hard dependency' },
-            { type: jQuery.jStorage, msg: 'jQuery.jStorage is a hard dependency' }
-        ];
-        for(i = 0; i < dependencies.length; i++) {
-            if(typeof dependencies[i].type === 'undefined') {
-                throw dependencies[i].msg;
-            }
-        }
-    }());
+    assert(typeof JSON !== 'undefined', 'JSON is a hard dependency');
+    assert(typeof _ !== 'undefined', 'underscore/lodash is a hard dependency');
+    assert(typeof TorrentClient !== 'undefined', 'client.btapp.js is a hard dependency');
+    assert(typeof jQuery !== 'undefined', 'jQuery is a hard dependency');
+    assert(typeof jQuery.jStorage !== 'undefined', 'jQuery.jStorage is a hard dependency');
     
     var MAX_POLL_FREQUENCY = 3000;
     var MIN_POLL_FREQUENCY = 0;
