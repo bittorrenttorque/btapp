@@ -190,7 +190,7 @@
         },
 
         plugin_up_to_date_check: function() {
-            if(isMac() || this.plugin_up_to_date()) {
+            if(this.plugin_up_to_date()) {
                 this.plugin_up_to_date_yes();
             } else {
                 this.plugin_up_to_date_no();
