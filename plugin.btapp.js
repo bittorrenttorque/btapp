@@ -4,7 +4,7 @@
 // http://pwmckenna.github.com/btapp
 
 (function() {
-    var LATEST_PLUGIN_VERSION = '4.3.7';
+    var LATEST_PLUGIN_VERSION = '4.4.1';
 
     function assert(b, err) { if(!b) { throw err; } }
 
