@@ -604,7 +604,7 @@
         }
     });
 
-    Btapp.VERSION = '0.1.0';
+    Btapp.VERSION = '0.2.0';
     Btapp.QUERIES = {
         ALL: [['btapp']],
         DHT: [['btapp','dht']],

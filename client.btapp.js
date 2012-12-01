@@ -280,7 +280,7 @@
                         this.falcon = this.session.api;
                         this.trigger('client:connected');
                     } else {
-                        this.reset();
+                        this.delayed_reset();
                     }
                 }, this));
             }, this));
@@ -323,7 +323,7 @@
                 },
                 _.bind(function() {
                     ret.reject();
-                    this.reset();
+                    this.delayed_reset();
                 }, this),
                 {}
             );
@@ -468,7 +468,7 @@
             // Handle the case of an invalid pairing key. Flush it out and start over.
             var err = _.bind(function() {
                 jQuery.jStorage.deleteKey(this.get('product') + '_pairing_key');
-                this.reset();
+                this.delayed_reset();
             }, this);
         
             var url = 'http://127.0.0.1:' + port + '/btapp/?pairing=' + key;
