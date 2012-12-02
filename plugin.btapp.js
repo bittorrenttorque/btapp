@@ -4,8 +4,6 @@
 // http://pwmckenna.github.com/btapp
 
 (function() {
-    var LATEST_PLUGIN_VERSION = '4.4.1';
-
     function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
@@ -121,12 +119,14 @@
 
     PluginManager = Backbone.Model.extend({
         soshare_props: {
+            latest_version: '4.4.1',
             mime_type: 'application/x-gyre-soshare',
             activex_progid: 'gyre.soshare',
             windows_download_url: 'https://torque.bittorrent.com/SoShare.msi',
             osx_download_url: 'https://torque.bittorrent.com/SoShare.pkg'
         },
         torque_props: {
+            latest_version: '4.3.8',
             mime_type: 'application/x-bittorrent-torque',
             activex_progid: 'bittorrent.torque',
             windows_download_url: 'https://torque.bittorrent.com/Torque.msi',
@@ -190,7 +190,7 @@
         },
 
         plugin_up_to_date_check: function() {
-            if(true || this.plugin_up_to_date()) {
+            if(this.plugin_up_to_date()) {
                 this.plugin_up_to_date_yes();
             } else {
                 this.plugin_up_to_date_no();
@@ -288,9 +288,14 @@
             }
         },
         plugin_up_to_date: function() {
+            if(window.location.protocol === 'chrome-extension:') {
+                //if we're in a chrome extension, there's a different update path
+                return true;
+            }
+
             var version = this.get_plugin().version;
             var version_arr = _.map(version.split('.'), function(i) { return parseInt(i, 10); });
-            var required_version_arr = _.map(LATEST_PLUGIN_VERSION.split('.'), function(i) { return parseInt(i, 10); });
+            var required_version_arr = _.map(this.get('latest_version').split('.'), function(i) { return parseInt(i, 10); });
             for (var i=0; i<version_arr.length; i++) {
                 if (version_arr[i] < required_version_arr[i]) {
                     return false;
