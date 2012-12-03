@@ -1,13 +1,10 @@
 # Btapp.js
-
 Head over to http://btappjs.com to get started!
 
 ## Questions?
-torque at bittorrent.com 
-
-patrick at bittorrent.com
-
-[@pwmckenna](http://twitter.com/pwmckenna)
+torque@bittorrent.com  
+patrick@bittorrent.com  
+[@pwmckenna](http://twitter.com/pwmckenna)  
 
 ##License
 Copyright 2012 Patrick Williams, BitTorrent Inc.
