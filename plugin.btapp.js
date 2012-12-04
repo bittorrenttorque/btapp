@@ -299,6 +299,8 @@
             for (var i=0; i<version_arr.length; i++) {
                 if (version_arr[i] < required_version_arr[i]) {
                     return false;
+                } else if(version_arr[i] > required_version_arr[i]) {
+                    return true;
                 }
             }
             return true;
