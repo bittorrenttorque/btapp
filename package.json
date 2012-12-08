@@ -4,5 +4,8 @@
     "dependencies": [
         "grunt-jasmine-runner",
         "bower"
-    ]
+    ],
+    "scripts": {
+       "test": "grunt test"
+    }    
 }
