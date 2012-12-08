@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/bittorrenttorque/btapp.png?branch=master)](https://travis-ci.org/bittorrenttorque/btapp)
+
 # Btapp.js
 Head over to http://btappjs.com to get started!
 
