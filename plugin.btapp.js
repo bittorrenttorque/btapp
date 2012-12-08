@@ -4,6 +4,8 @@
 // http://pwmckenna.github.com/btapp
 
 (function() {
+    "use strict";
+
     function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
@@ -46,7 +48,7 @@
         jQuery.facebox.settings.opacity = 0.6;
     }
 
-    PluginManagerView = Backbone.View.extend({
+    this.PluginManagerView = Backbone.View.extend({
         initialize: function(options) {
             this.model.on('plugin:install_plugin', this.download, this);
             this.model.on('plugin:plugin_updated', this.restart, this);
@@ -117,7 +119,7 @@
         }
     });
 
-    PluginManager = Backbone.Model.extend({
+    this.PluginManager = Backbone.Model.extend({
         soshare_props: {
             latest_version: '4.4.1',
             mime_type: 'application/x-gyre-soshare',

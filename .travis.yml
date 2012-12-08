@@ -1,6 +1,6 @@
-language: ruby
-rvm:
-  - 1.9.2
-env:
-  - DISPLAY=:99.0
-before_install: sh -e /etc/init.d/xvfb start  
+before_script:
+    - bower install
+language: node_js
+node_js:
+    - 0.8
+    - 0.6

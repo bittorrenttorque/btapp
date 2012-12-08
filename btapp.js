@@ -19,6 +19,7 @@
 // rely on this as the  torrentStatus event function is set and the used to keep our models up to date
 
 (function() {
+    "use strict";
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
     function assert(b, err) { if(!b) { throw err; } }
@@ -45,7 +46,7 @@
     // reducing redundant code...both these types need a way to build up children elements
     // from data retrieved from the torrent client, as a way to clean that data up should
     // the client become unreachable.
-    BtappBase = {
+    var BtappBase = {
         initialize: function() {
             _.bindAll(this, 'initializeValues', 'updateState', 'clearState', 'isEmpty', 'destructor');
             this.initializeValues();
@@ -221,7 +222,7 @@
     // currently this can only be used to represent the list of torrents,
     // then within the torrents, their list of files...this will eventually
     // be used for rss feeds, etc as well.
-    BtappCollection = Backbone.Collection.extend(BtappBase).extend({
+    this.BtappCollection = Backbone.Collection.extend(BtappBase).extend({
         initialize: function(models, options) {
             Backbone.Collection.prototype.initialize.apply(this, arguments);
             BtappBase.initialize.apply(this, arguments);
@@ -313,7 +314,7 @@
     // hang off of most BtappModels is also a BtappModel...both BtappModel
     // and BtappCollection objects are responsible for taking the json object
     // that is returned by the client and turning that into attributes/functions/etc
-    BtappModel = Backbone.Model.extend(BtappBase).extend({
+    this.BtappModel = Backbone.Model.extend(BtappBase).extend({
         initialize: function(attributes) {
             Backbone.Model.prototype.initialize.apply(this, arguments);
             BtappBase.initialize.apply(this, arguments);
@@ -415,7 +416,7 @@
     // Btapp is the root of the client objects' tree, and generally the only object that clients should instantiate.
     // This mirrors the original api where document.btapp was the root of everything. generally, this api attempts to be
     // as similar as possible to that one...
-    Btapp = BtappModel.extend({
+    this.Btapp = BtappModel.extend({
         initialize: function() {
             BtappModel.prototype.initialize.apply(this, arguments);
 

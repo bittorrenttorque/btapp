@@ -22,6 +22,7 @@
 // timeouts...this can lead to some less than desirable code :(
 
 (function() {
+    "use strict";
     function assert(b, err) { if(!b) { throw err; } }
 
     //validate dependencies
@@ -36,7 +37,7 @@
     //we will sadly need to fiddle with some globals for falcon one offs.
     var root = this;
 
-    TorrentClient = Backbone.Model.extend({
+    this.TorrentClient = Backbone.Model.extend({
         initialize: function(attributes) {
             this.btappCallbacks = {};
         },
@@ -213,7 +214,7 @@
     // We have additional javascript dependencies that are substantial enough that we don't load them
     // unless you open a falcon connection. In addition we have some handshaking with the falcon proxy
     // that we need to wait for.
-    FalconTorrentClient = TorrentClient.extend({
+    this.FalconTorrentClient = TorrentClient.extend({
         initialize: function(attributes) {
             TorrentClient.prototype.initialize.call(this, attributes);
             
@@ -342,7 +343,7 @@
     // the client listens on, so we can just make requests to that. We can also immediately
     // consider ourselves "connected", which indicates that we're connected to the machine
     // (for falcon clients we may not ever reach the client even if it is logged into falcon)
-    LocalTorrentClient = TorrentClient.extend({
+    this.LocalTorrentClient = TorrentClient.extend({
         defaults: {
             product: 'Torque'
         },

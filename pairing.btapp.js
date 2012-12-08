@@ -4,10 +4,12 @@
 // http://pwmckenna.github.com/btapp
 
 (function() {
-    var NUM_PORTS_SCANNED = 5;
-    var AJAX_TIMEOUT = 3000;
+    "use strict";
     
     function assert(b, err) { if(!b) { throw err; } } 
+
+    var NUM_PORTS_SCANNED = 5;
+    var AJAX_TIMEOUT = 3000;
 
     //validate dependencies
     assert(typeof JSON !== 'undefined', 'JSON is a hard dependency');
@@ -65,7 +67,7 @@
         return 7 * Math.pow(i, 3) + 3 * Math.pow(i, 2) + 5 * i + 10000;
     }
 
-    PairingView = Backbone.View.extend({
+    this.PairingView = Backbone.View.extend({
         initialize: function() {
             assert(this.model.get('pairing_type') !== 'native');
             this.model.on('pairing:authorize', this.authorize_iframe, this);
@@ -124,7 +126,7 @@
         }
     });
     var plugin_native_pairing_requests = {};
-    PluginPairing = {
+    this.PluginPairing = {
         check_version: function(port) {
             var ret = new jQuery.Deferred();
             this.trigger('pairing:check_version', {'port': port});
@@ -167,7 +169,7 @@
         }
     };
     var image_native_pairing_requests = {};
-    JQueryPairing = {
+    this.JQueryPairing = {
         check_version: function(port) {
             this.trigger('pairing:check_version', {'port': port});
             return jQuery.ajax({
@@ -198,7 +200,7 @@
         }
     };
     var plugin_iframe_pairing_requests = {};
-    Pairing = Backbone.Model.extend({
+    this.Pairing = Backbone.Model.extend({
         defaults: {
             pairing_type: 'iframe'
         },

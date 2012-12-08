@@ -1,15 +1,16 @@
 (function() {
+	"use strict";
 	describe('Btapp Unit Tests', function() {
 		describe('Btapp initialize parameter validation', function() {
 			it('defaults queries to [[\'btapp\']]', function() {
-				var btapp = new Btapp;
+				var btapp = new Btapp();
 				btapp.connect();
 				expect(btapp.queries).toEqual([['btapp']]);
 				btapp.disconnect();
 			});
 			it('accepts queries as an array of arrays of strings', function() {
 				var queries = [['btapp','events'],['btapp','create']];
-				var btapp = new Btapp;
+				var btapp = new Btapp();
 				btapp.connect({
 					queries: queries
 				});
@@ -18,7 +19,7 @@
 			});
 			it('expects queries to be cleared after disconnect', function() {
 				var queries = [['btapp','events'],['btapp','create']];
-				var btapp = new Btapp;
+				var btapp = new Btapp();
 				btapp.connect({
 					queries: queries
 				});
@@ -45,20 +46,20 @@
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				var exception = 'trying to remove an attribute, but did not provide the correct previous value';
-				expect(function() { model.updateState('testsession', null, {'testkey':'testvalue1'}, ['testurl']) }).toThrow(exception);
+				expect(function() { model.updateState('testsession', null, {'testkey':'testvalue1'}, ['testurl']); }).toThrow(exception);
 			});
 			it('throws an error if changing an attribute and providing the wrong previous value', function() {
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				var exception = 'trying to update an attribute, but did not provide the correct previous value';
-				expect(function() { model.updateState('testsession', {'testkey':'testvalue2'}, {'testkey':'testvalue1'}, ['testurl']) }).toThrow(exception);
+				expect(function() { model.updateState('testsession', {'testkey':'testvalue2'}, {'testkey':'testvalue1'}, ['testurl']); }).toThrow(exception);
 			});
 			it('throws an error if changing an attribute to the same value', function() {
 				var model = new BtappModel({'id':'test'});
 				model.updateState('testsession', {'testkey':'testvalue'}, null, ['testurl']);
 				var exception = 'trying to set a variable to the existing value [testurl,testkey -> "testvalue"]';
 				expect(function() { 
-					model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, ['testurl']) 
+					model.updateState('testsession', {'testkey':'testvalue'}, {'testkey':'testvalue'}, ['testurl']);
 				}).toThrow(exception);
 			});
 			it('changes from url encoded strings', function() {
@@ -176,27 +177,27 @@
 		});
 		describe('BtappCollection state updates', function() {
 			it('throws an exception if not given a valid path', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				var exception = 'cannot updateState with an invalid collection path';
 				expect(function() { 
 					collection.updateState('testsession', {'torrent':{'all':{'01234':{'torrentname':'name'}}}}, null, ['testurl']); 
 				}).toThrow(exception);
 			});
 			it('adds models', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				collection.updateState('testsession', {'key1':{'torrentname':'name1'},'key2':{'torrentname':'name1'}}, null, ['btapp','torrent']);
 				expect(collection.length).toEqual(2);
 				expect(collection.get('key1') instanceof BtappModel).toBeTruthy();
 				expect(collection.get('key2') instanceof BtappModel).toBeTruthy();
 			});
 			it('adds a function', function() {
-				var collection = new BtappCollection;
-				collection.client = new LocalTorrentClient({'btapp':new BtappModel});
+				var collection = new BtappCollection();
+				collection.client = new LocalTorrentClient({'btapp':new BtappModel()});
 				collection.updateState('testsession', {'testfunc':'[nf]()'}, null, ['btapp','torrent']);
 				expect(typeof collection.bt.testfunc).toEqual('function');
 			});
 			it('throws an exception if trying to add a non-BtappModel', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				expect(function() { 
 					collection.updateState('testsession', {'key1':'value1','key2':{}}, null, ['btapp','torrent']);
 				}).toThrow('trying to add an invalid type to a BtappCollection');
@@ -227,7 +228,7 @@
 		});
 		describe('BtappCollection events', function() {
 			it('triggers add event', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				var add_callback = jasmine.createSpy();
 				collection.bind('add', add_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
@@ -235,7 +236,7 @@
 				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers add:key event', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				var add_callback = jasmine.createSpy();
 				collection.bind('add:' + 'ABCD', add_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
@@ -243,7 +244,7 @@
 				expect(add_callback.callCount).toEqual(1);
 			});
 			it('triggers remove event', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				var remove_callback = jasmine.createSpy();
 				collection.bind('remove', remove_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
@@ -252,7 +253,7 @@
 				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers remove:key event', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				var remove_callback = jasmine.createSpy();
 				collection.bind('remove:' + 'ABCD', remove_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'torrentname':'name'}}}, null, ['btapp','torrent']);
@@ -261,7 +262,7 @@
 				expect(remove_callback.callCount).toEqual(1);
 			});
 			it('triggers change event when a model changes in the collection', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				var change_callback = jasmine.createSpy();
 				collection.bind('change', change_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, ['btapp','torrent']);
@@ -270,7 +271,7 @@
 				expect(change_callback.callCount).toEqual(1);
 			});
 			it('triggers change:key event when a model changes in the collection', function() {
-				var collection = new BtappCollection;
+				var collection = new BtappCollection();
 				var change_callback = jasmine.createSpy();
 				collection.bind('change:' + 'ABCD', change_callback);
 				collection.updateState('testsession', {'all':{'ABCD':{'key':'value'} } }, null, ['btapp','torrent']);
