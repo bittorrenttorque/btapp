@@ -21,7 +21,7 @@ module.exports = function(grunt) {
     },
     watch: {
       files: ['<config:jasmine.specs>','*.js'],
-      tasks: 'jasmine'
+      tasks: 'default'
     },
     jasmine : {
       src : [
