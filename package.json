@@ -2,8 +2,9 @@
     "name": "btapp.js",
     "version": "0.2.0",
     "dependencies": [
-        "grunt-jasmine-runner",
-        "bower"
+        "bower",
+        "grunt",
+        "grunt-jasmine-runner"
     ],
     "scripts": {
        "test": "grunt jasmine"
