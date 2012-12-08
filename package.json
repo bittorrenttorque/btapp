@@ -6,6 +6,6 @@
         "bower"
     ],
     "scripts": {
-       "test": "grunt test"
+       "test": "grunt jasmine"
     }    
 }
