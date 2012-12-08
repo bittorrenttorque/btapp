@@ -2,8 +2,22 @@
 module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
+    files: [
+      'plugin.btapp.js',
+      'pairing.btapp.js',
+      'client.btapp.js',
+      'btapp.js'
+    ],
+    meta: {
+      version: '0.2.0',
+      banner: '// Btapp.js <%= meta.version %>\n\n' +
+              '// (c) 2012 Patrick Williams, BitTorrent Inc.\n' +
+              '// Btapp may be freely distributed under the MIT license.\n' +
+              '// For all details and documentation:\n' +
+              '// http://btappjs.com\n' 
+    },
     lint: {
-      files: ['*.js','spec/**/*.js']
+      files: ['<config:files>','spec/**/*.js']
     },
     watch: {
       files: ['<config:jasmine.specs>','*.js'],
@@ -15,12 +29,21 @@ module.exports = function(grunt) {
         'components/underscore/underscore.js', 
         'components/backbone/backbone.js', 
         'components/jStorage/jstorage.js', 
-        'plugin.btapp.js',
-        'pairing.btapp.js',
-        'client.btapp.js',
-        'btapp.js'
+        'btapp.min.js'
       ],
       specs : ['spec/**/*.js']
+    },
+    concat: {
+      dist: {
+        src: ['<config:files>'],
+        dest: 'btapp.concat.js'
+      }
+    },
+    min: {
+      dist: {
+        src: ['<banner:meta.banner>', '<config:concat.dist.dest>'],
+        dest: 'btapp.min.js'
+      }
     },
     jshint: {
       options: {
@@ -74,6 +97,6 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-jasmine-runner');
-  grunt.registerTask('default', 'lint jasmine');
+  grunt.registerTask('default', 'lint concat min jasmine');
 
 };
