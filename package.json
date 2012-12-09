@@ -7,6 +7,6 @@
         "grunt-jasmine-runner"
     ],
     "scripts": {
-       "test": "grunt jasmine"
+       "test": "grunt sauce"
     }    
 }

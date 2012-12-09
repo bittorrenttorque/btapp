@@ -17,21 +17,60 @@ module.exports = function(grunt) {
               '// http://btappjs.com\n' 
     },
     lint: {
-      files: ['<config:files>','spec/**/*.js']
+      files: ['<config:files>','tests/spec/**/*.js']
     },
     watch: {
       files: ['<config:jasmine.specs>','*.js'],
       tasks: 'default'
     },
-    jasmine : {
-      src : [
-        'components/jquery/jquery.js', 
-        'components/underscore/underscore.js', 
-        'components/backbone/backbone.js', 
-        'components/jStorage/jstorage.js', 
-        'btapp.min.js'
-      ],
-      specs : ['spec/**/*.js']
+    server: {
+      base: '.',
+      port: 8888
+    },
+    'saucelabs-jasmine': {
+        all: {
+            username: 'pwmckenna',
+            key: '06ba33e4-781f-4f69-b943-f8903ef39fcc',
+            urls: ['http://127.0.0.1:8888/tests/SpecRunner.html'],
+            browsers: [
+              {
+                // prerun: 'http://torque.bittorrent.com/Torque.msi',
+                // 'prerun-args': '/q'
+                browserName: 'chrome',
+                os: "Windows 2003",
+              },
+              {
+                browserName: 'chrome',
+                os: "Windows 2008"
+              },
+              {
+                browserName: 'internet explorer',
+                os: "Windows 2003",
+                "browser-version": "8"
+              }, 
+              {
+                browserName: 'internet explorer',
+                os: "Windows 2008",
+                "browser-version": "8"
+              }, 
+              {
+                browserName: 'internet explorer',
+                os: "Windows 2008",
+                "browser-version": "9"
+              }, 
+              {
+                browserName: 'firefox',
+                os: "Windows 2003"
+              },
+              {
+                browserName: 'firefox',
+                os: "Windows 2008"
+              }
+            ],
+            onTestComplete: function(){
+                return;
+            }
+        }
     },
     concat: {
       dist: {
@@ -96,7 +135,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-jasmine-runner');
-  grunt.registerTask('default', 'lint concat min jasmine');
-
+  grunt.loadNpmTasks('grunt-saucelabs');
+  grunt.registerTask('default', 'lint concat min');
+  grunt.registerTask('sauce', 'server saucelabs-jasmine')
 };
