@@ -136,6 +136,6 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-saucelabs');
-  grunt.registerTask('default', 'lint concat min');
+  grunt.registerTask('default', 'lint concat min sauce');
   grunt.registerTask('sauce', 'server saucelabs-jasmine')
 };
