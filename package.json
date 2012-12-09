@@ -4,7 +4,7 @@
     "dependencies": [
         "bower",
         "grunt",
-        "grunt-jasmine-runner"
+        "saucelabs-jasmine"
     ],
     "scripts": {
        "test": "grunt sauce"
