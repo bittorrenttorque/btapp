@@ -1,12 +1,12 @@
 {
     "name": "btapp.js",
     "version": "0.2.0",
-    "dependencies": [
-        "bower",
-        "grunt",
-        "grunt-saucelabs",
-        "grunt-jasmine-task"
-    ],
+    "dependencies": {
+        "bower": "latest",
+        "grunt": "latest",
+        "grunt-saucelabs": "latest",
+        "grunt-jasmine-task": "0.2.3"
+    },
     "scripts": {
        "test": "grunt sauce"
     }    
