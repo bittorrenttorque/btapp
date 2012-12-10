@@ -8,6 +8,12 @@ module.exports = function(grunt) {
       'client.btapp.js',
       'btapp.js'
     ],
+    dependencies: [
+      'components/jquery/jquery.js',
+      'components/underscore/underscore.js',
+      'components/jStorage/jstorage.js',
+      'components/backbone/backbone.js'
+    ],
     meta: {
       version: '0.2.0',
       banner: '// Btapp.js <%= meta.version %>\n\n' +
@@ -23,6 +29,9 @@ module.exports = function(grunt) {
       files: ['<config:jasmine.specs>','*.js'],
       tasks: 'default'
     },
+    jasmine : {
+      all: ['tests/local/SpecRunner.html']
+    },
     server: {
       base: '.',
       port: 8888
@@ -31,7 +40,7 @@ module.exports = function(grunt) {
         all: {
             username: 'pwmckenna',
             key: '06ba33e4-781f-4f69-b943-f8903ef39fcc',
-            urls: ['http://127.0.0.1:8888/tests/SpecRunner.html'],
+            urls: ['http://127.0.0.1:8888/tests/saucelabs/SpecRunner.html'],
             browsers: [
               {
                 // prerun: 'http://torque.bittorrent.com/Torque.msi',
@@ -136,6 +145,7 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-saucelabs');
+  grunt.loadNpmTasks('grunt-jasmine-task');
   grunt.registerTask('default', 'lint concat min sauce');
   grunt.registerTask('sauce', 'server saucelabs-jasmine')
 };
