@@ -18,6 +18,24 @@
         return match !== undefined && match !== null;
     }
 
+    var add_plugin = _.memoize(function(mime_type) {
+        var ret = new jQuery.Deferred();
+        var obj = document.createElement('object');
+        var onload = mime_type + '_onload';
+        window[onload] = function() {
+            ret.resolve();
+        };
+        var div = document.createElement('div');            
+        jQuery(div).css({'position':'absolute','left':'-999em','z-index':-1});
+        div.innerHTML =
+            '<object type="' + mime_type + '" width="0" height="0">' +
+                '<param name="onload" value="' + onload + '" />' +
+            '</object>';
+
+        document.body.appendChild(div);
+        return ret;
+    });
+
     //utility function to wait for some condition
     //this ends up being helpful as we toggle between a flow chart and a state diagram
     function when(condition, functionality, interval) {
@@ -164,7 +182,6 @@
             jQuery(_.bind(_.defer, this, this.mime_type_check));
         },
         disconnect: function() {
-            this.remove_plugin();
         },
         //we know nothing. we want:
         //the plugin installed
@@ -185,7 +202,8 @@
         },
         mime_type_check_yes: function() {
             this.trigger('plugin:plugin_installed');
-            this.add_plugin(_.bind(function() {
+            var add = add_plugin(this.get('mime_type'));
+            add.then(_.bind(function() {
                 this.trigger('plugin:plugin_running');
                 this.plugin_up_to_date_check();
             }, this));
@@ -308,35 +326,15 @@
             return true;
         },
         get_plugin: function() {
-            var ret = document.getElementById(this.get('pid'));
-            assert(ret, 'cannot call get_plugin before adding the plugin');
-            return ret;
+            var plugins = jQuery('[type="' + this.get('mime_type') + '"]');
+            assert(plugins.length === 1, 'cannot call get_plugin before adding the plugin');
+            return plugins[0];
         },
         plugin_loaded: function() {
             assert(this.supports_mime_type(), 'you have not installed the plugin yet');
             assert(jQuery('#' + this.get('pid')).length !== 0, 'you have not yet added the plugin');
             return this.get_plugin().version;
         },
-        add_plugin: function(cb) {
-            assert(this.supports_mime_type(), 'you have not installed the plugin yet');
-            assert(jQuery('#' + this.get('pid')).length === 0);
-            var obj = document.createElement('object');
-            var onload = this.get('pid') + 'onload';
-            window[onload] = cb;
-            var div = document.createElement('div');            
-            jQuery(div).css({'position':'absolute','left':'-999em','z-index':-1});
-            div.innerHTML =
-                '<object id="' + this.get('pid') + '" type="' + this.get('mime_type') + '" width="0" height="0">' +
-                    '<param name="onload" value="' + onload + '" />' +
-                '</object>';
-
-            document.body.appendChild(div);
-        },  
-        remove_plugin: function() {
-            jQuery('#btapp_plugin').remove();
-        },
-
-
 
         // Client Specific Functionality
         // ---------------------------
