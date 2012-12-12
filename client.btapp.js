@@ -330,6 +330,12 @@
             );
             return ret;
         },
+        delayed_reset: function() {
+            this.reset_timeout = setTimeout(_.bind(function() { 
+                this.reset();
+                this.reset_timeout = null;
+            }, this), 1000 );
+        },
         reset: function() {
             this.falcon = null;
             this.connect();
