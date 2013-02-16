@@ -52,6 +52,7 @@
             this.initializeValues();
         },
         clearRemoteProcedureCalls: function() {
+            //console.error('clearRemoteProcedureCalls', this);
             var keys = _.keys(this.bt || {});
             for(var i = 0; i < keys.length; i++) {
                 var key = keys[i];
@@ -121,13 +122,20 @@
             return ret;
         },
         updateAddFunctionState: function(session, added, path, v) {
+            //console.log('updateAddFunctionState', this, arguments);
             //we have a special case for get...we never want the server rpc version
             var childpath = _.clone(path || []);
             childpath.push(v);
             var func = this.client.createFunction(session, childpath, added);
 
             //set the function in the bt object...this is where we store just our rpc client functions
+            if ( !this.bt ) {
+                console.error('this.bt does not exist and should', this);
+                //debugger;
+                this.bt = {};
+            }
             assert(!(v in this.bt), 'trying to add a function that already exists');
+            
             this.bt[v] = func;
 
             //also set it on the object directly...this ends up being how people expect to use the objects
@@ -484,7 +492,8 @@
             // While we don't want app writers having to interact with the client directly,
             // it would be nice to be able to listen in on what's going on...so let em bubble up
             this.client.bind('all', this.trigger, this);
-            this.client.bind('client:connected', this.fetch);       
+            // this.client.bind('client:connected', this.fetch);       
+            this.client.bind('client:connected', this.fetch, this);       
         },
         setEvents: function(events) {
             // For each client event, just set it to trigger an javascript side event
@@ -558,7 +567,7 @@
                 this.last_query = this.client.query({
                     type: 'state', 
                     queries: JSON.stringify(this.queries)
-                }).done(this.onFetch).fail(this.onConnectionError);
+                }).done( _.bind( this.onFetch, this ) ).fail(this.onConnectionError);
             }
         },
         onEvent: function(session, data) {
