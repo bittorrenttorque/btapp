@@ -52,7 +52,6 @@
             this.initializeValues();
         },
         clearRemoteProcedureCalls: function() {
-            //console.error('clearRemoteProcedureCalls', this);
             var keys = _.keys(this.bt || {});
             for(var i = 0; i < keys.length; i++) {
                 var key = keys[i];
@@ -122,7 +121,6 @@
             return ret;
         },
         updateAddFunctionState: function(session, added, path, v) {
-            //console.log('updateAddFunctionState', this, arguments);
             //we have a special case for get...we never want the server rpc version
             var childpath = _.clone(path || []);
             childpath.push(v);
@@ -130,8 +128,7 @@
 
             //set the function in the bt object...this is where we store just our rpc client functions
             if ( !this.bt ) {
-                console.error('this.bt does not exist and should', this);
-                //debugger;
+                //added this because when it hit the def for btapp.browseforfiles, there was no this.bt
                 this.bt = {};
             }
             assert(!(v in this.bt), 'trying to add a function that already exists');
@@ -492,7 +489,7 @@
             // While we don't want app writers having to interact with the client directly,
             // it would be nice to be able to listen in on what's going on...so let em bubble up
             this.client.bind('all', this.trigger, this);
-            // this.client.bind('client:connected', this.fetch);       
+            //bound fetch to this because there is something wrong with bindall
             this.client.bind('client:connected', this.fetch, this);       
         },
         setEvents: function(events) {
@@ -567,7 +564,10 @@
                 this.last_query = this.client.query({
                     type: 'state', 
                     queries: JSON.stringify(this.queries)
-                }).done( _.bind( this.onFetch, this ) ).fail(this.onConnectionError);
+                })
+                //also bound this.onFetch to this.
+                .done( _.bind( this.onFetch, this ) )
+                .fail(this.onConnectionError);
             }
         },
         onEvent: function(session, data) {
