@@ -3,8 +3,7 @@ define([
     'backbone',
     'underscore',
     'jquery',
-    'rpc.btapp',
-    'collection.btapp'
+    'rpc.btapp'
 ], function (require, Backbone, _, jQuery, RPC) {
     'use strict';
     // some of us are lost in the world without __asm int 3;

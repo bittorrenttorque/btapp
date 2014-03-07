@@ -1,5 +1,5 @@
 ({
-    baseUrl: './lib',
+    baseUrl: './src',
     paths: {
         'jquery': 'empty:',
         'backbone': 'empty:',
@@ -11,5 +11,5 @@
         'rpc.btapp': './rpc.btapp'
     },
     name: 'btapp',
-    out: 'btapp.min.js'
+    out: 'dist/btapp.min.js'
 })

@@ -1,9 +1,12 @@
 define([
+    'jquery',
     'underscore',
     'backbone',
     'rpc.btapp',
-    'model.btapp'
-], function (_, Backbone, RPC, BtappModel) {
+    'model.btapp',
+    // load the collection as well to solve requirejs loops
+    'collection.btapp'
+], function (jQuery, _, Backbone, RPC, BtappModel) {
     'use strict';
     // some of us are lost in the world without __asm int 3;
     // lets give ourselves an easy way to blow the world up if we're not happy about something
@@ -24,6 +27,7 @@ define([
         initialize: function () {
             BtappModel.prototype.initialize.apply(this, arguments);
 
+            this.ajax = Btapp.ajax;
             this.path = ['btapp'];
             this.connectedState = false;
             this.rpc = null;
@@ -49,6 +53,7 @@ define([
             this.queries = attributes.queries || [['btapp']];
 
 
+
             var error = 'the queries attribute must be an array of arrays of strings';
             assert(_.isArray(this.queries), error);
             assert(_.all(this.queries, function (query) {
@@ -57,7 +62,7 @@ define([
                 });
             }), error);
 
-            assert(_.has(attributes, 'port'));
+            assert(_.has(attributes, 'port'), 'port must be specified');
 
             // At this point, if a username password combo is provided we assume that we're trying to
             // access a falcon client. If not, default to the client running on your local machine.
@@ -167,6 +172,8 @@ define([
             }
         }
     });
+
+    Btapp.ajax = jQuery.ajax;
 
     return Btapp;
 });

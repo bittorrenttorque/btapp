@@ -174,7 +174,8 @@ define([
     };
     RPC.prototype.sendQuery = function (data) {
         var url = 'http://localhost.bittorrent.com:' + this.port + '/btapp/';
-        return this.ajax({
+        var Btapp = require('btapp');
+        return Btapp.ajax({
             url: url,
             data: data,
             dataType: 'jsonp'

@@ -10,5 +10,5 @@
         "underscore": "latest",
         "backbone": "latest"
     },
-    "main": "./btapp.min.js"
+    "main": "./dist/btapp.min.js"
 }
