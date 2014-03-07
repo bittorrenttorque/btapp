@@ -1,0 +1,14 @@
+{
+    "name": "btapp",
+    "version": "0.4.0",
+    "author": {
+        "name": "Patrick Williams",
+        "email": "patrick@bittorrent.com"
+    },
+    "dependencies": {
+        "jquery": "latest",
+        "underscore": "latest",
+        "backbone": "latest"
+    },
+    "main": "./btapp.min.js"
+}

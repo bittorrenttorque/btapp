@@ -1,13 +1,13 @@
 {
   "name": "btapp.js",
-  "version": "0.3.0",
-  "dependencies": {
-    "bower": "latest",
-    "grunt": "latest",
-    "grunt-saucelabs": "latest",
-    "grunt-jasmine-task": "0.2.3"
+  "version": "0.4.0",
+  "author": {
+    "name": "Patrick Williams",
+    "email": "patrick@bittorrent.com"
   },
-  "scripts": {
-    "test": "grunt sauce"
+  "dependencies": {},
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.8.0",
+    "matchdep": "^0.3.0"
   }
 }
