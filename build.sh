@@ -1,1 +1,1 @@
-r.js -o build.js
+./node_modules/requirejs/bin/r.js -o build.js

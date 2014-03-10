@@ -8,6 +8,7 @@
   "dependencies": {},
   "devDependencies": {
     "grunt-contrib-jshint": "^0.8.0",
-    "matchdep": "^0.3.0"
+    "matchdep": "^0.3.0",
+    "requirejs": "^2.1.11"
   }
 }
