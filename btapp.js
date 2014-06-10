@@ -402,10 +402,16 @@
         },
         save: function(attributes, options) {
             var deferreds = [];
-            _(attributes).each(function(value, key) {
-                deferreds.push(this.bt.set(key, value));
-            }, this);
-            return jQuery.when.apply(jQuery, deferreds);
+	    if (isEmptyObject(this.bt)) {
+		var tdf = new jQuery.Deferred();
+		setTimeout(function() { this.save.call(this, attributes, options).when.apply(jQuery, tdf); }, 500);
+		return [tdf];
+	    } else {
+		_(attributes).each(function(value, key) {
+                    deferreds.push(this.bt.set(key, value));
+		}, this);
+		return jQuery.when.apply(jQuery, deferreds);
+	    }
         }
     });
 
