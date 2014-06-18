@@ -10,6 +10,7 @@ define([
 
     var RPC = function (attributes) {
         this.port = attributes.port;
+        this.pairing = attributes.pairing;
         this.callbacks = {};
     };
 
@@ -173,7 +174,7 @@ define([
         return ret;
     };
     RPC.prototype.sendQuery = function (data) {
-        var url = 'http://localhost.bittorrent.com:' + this.port + '/btapp/';
+        var url = 'http://localhost.bittorrent.com:' + this.port + '/btapp/?pairing=' + this.pairing;
         var Btapp = require('btapp');
         return Btapp.ajax({
             url: url,
